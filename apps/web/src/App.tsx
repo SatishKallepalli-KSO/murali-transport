@@ -17,7 +17,6 @@ import {
   type VehicleSuggestion,
 } from './api'
 import { address, business } from './content'
-import { LorrySky } from './LorrySky'
 
 type Portal = 'home' | 'request' | 'owner' | 'admin'
 
@@ -217,7 +216,10 @@ export default function App() {
 
   return (
     <div className="site">
-      <LorrySky />
+      <div className="page-bg" aria-hidden="true">
+        <img src="/eicher-hero.jpg" alt="" className="page-bg-img" />
+        <div className="page-bg-veil" />
+      </div>
 
       <div className="topbar">
         <span>
@@ -276,12 +278,14 @@ export default function App() {
           <>
             <section className="hero">
               <div className="hero-copy">
-                <p className="hero-kicker">End-to-end lorry booking · Dommeru</p>
-                <h1 className="hero-name">{business.name}</h1>
+                <p className="hero-kicker">Dommeru · Andhra Pradesh</p>
+                <h1 className="hero-name">
+                  Murali Office
+                  <span>Miny Lorry Transport</span>
+                </h1>
                 <p className="hero-tagline">
-                  Owners register lorries. Traders post loads. Office assigns by location.
+                  Register lorries, post loads, and let the office assign the right vehicle by location.
                 </p>
-                <p className="hero-summary">{business.summary}</p>
                 <div className="hero-actions">
                   <button type="button" className="btn btn-primary" onClick={() => setPortal('request')}>
                     Post a load
@@ -289,20 +293,19 @@ export default function App() {
                   <button type="button" className="btn btn-ghost" onClick={() => setPortal('owner')}>
                     Register your lorry
                   </button>
-                  <button type="button" className="btn btn-ghost" onClick={() => setPortal('admin')}>
-                    Open admin desk
-                  </button>
                 </div>
               </div>
-              <div className="hero-visual" aria-hidden="true">
-                <div className="road-band" />
-                <div className="truck">
-                  <div className="truck-cab" />
-                  <div className="truck-bed" />
-                  <div className="truck-wheel truck-wheel-f" />
-                  <div className="truck-wheel truck-wheel-r" />
-                </div>
-                <p className="hero-visual-caption">Live dispatch in motion</p>
+            </section>
+
+            <section className="fleet-band" aria-label="Fleet highlight">
+              <img src="/eicher-lorry.png" alt="Eicher lorry used for freight booking" />
+              <div>
+                <p className="fleet-kicker">Built for real freight</p>
+                <h2>Mini lorries & trucks on one Dommeru desk</h2>
+                <p>
+                  Owners list vehicles with live location. Traders post cargo. The transport office
+                  matches and assigns — capacity, route, and where the lorry is right now.
+                </p>
               </div>
             </section>
 
