@@ -259,11 +259,6 @@ export default function App() {
 
   return (
     <div className={`site lang-${lang}`}>
-      <div className="page-bg" aria-hidden="true">
-        <img src="/eicher-hero.jpg" alt="" className="page-bg-img" />
-        <div className="page-bg-veil" />
-      </div>
-
       <div className="topbar">
         <span className="topbar-banner">
           Murali Transport Office, Dommeru · ph:{' '}
@@ -282,8 +277,8 @@ export default function App() {
         >
           <span className="nav-mark" aria-hidden="true" />
           <span>
-            <strong>{tx('heroBrand')}</strong>
-            <small>{tx('heroSub')}</small>
+            <strong>Murali Transport</strong>
+            <small>Dommeru</small>
           </span>
         </a>
         <nav className="nav-links" aria-label="Primary">
@@ -341,10 +336,8 @@ export default function App() {
             <section className="hero">
               <div className="hero-copy">
                 <p className="hero-kicker">{tx('heroKicker')}</p>
-                <h1 className="hero-name">
-                  {tx('heroBrand')}
-                  <span>{tx('heroSub')}</span>
-                </h1>
+                <h1 className="hero-name">{tx('heroBrand')}</h1>
+                <p className="hero-sub">{tx('heroSub')}</p>
                 <p className="hero-tagline">{tx('heroTagline')}</p>
                 <div className="hero-actions">
                   <button type="button" className="btn btn-primary" onClick={() => setPortal('request')}>
@@ -357,6 +350,9 @@ export default function App() {
                     {tx('callNow')}
                   </a>
                 </div>
+              </div>
+              <div className="hero-media">
+                <img src="/eicher-hero.jpg" alt="Eicher lorry — Murali Transport Office Dommeru" />
               </div>
             </section>
 
@@ -371,7 +367,7 @@ export default function App() {
               </button>
               <a className="quick-card" href={waHref(lang)} target="_blank" rel="noreferrer">
                 <strong>{tx('whatsapp')}</strong>
-                <span>{business.phoneDisplay}</span>
+                <span>9949705008</span>
               </a>
             </section>
 
