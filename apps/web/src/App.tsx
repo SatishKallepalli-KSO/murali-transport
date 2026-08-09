@@ -16,9 +16,9 @@ import {
   type Vehicle,
   type VehicleSuggestion,
 } from './api'
-import { address, business } from './content'
+import { address, business, t, type Lang } from './content'
 
-type Portal = 'home' | 'request' | 'owner' | 'admin'
+type Portal = 'home' | 'request' | 'owner' | 'admin' | 'about'
 
 const emptyLoad = {
   requestor_name: '',
@@ -42,7 +42,19 @@ const emptyVehicle = {
   notes: '',
 }
 
+function waHref(lang: Lang) {
+  const text =
+    lang === 'te'
+      ? `నమస్కారం, ${business.shortName} (దొమ్మేరు) నుండి లారీ/ట్రక్ బుక్ చేయాలనుకుంటున్నాను.`
+      : `Namaste, I want to book a mini lorry / truck from ${business.shortName} (Dommeru).`
+  return `https://wa.me/${business.whatsapp}?text=${encodeURIComponent(text)}`
+}
+
 export default function App() {
+  const [lang, setLang] = useState<Lang>(() => {
+    const saved = localStorage.getItem('murali_lang')
+    return saved === 'te' ? 'te' : 'en'
+  })
   const [portal, setPortal] = useState<Portal>('home')
   const [stats, setStats] = useState<Stats | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -61,6 +73,18 @@ export default function App() {
   const [selectedLoadId, setSelectedLoadId] = useState<number | null>(null)
   const [suggestions, setSuggestions] = useState<VehicleSuggestion[]>([])
   const [busy, setBusy] = useState(false)
+
+  const tx = (key: Parameters<typeof t>[1]) => t(lang, key)
+
+  function switchLang(next: Lang) {
+    setLang(next)
+    localStorage.setItem('murali_lang', next)
+    document.documentElement.lang = next === 'te' ? 'te' : 'en'
+  }
+
+  useEffect(() => {
+    document.documentElement.lang = lang === 'te' ? 'te' : 'en'
+  }, [lang])
 
   async function refreshPublic() {
     try {
@@ -120,7 +144,11 @@ export default function App() {
         ...loadForm,
         weight_tons: Number(loadForm.weight_tons) || 1,
       })
-      setMessage(`Load #${created.id} posted. Office will assign a lorry near ${created.pickup}.`)
+      setMessage(
+        lang === 'te'
+          ? `లోడ్ #${created.id} నమోదు అయింది. ఆఫీస్ ${created.pickup} సమీప లారీని కేటాయిస్తుంది.`
+          : `Load #${created.id} posted. Office will assign a lorry near ${created.pickup}.`,
+      )
       setLoadForm(emptyLoad)
       void refreshPublic()
     } catch (err) {
@@ -140,7 +168,9 @@ export default function App() {
         capacity_tons: Number(vehicleForm.capacity_tons) || 1,
       })
       setMessage(
-        `Vehicle ${created.plate_number} registered at ${created.current_location}. Ready for loads.`,
+        lang === 'te'
+          ? `వాహనం ${created.plate_number} ${created.current_location} వద్ద నమోదు అయింది.`
+          : `Vehicle ${created.plate_number} registered at ${created.current_location}. Ready for loads.`,
       )
       setVehicleForm(emptyVehicle)
       void refreshPublic()
@@ -160,7 +190,7 @@ export default function App() {
       setAdminToken(access_token)
       localStorage.setItem('murali_admin_token', access_token)
       setAdminPin('')
-      setMessage('Admin desk unlocked.')
+      setMessage(lang === 'te' ? 'అడ్మిన్ డెస్క్ అన్‌లాక్ అయింది.' : 'Admin desk unlocked.')
       await refreshAdmin(access_token)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
@@ -179,7 +209,9 @@ export default function App() {
         vehicle_id: vehicleId,
       })
       setMessage(
-        `Assigned ${row.vehicle?.plate_number} to load #${row.load_id} (${Math.round(row.match_score * 100)}% location match).`,
+        lang === 'te'
+          ? `${row.vehicle?.plate_number} ను లోడ్ #${row.load_id} కు అసైన్ చేశారు (${Math.round(row.match_score * 100)}% మ్యాచ్).`
+          : `Assigned ${row.vehicle?.plate_number} to load #${row.load_id} (${Math.round(row.match_score * 100)}% location match).`,
       )
       setSelectedLoadId(null)
       await refreshAdmin(adminToken)
@@ -197,7 +229,11 @@ export default function App() {
     setBusy(true)
     try {
       await completeAssignment(adminToken, id)
-      setMessage(`Assignment #${id} completed. Vehicle is available again.`)
+      setMessage(
+        lang === 'te'
+          ? `అసైన్‌మెంట్ #${id} పూర్తయింది. వాహనం మళ్లీ అందుబాటులో ఉంది.`
+          : `Assignment #${id} completed. Vehicle is available again.`,
+      )
       await refreshAdmin(adminToken)
       void refreshPublic()
     } catch (err) {
@@ -214,20 +250,30 @@ export default function App() {
     setSuggestions([])
   }
 
+  const services = [
+    { title: tx('service1Title'), body: tx('service1Body') },
+    { title: tx('service2Title'), body: tx('service2Body') },
+    { title: tx('service3Title'), body: tx('service3Body') },
+    { title: tx('service4Title'), body: tx('service4Body') },
+  ]
+
   return (
-    <div className="site">
+    <div className={`site lang-${lang}`}>
       <div className="page-bg" aria-hidden="true">
         <img src="/eicher-hero.jpg" alt="" className="page-bg-img" />
         <div className="page-bg-veil" />
       </div>
 
       <div className="topbar">
+        <a className="topbar-phone" href={`tel:${business.phone}`}>
+          ☎ {business.phoneDisplay}
+        </a>
         <span>
           {stats
-            ? `${stats.available_vehicles} lorries free · ${stats.open_loads} open loads · ${stats.assignments} assigned`
-            : 'Live lorry booking desk · Dommeru'}
+            ? `${stats.available_vehicles} · ${stats.open_loads} · ${stats.assignments}`
+            : tx('topStatsFallback')}
         </span>
-        <span>{business.hours}</span>
+        <span>{tx('hours')}</span>
       </div>
 
       <header className="nav">
@@ -241,27 +287,48 @@ export default function App() {
         >
           <span className="nav-mark" aria-hidden="true" />
           <span>
-            <strong>Murali Office</strong>
-            <small>Miny Lorry Transport</small>
+            <strong>{tx('heroBrand')}</strong>
+            <small>{tx('heroSub')}</small>
           </span>
         </a>
         <nav className="nav-links" aria-label="Primary">
           <button type="button" className={portal === 'home' ? 'active' : ''} onClick={() => setPortal('home')}>
-            Home
+            {tx('navHome')}
+          </button>
+          <button type="button" className={portal === 'about' ? 'active' : ''} onClick={() => setPortal('about')}>
+            {tx('navAbout')}
           </button>
           <button type="button" className={portal === 'request' ? 'active' : ''} onClick={() => setPortal('request')}>
-            Post load
+            {tx('navRequest')}
           </button>
           <button type="button" className={portal === 'owner' ? 'active' : ''} onClick={() => setPortal('owner')}>
-            Register lorry
+            {tx('navOwner')}
           </button>
           <button type="button" className={portal === 'admin' ? 'active' : ''} onClick={() => setPortal('admin')}>
-            Admin desk
+            {tx('navAdmin')}
           </button>
         </nav>
-        <button type="button" className="nav-cta" onClick={() => setPortal('request')}>
-          Book freight
-        </button>
+        <div className="nav-end">
+          <div className="lang-switch" role="group" aria-label="Language">
+            <button
+              type="button"
+              className={lang === 'en' ? 'active' : ''}
+              onClick={() => switchLang('en')}
+            >
+              {tx('langEn')}
+            </button>
+            <button
+              type="button"
+              className={lang === 'te' ? 'active' : ''}
+              onClick={() => switchLang('te')}
+            >
+              {tx('langTe')}
+            </button>
+          </div>
+          <a className="nav-cta" href={`tel:${business.phone}`}>
+            {tx('callNow')}
+          </a>
+        </div>
       </header>
 
       <main id="top">
@@ -278,154 +345,255 @@ export default function App() {
           <>
             <section className="hero">
               <div className="hero-copy">
-                <p className="hero-kicker">Dommeru · Andhra Pradesh</p>
+                <p className="hero-kicker">{tx('heroKicker')}</p>
                 <h1 className="hero-name">
-                  Murali Office
-                  <span>Miny Lorry Transport</span>
+                  {tx('heroBrand')}
+                  <span>{tx('heroSub')}</span>
                 </h1>
-                <p className="hero-tagline">
-                  Register lorries, post loads, and let the office assign the right vehicle by location.
-                </p>
+                <p className="hero-tagline">{tx('heroTagline')}</p>
                 <div className="hero-actions">
                   <button type="button" className="btn btn-primary" onClick={() => setPortal('request')}>
-                    Post a load
+                    {tx('ctaPostLoad')}
                   </button>
                   <button type="button" className="btn btn-ghost" onClick={() => setPortal('owner')}>
-                    Register your lorry
+                    {tx('ctaRegister')}
                   </button>
+                  <a className="btn btn-ghost" href={`tel:${business.phone}`}>
+                    {tx('callNow')}
+                  </a>
                 </div>
               </div>
             </section>
 
+            <section className="quick-actions" aria-label="Quick actions">
+              <button type="button" className="quick-card" onClick={() => setPortal('request')}>
+                <strong>{tx('ctaPostLoad')}</strong>
+                <span>{tx('service2Body')}</span>
+              </button>
+              <button type="button" className="quick-card" onClick={() => setPortal('owner')}>
+                <strong>{tx('ctaRegister')}</strong>
+                <span>{tx('service3Body')}</span>
+              </button>
+              <a className="quick-card" href={waHref(lang)} target="_blank" rel="noreferrer">
+                <strong>{tx('whatsapp')}</strong>
+                <span>{business.phoneDisplay}</span>
+              </a>
+            </section>
+
+            <section className="section" id="services">
+              <div className="section-head">
+                <h2>{tx('servicesTitle')}</h2>
+                <p>{tx('servicesIntro')}</p>
+              </div>
+              <div className="service-grid">
+                {services.map((service) => (
+                  <article key={service.title} className="service-item">
+                    <h3>{service.title}</h3>
+                    <p>{service.body}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+
             <section className="fleet-band" aria-label="Fleet highlight">
-              <img src="/eicher-lorry.png" alt="Eicher lorry used for freight booking" />
+              <img src="/eicher-lorry.png" alt="Eicher lorry" />
               <div>
-                <p className="fleet-kicker">Built for real freight</p>
-                <h2>Mini lorries & trucks on one Dommeru desk</h2>
-                <p>
-                  Owners list vehicles with live location. Traders post cargo. The transport office
-                  matches and assigns — capacity, route, and where the lorry is right now.
-                </p>
+                <p className="fleet-kicker">Eicher · Mini lorry & truck</p>
+                <h2>{tx('fleetTitle')}</h2>
+                <p>{tx('fleetBody')}</p>
               </div>
             </section>
 
             <section className="trust" aria-label="Live platform stats">
               <div className="trust-item">
-                <p className="trust-label">Fleet on books</p>
+                <p className="trust-label">{tx('trustFleet')}</p>
                 <p className="trust-value">{stats?.vehicles ?? '—'}</p>
-                <p className="trust-detail">{stats?.available_vehicles ?? 0} available now</p>
+                <p className="trust-detail">
+                  {stats?.available_vehicles ?? 0} {tx('trustAvailable')}
+                </p>
               </div>
               <div className="trust-item">
-                <p className="trust-label">Open loads</p>
+                <p className="trust-label">{tx('trustOpen')}</p>
                 <p className="trust-value">{stats?.open_loads ?? '—'}</p>
-                <p className="trust-detail">Waiting for office assignment</p>
+                <p className="trust-detail">{tx('trustOpenDetail')}</p>
               </div>
               <div className="trust-item">
-                <p className="trust-label">Assigned trips</p>
+                <p className="trust-label">{tx('trustAssigned')}</p>
                 <p className="trust-value">{stats?.assignments ?? '—'}</p>
-                <p className="trust-detail">Matched by location & capacity</p>
+                <p className="trust-detail">{tx('trustAssignedDetail')}</p>
               </div>
             </section>
 
             <section className="section">
               <div className="section-head">
-                <h2>How the platform works</h2>
-                <p>Three roles, one Dommeru transport desk.</p>
+                <h2>{tx('howTitle')}</h2>
+                <p>{tx('howIntro')}</p>
               </div>
               <ol className="steps">
                 <li className="step">
                   <span className="step-num">01</span>
                   <div>
-                    <h3>Lorry owners register</h3>
-                    <p>Add plate, type, capacity, and current location so the office can find you.</p>
+                    <h3>{tx('how1Title')}</h3>
+                    <p>{tx('how1Body')}</p>
                   </div>
                 </li>
                 <li className="step">
                   <span className="step-num">02</span>
                   <div>
-                    <h3>Requestors post loads</h3>
-                    <p>Share pickup, drop, cargo, and weight. The desk receives every request.</p>
+                    <h3>{tx('how2Title')}</h3>
+                    <p>{tx('how2Body')}</p>
                   </div>
                 </li>
                 <li className="step">
                   <span className="step-num">03</span>
                   <div>
-                    <h3>Admin assigns by location</h3>
-                    <p>Suggested lorries are ranked near the pickup — assign in one click.</p>
+                    <h3>{tx('how3Title')}</h3>
+                    <p>{tx('how3Body')}</p>
                   </div>
                 </li>
               </ol>
             </section>
 
-            <section className="section section-alt">
+            <section className="section section-alt about-preview">
               <div className="section-head">
-                <h2>Office</h2>
-                <p>{address.line}</p>
+                <h2>{tx('aboutTitle')}</h2>
+                <p>{tx('aboutIntro')}</p>
               </div>
+              <dl className="about-facts">
+                <div>
+                  <dt>{tx('aboutOwnerLabel')}</dt>
+                  <dd>{business.owner}</dd>
+                </div>
+                <div>
+                  <dt>{tx('aboutPhoneLabel')}</dt>
+                  <dd>
+                    <a href={`tel:${business.phone}`}>{business.phoneDisplay}</a>
+                  </dd>
+                </div>
+                <div>
+                  <dt>{tx('aboutAddressLabel')}</dt>
+                  <dd>{address.line}</dd>
+                </div>
+              </dl>
               <div className="location-actions">
-                <a className="btn btn-primary" href={business.mapsShareUrl} target="_blank" rel="noreferrer">
-                  Open in Google Maps
-                </a>
-                <button type="button" className="btn btn-ghost" onClick={() => setPortal('admin')}>
-                  Go to admin desk
+                <button type="button" className="btn btn-primary" onClick={() => setPortal('about')}>
+                  {tx('navAbout')}
                 </button>
+                <a className="btn btn-ghost" href={business.mapsShareUrl} target="_blank" rel="noreferrer">
+                  {tx('ctaDirections')}
+                </a>
               </div>
             </section>
           </>
         )}
 
+        {portal === 'about' && (
+          <section className="portal about-page">
+            <div className="section-head">
+              <h2>{tx('aboutTitle')}</h2>
+              <p>{tx('aboutIntro')}</p>
+            </div>
+            <div className="about-layout">
+              <div className="about-card">
+                <dl className="about-facts">
+                  <div>
+                    <dt>{tx('aboutOwnerLabel')}</dt>
+                    <dd>{business.owner}</dd>
+                  </div>
+                  <div>
+                    <dt>{tx('aboutPhoneLabel')}</dt>
+                    <dd>
+                      <a href={`tel:${business.phone}`}>{business.phoneDisplay}</a>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{tx('aboutAddressLabel')}</dt>
+                    <dd>{address.line}</dd>
+                  </div>
+                  <div>
+                    <dt>{tx('aboutHoursLabel')}</dt>
+                    <dd>{tx('aboutHoursValue')}</dd>
+                  </div>
+                  <div>
+                    <dt>Google</dt>
+                    <dd>
+                      {business.rating}★ · {business.reviewCount} reviews
+                    </dd>
+                  </div>
+                </dl>
+                <p className="about-body">{tx('aboutBody')}</p>
+                <div className="location-actions">
+                  <a className="btn btn-primary" href={`tel:${business.phone}`}>
+                    {tx('callNow')}
+                  </a>
+                  <a className="btn btn-ghost" href={waHref(lang)} target="_blank" rel="noreferrer">
+                    {tx('whatsapp')}
+                  </a>
+                  <a className="btn btn-ghost" href={business.mapsShareUrl} target="_blank" rel="noreferrer">
+                    {tx('ctaDirections')}
+                  </a>
+                </div>
+              </div>
+              <img className="about-photo" src="/eicher-lorry.png" alt="Office fleet lorry" />
+            </div>
+          </section>
+        )}
+
         {portal === 'request' && (
           <section className="portal">
             <div className="section-head">
-              <h2>Post a load</h2>
-              <p>Tell the Dommeru office what you need to move. Admin will assign a nearby lorry.</p>
+              <h2>{tx('postTitle')}</h2>
+              <p>{tx('postIntro')}</p>
             </div>
             <form className="panel-form" onSubmit={onCreateLoad}>
               <label>
-                Your name
+                {tx('name')}
                 <input required value={loadForm.requestor_name} onChange={(e) => setLoadForm({ ...loadForm, requestor_name: e.target.value })} />
               </label>
               <label>
-                Phone
+                {tx('phone')}
                 <input required value={loadForm.requestor_phone} onChange={(e) => setLoadForm({ ...loadForm, requestor_phone: e.target.value })} />
               </label>
               <label>
-                Pickup location
-                <input required value={loadForm.pickup} onChange={(e) => setLoadForm({ ...loadForm, pickup: e.target.value })} placeholder="e.g. Dommeru" />
+                {tx('pickup')}
+                <input required value={loadForm.pickup} onChange={(e) => setLoadForm({ ...loadForm, pickup: e.target.value })} placeholder="Dommeru" />
               </label>
               <label>
-                Drop location
-                <input required value={loadForm.dropoff} onChange={(e) => setLoadForm({ ...loadForm, dropoff: e.target.value })} placeholder="e.g. Rajahmundry" />
+                {tx('dropoff')}
+                <input required value={loadForm.dropoff} onChange={(e) => setLoadForm({ ...loadForm, dropoff: e.target.value })} />
               </label>
               <label>
-                Cargo
+                {tx('cargo')}
                 <input required value={loadForm.cargo} onChange={(e) => setLoadForm({ ...loadForm, cargo: e.target.value })} />
               </label>
               <label>
-                Weight (tons)
+                {tx('weight')}
                 <input required type="number" min="0.1" step="0.1" value={loadForm.weight_tons} onChange={(e) => setLoadForm({ ...loadForm, weight_tons: e.target.value })} />
               </label>
               <label>
-                Vehicle preference
+                {tx('vehiclePref')}
                 <select value={loadForm.vehicle_preference} onChange={(e) => setLoadForm({ ...loadForm, vehicle_preference: e.target.value })}>
-                  <option value="any">Any</option>
-                  <option value="mini_lorry">Mini lorry</option>
-                  <option value="truck">Truck</option>
-                  <option value="part_load">Part load</option>
+                  <option value="any">{tx('any')}</option>
+                  <option value="mini_lorry">{tx('mini')}</option>
+                  <option value="truck">{tx('truck')}</option>
+                  <option value="part_load">{tx('partLoad')}</option>
                 </select>
               </label>
               <label>
-                Preferred date
+                {tx('preferredDate')}
                 <input value={loadForm.preferred_date} onChange={(e) => setLoadForm({ ...loadForm, preferred_date: e.target.value })} />
               </label>
               <label className="span-2">
-                Notes
+                {tx('notes')}
                 <textarea rows={3} value={loadForm.notes} onChange={(e) => setLoadForm({ ...loadForm, notes: e.target.value })} />
               </label>
               <div className="form-actions span-2">
                 <button className="btn btn-primary" type="submit" disabled={busy}>
-                  {busy ? 'Posting…' : 'Submit load request'}
+                  {busy ? tx('posting') : tx('submitLoad')}
                 </button>
+                <a className="btn btn-ghost" href={`tel:${business.phone}`}>
+                  {tx('callNow')}
+                </a>
               </div>
             </form>
           </section>
@@ -434,45 +602,45 @@ export default function App() {
         {portal === 'owner' && (
           <section className="portal">
             <div className="section-head">
-              <h2>Register your lorry</h2>
-              <p>Owners list vehicles with the transport office. Keep location updated for better load matches.</p>
+              <h2>{tx('ownerTitle')}</h2>
+              <p>{tx('ownerIntro')}</p>
             </div>
             <form className="panel-form" onSubmit={onRegisterVehicle}>
               <label>
-                Owner name
+                {tx('ownerName')}
                 <input required value={vehicleForm.owner_name} onChange={(e) => setVehicleForm({ ...vehicleForm, owner_name: e.target.value })} />
               </label>
               <label>
-                Owner phone
+                {tx('ownerPhone')}
                 <input required value={vehicleForm.owner_phone} onChange={(e) => setVehicleForm({ ...vehicleForm, owner_phone: e.target.value })} />
               </label>
               <label>
-                Plate number
+                {tx('plate')}
                 <input required value={vehicleForm.plate_number} onChange={(e) => setVehicleForm({ ...vehicleForm, plate_number: e.target.value })} placeholder="AP39XX1234" />
               </label>
               <label>
-                Vehicle type
+                {tx('vehicleType')}
                 <select value={vehicleForm.vehicle_type} onChange={(e) => setVehicleForm({ ...vehicleForm, vehicle_type: e.target.value })}>
-                  <option value="mini_lorry">Mini lorry</option>
-                  <option value="truck">Truck</option>
-                  <option value="trailer">Trailer</option>
+                  <option value="mini_lorry">{tx('mini')}</option>
+                  <option value="truck">{tx('truck')}</option>
+                  <option value="trailer">{tx('trailer')}</option>
                 </select>
               </label>
               <label>
-                Capacity (tons)
+                {tx('capacity')}
                 <input required type="number" min="0.5" step="0.5" value={vehicleForm.capacity_tons} onChange={(e) => setVehicleForm({ ...vehicleForm, capacity_tons: e.target.value })} />
               </label>
               <label>
-                Current location
+                {tx('currentLoc')}
                 <input required value={vehicleForm.current_location} onChange={(e) => setVehicleForm({ ...vehicleForm, current_location: e.target.value })} />
               </label>
               <label className="span-2">
-                Notes
+                {tx('notes')}
                 <textarea rows={3} value={vehicleForm.notes} onChange={(e) => setVehicleForm({ ...vehicleForm, notes: e.target.value })} />
               </label>
               <div className="form-actions span-2">
                 <button className="btn btn-primary" type="submit" disabled={busy}>
-                  {busy ? 'Saving…' : 'Register with office'}
+                  {busy ? tx('saving') : tx('registerBtn')}
                 </button>
               </div>
             </form>
@@ -482,48 +650,43 @@ export default function App() {
         {portal === 'admin' && (
           <section className="portal admin-portal">
             <div className="section-head">
-              <h2>Transport office admin</h2>
-              <p>Receive load requests, review nearby lorries, and assign trips.</p>
+              <h2>{tx('adminTitle')}</h2>
+              <p>{tx('adminIntro')}</p>
             </div>
 
             {!adminToken ? (
               <form className="panel-form admin-login" onSubmit={onAdminLogin}>
                 <label className="span-2">
-                  Admin PIN
+                  {tx('adminPin')}
                   <input
                     required
                     type="password"
                     value={adminPin}
                     onChange={(e) => setAdminPin(e.target.value)}
-                    placeholder="Office PIN"
                     autoComplete="current-password"
                   />
                 </label>
                 <div className="form-actions span-2">
                   <button className="btn btn-primary" type="submit" disabled={busy}>
-                    {busy ? 'Checking…' : 'Unlock desk'}
+                    {busy ? '…' : tx('unlockDesk')}
                   </button>
                 </div>
               </form>
             ) : (
               <>
                 <div className="admin-toolbar">
-                  <p>Desk session active</p>
+                  <p>{tx('deskActive')}</p>
                   <button type="button" className="btn btn-ghost" onClick={logoutAdmin}>
-                    Lock desk
+                    {tx('lockDesk')}
                   </button>
-                  <button
-                    type="button"
-                    className="btn btn-ghost"
-                    onClick={() => void refreshAdmin(adminToken)}
-                  >
-                    Refresh
+                  <button type="button" className="btn btn-ghost" onClick={() => void refreshAdmin(adminToken)}>
+                    {tx('refresh')}
                   </button>
                 </div>
 
                 <div className="admin-grid">
                   <div className="admin-col">
-                    <h3>Open loads</h3>
+                    <h3>{tx('openLoads')}</h3>
                     <ul className="data-list">
                       {openLoads.filter((l) => l.status === 'open').map((load) => (
                         <li key={load.id}>
@@ -543,24 +706,24 @@ export default function App() {
                         </li>
                       ))}
                       {openLoads.filter((l) => l.status === 'open').length === 0 && (
-                        <li className="empty">No open loads right now.</li>
+                        <li className="empty">{tx('noOpen')}</li>
                       )}
                     </ul>
                   </div>
 
                   <div className="admin-col">
                     <h3>
-                      Suggested lorries
-                      {selectedLoadId ? ` for #${selectedLoadId}` : ''}
+                      {tx('suggested')}
+                      {selectedLoadId ? ` #${selectedLoadId}` : ''}
                     </h3>
                     {!selectedLoadId ? (
-                      <p className="empty">Select an open load to see location-ranked vehicles.</p>
+                      <p className="empty">{tx('selectLoad')}</p>
                     ) : (
                       <ul className="data-list">
                         {suggestions.map((s) => (
                           <li key={s.vehicle.id} className="data-card suggest">
                             <strong>
-                              {s.vehicle.plate_number} · {Math.round(s.match_score * 100)}% match
+                              {s.vehicle.plate_number} · {Math.round(s.match_score * 100)}%
                             </strong>
                             <span>
                               {s.vehicle.current_location} · {s.vehicle.capacity_tons}t ·{' '}
@@ -568,7 +731,7 @@ export default function App() {
                             </span>
                             <span>{s.match_reason}</span>
                             <span>
-                              Owner: {s.vehicle.owner_name} · {s.vehicle.owner_phone}
+                              {s.vehicle.owner_name} · {s.vehicle.owner_phone}
                             </span>
                             <button
                               type="button"
@@ -576,19 +739,17 @@ export default function App() {
                               disabled={busy}
                               onClick={() => void onAssign(s.vehicle.id)}
                             >
-                              Assign this lorry
+                              {tx('assignBtn')}
                             </button>
                           </li>
                         ))}
-                        {suggestions.length === 0 && (
-                          <li className="empty">No available vehicles match capacity yet.</li>
-                        )}
+                        {suggestions.length === 0 && <li className="empty">{tx('noSuggest')}</li>}
                       </ul>
                     )}
                   </div>
 
                   <div className="admin-col">
-                    <h3>Fleet snapshot</h3>
+                    <h3>{tx('fleetSnap')}</h3>
                     <ul className="data-list compact">
                       {vehicles.map((v) => (
                         <li key={v.id} className="data-card">
@@ -600,17 +761,17 @@ export default function App() {
                           </span>
                         </li>
                       ))}
-                      {vehicles.length === 0 && <li className="empty">No vehicles registered.</li>}
+                      {vehicles.length === 0 && <li className="empty">{tx('noVehicles')}</li>}
                     </ul>
                   </div>
 
                   <div className="admin-col">
-                    <h3>Assignments</h3>
+                    <h3>{tx('assignments')}</h3>
                     <ul className="data-list">
                       {assignments.map((a) => (
                         <li key={a.id} className="data-card">
                           <strong>
-                            #{a.id} · {a.vehicle?.plate_number} → load #{a.load_id}
+                            #{a.id} · {a.vehicle?.plate_number} → #{a.load_id}
                           </strong>
                           <span>
                             {a.load?.pickup} → {a.load?.dropoff} · {a.status}
@@ -623,12 +784,12 @@ export default function App() {
                               disabled={busy}
                               onClick={() => void onComplete(a.id)}
                             >
-                              Mark delivered
+                              {tx('markDelivered')}
                             </button>
                           )}
                         </li>
                       ))}
-                      {assignments.length === 0 && <li className="empty">No assignments yet.</li>}
+                      {assignments.length === 0 && <li className="empty">{tx('noAssign')}</li>}
                     </ul>
                   </div>
                 </div>
@@ -641,9 +802,13 @@ export default function App() {
       <footer className="footer">
         <div>
           <strong>{business.name}</strong>
+          <p>{business.owner}</p>
+          <p>
+            <a href={`tel:${business.phone}`}>{business.phoneDisplay}</a>
+          </p>
           <p>{address.line}</p>
         </div>
-        <p className="footer-meta">Lorry owners · Load requestors · Office dispatch</p>
+        <p className="footer-meta">{tx('footerRoles')}</p>
       </footer>
     </div>
   )
