@@ -1,11 +1,15 @@
 :root {
-  --ink: #000000;
-  --ink-soft: #5e5e5e;
-  --paper: #ffffff;
-  --paper-soft: #f6f6f6;
-  --accent: #06c167;
-  --accent-deep: #048a49;
-  --line: rgba(0, 0, 0, 0.08);
+  --ink: #142033;
+  --ink-soft: #5c6b7a;
+  --paper: #f4f6fa;
+  --paper-soft: #e9eef5;
+  --surface: #ffffff;
+  --accent: #1f6feb;
+  --accent-deep: #1557c0;
+  --warm: #ef8b2e;
+  --warm-deep: #d97316;
+  --brand: #0b2a4a;
+  --line: rgba(20, 32, 51, 0.1);
   --max: 1180px;
   --font-display: 'Plus Jakarta Sans', 'Noto Sans Telugu', sans-serif;
   --font-body: 'Plus Jakarta Sans', 'Noto Sans Telugu', sans-serif;
@@ -53,8 +57,8 @@ a:hover {
   align-items: center;
   justify-content: center;
   padding: 0.7rem 1rem;
-  background: #000;
-  color: #fff;
+  background: var(--brand);
+  color: #f5f8fc;
 }
 
 .topbar-banner {
@@ -65,13 +69,13 @@ a:hover {
 }
 
 .topbar-banner a {
-  color: var(--accent);
+  color: #ffc57a;
   text-decoration: none;
   font-weight: 750;
 }
 
 .topbar-banner a:hover {
-  color: #3fe08a;
+  color: #ffe0b0;
 }
 
 .nav {
@@ -113,19 +117,30 @@ a:hover {
 }
 
 .nav-mark {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 999px;
-  background: #000;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.55rem;
+  background:
+    linear-gradient(145deg, #2f86ff 0%, var(--accent) 48%, #0b2a4a 100%);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.12);
   position: relative;
 }
 
-.nav-mark::after {
-  content: '';
+.nav-mark::before {
+  content: 'M';
   position: absolute;
-  inset: 28% 22%;
-  border-radius: 999px;
-  background: var(--accent);
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.nav-mark::after {
+  display: none;
 }
 
 .nav-links {
@@ -178,7 +193,7 @@ a:hover {
 }
 
 .lang-switch button.active {
-  background: #000;
+  background: var(--brand);
   color: #fff;
 }
 
@@ -187,7 +202,7 @@ a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: 0.55rem;
   padding: 0.78rem 1.25rem;
   font: inherit;
   font-size: 0.95rem;
@@ -200,34 +215,35 @@ a:hover {
 
 .nav-cta,
 .btn-primary {
-  background: var(--accent);
-  color: #000;
+  background: var(--warm);
+  color: #1a1208;
 }
 
 .nav-cta:hover,
 .btn-primary:hover {
-  background: #05a859;
-  color: #000;
+  background: var(--warm-deep);
+  color: #fff;
 }
 
 .btn-ghost {
   background: transparent;
-  border-color: #000;
-  color: #000;
+  border-color: rgba(20, 32, 51, 0.22);
+  color: var(--ink);
 }
 
 .btn-ghost:hover {
-  background: #000;
+  background: var(--brand);
+  border-color: var(--brand);
   color: #fff;
 }
 
 .btn-dark {
-  background: #000;
+  background: var(--brand);
   color: #fff;
 }
 
 .btn-dark:hover {
-  background: #222;
+  background: #163a5f;
   color: #fff;
 }
 
@@ -299,13 +315,13 @@ main {
   gap: 1.25rem;
   margin: 0.5rem 0 2.5rem;
   padding: 2rem 1.35rem;
-  border-radius: 1.25rem;
-  background: #000;
+  border-radius: 1.1rem;
+  background: linear-gradient(135deg, #0b2a4a 0%, #1557c0 100%);
   color: #fff;
 }
 
 .stats-band .trust-label {
-  color: #9a9a9a;
+  color: #b7c9e0;
 }
 
 .stats-band .trust-value {
@@ -313,7 +329,7 @@ main {
 }
 
 .stats-band .trust-detail {
-  color: #bdbdbd;
+  color: #d5e2f2;
 }
 
 .quick-actions {
