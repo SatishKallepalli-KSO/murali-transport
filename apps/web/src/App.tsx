@@ -343,7 +343,7 @@ export default function App() {
                   <button type="button" className="btn btn-primary" onClick={() => setPortal('request')}>
                     {tx('ctaPostLoad')}
                   </button>
-                  <button type="button" className="btn btn-ghost" onClick={() => setPortal('owner')}>
+                  <button type="button" className="btn btn-dark" onClick={() => setPortal('owner')}>
                     {tx('ctaRegister')}
                   </button>
                   <a className="btn btn-ghost" href={`tel:${business.phone}`}>
@@ -353,6 +353,26 @@ export default function App() {
               </div>
               <div className="hero-media">
                 <img src="/eicher-hero.jpg" alt="Eicher lorry — Murali Transport Office Dommeru" />
+              </div>
+            </section>
+
+            <section className="stats-band trust" aria-label="Live platform stats">
+              <div className="trust-item">
+                <p className="trust-label">{tx('trustFleet')}</p>
+                <p className="trust-value">{stats?.vehicles ?? '—'}</p>
+                <p className="trust-detail">
+                  {stats?.available_vehicles ?? 0} {tx('trustAvailable')}
+                </p>
+              </div>
+              <div className="trust-item">
+                <p className="trust-label">{tx('trustOpen')}</p>
+                <p className="trust-value">{stats?.open_loads ?? '—'}</p>
+                <p className="trust-detail">{tx('trustOpenDetail')}</p>
+              </div>
+              <div className="trust-item">
+                <p className="trust-label">{tx('trustAssigned')}</p>
+                <p className="trust-value">{stats?.assignments ?? '—'}</p>
+                <p className="trust-detail">{tx('trustAssignedDetail')}</p>
               </div>
             </section>
 
@@ -392,26 +412,6 @@ export default function App() {
                 <p className="fleet-kicker">Eicher · Mini lorry & truck</p>
                 <h2>{tx('fleetTitle')}</h2>
                 <p>{tx('fleetBody')}</p>
-              </div>
-            </section>
-
-            <section className="trust" aria-label="Live platform stats">
-              <div className="trust-item">
-                <p className="trust-label">{tx('trustFleet')}</p>
-                <p className="trust-value">{stats?.vehicles ?? '—'}</p>
-                <p className="trust-detail">
-                  {stats?.available_vehicles ?? 0} {tx('trustAvailable')}
-                </p>
-              </div>
-              <div className="trust-item">
-                <p className="trust-label">{tx('trustOpen')}</p>
-                <p className="trust-value">{stats?.open_loads ?? '—'}</p>
-                <p className="trust-detail">{tx('trustOpenDetail')}</p>
-              </div>
-              <div className="trust-item">
-                <p className="trust-label">{tx('trustAssigned')}</p>
-                <p className="trust-value">{stats?.assignments ?? '—'}</p>
-                <p className="trust-detail">{tx('trustAssignedDetail')}</p>
               </div>
             </section>
 
@@ -791,15 +791,17 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        <div>
-          <strong>{business.name}</strong>
-          <p>{business.owner}</p>
-          <p>
-            <a href={`tel:${business.phone}`}>{business.phoneDisplay}</a>
-          </p>
-          <p>{address.line}</p>
+        <div className="footer-inner">
+          <div>
+            <strong>{business.name}</strong>
+            <p>{business.owner}</p>
+            <p>
+              <a href={`tel:${business.phone}`}>9949705008</a>
+            </p>
+            <p>{address.line}</p>
+          </div>
+          <p>{tx('footerRoles')}</p>
         </div>
-        <p className="footer-meta">{tx('footerRoles')}</p>
       </footer>
     </div>
   )
