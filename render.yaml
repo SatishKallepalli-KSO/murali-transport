@@ -1,0 +1,20 @@
+# Free-tier live stack on Render (web) + Neon Free (Postgres)
+# App: https://murali-transport.onrender.com
+#
+# DATABASE_URL must be set in the Render dashboard to your Neon pooled
+# connection string (do not commit secrets). Neon project: polished-river-47162645
+
+services:
+  - type: web
+    name: murali-transport
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /healthz
+    envVars:
+      - key: APP_URL
+        value: https://murali-transport.onrender.com
+      # Set in dashboard: Neon pooled URL
+      # postgresql://murali:...@...-pooler.../murali?sslmode=require
+      - key: DATABASE_URL
+        sync: false

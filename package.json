@@ -1,0 +1,19 @@
+{
+  "name": "murali-transport",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Murali Office Miny Lorry Transport — Dommeru freight booking site",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@murali-transport/web",
+    "dev:web": "npm run dev --workspace=@murali-transport/web",
+    "build": "npm run build --workspace=@murali-transport/web",
+    "preview": "npm run preview --workspace=@murali-transport/web",
+    "lint": "npm run lint --workspace=@murali-transport/web"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

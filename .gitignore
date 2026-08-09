@@ -1,0 +1,16 @@
+node_modules
+dist
+.venv
+__pycache__
+*.pyc
+.env
+.env.local
+.DS_Store
+*.local
+.vite
+coverage
+apps/api/data/
+apps/api/static/
+backups/
+*.sql
+*.sql.gz
