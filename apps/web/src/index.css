@@ -167,18 +167,27 @@ code {
 
 .nav-links {
   display: none;
-  gap: 1.1rem;
+  gap: 0.35rem;
   font-size: 0.95rem;
   font-weight: 600;
 }
 
-.nav-links a {
-  text-decoration: none;
+.nav-links button {
+  appearance: none;
+  border: 0;
+  background: transparent;
   color: var(--ink-soft);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.3rem;
 }
 
-.nav-links a:hover {
+.nav-links button:hover,
+.nav-links button.active {
   color: var(--ink);
+  background: rgba(47, 74, 94, 0.08);
 }
 
 .nav-cta,
@@ -893,5 +902,376 @@ main {
   *::after {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* ---- animated lorry sky ---- */
+.lorry-sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(1000px 520px at 10% -10%, rgba(196, 92, 26, 0.16), transparent 55%),
+    radial-gradient(900px 480px at 95% 0%, rgba(47, 74, 94, 0.18), transparent 50%),
+    linear-gradient(180deg, #f4efe4 0%, #ebe3d4 45%, #e4dccb 100%);
+}
+
+.sky-haze {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      -8deg,
+      transparent,
+      transparent 54px,
+      rgba(47, 74, 94, 0.03) 54px,
+      rgba(47, 74, 94, 0.03) 56px
+    );
+  mask-image: linear-gradient(180deg, black, transparent 75%);
+}
+
+.sky-road {
+  position: absolute;
+  left: -5%;
+  right: -5%;
+  height: 2.4rem;
+  background: rgba(42, 48, 54, 0.18);
+  transform: skewX(-10deg);
+}
+
+.sky-road-far {
+  top: 34%;
+  opacity: 0.45;
+}
+
+.sky-road-near {
+  top: 62%;
+  height: 3.2rem;
+  opacity: 0.55;
+}
+
+.sky-road::after {
+  content: '';
+  position: absolute;
+  inset: 45% 0 auto;
+  height: 0.16rem;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(240, 193, 75, 0.7) 0 1.4rem,
+    transparent 1.4rem 2.6rem
+  );
+  animation: dash 1.1s linear infinite;
+}
+
+.sky-truck {
+  position: absolute;
+  left: -18%;
+  width: 7.5rem;
+  height: 2.6rem;
+  animation-name: convoy;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  opacity: 0.55;
+}
+
+.sky-cab {
+  position: absolute;
+  left: 0;
+  bottom: 0.45rem;
+  width: 2.2rem;
+  height: 1.55rem;
+  background: var(--accent);
+  border-radius: 0.3rem 0.12rem 0.1rem 0.1rem;
+}
+
+.sky-cab::before {
+  content: '';
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
+  width: 0.95rem;
+  height: 0.55rem;
+  background: #d7e7f2;
+  border-radius: 0.12rem;
+}
+
+.sky-bed {
+  position: absolute;
+  left: 2.05rem;
+  bottom: 0.45rem;
+  width: 4.8rem;
+  height: 1.2rem;
+  background: var(--steel);
+  border-radius: 0.1rem;
+}
+
+.sky-wheel {
+  position: absolute;
+  bottom: 0;
+  width: 0.72rem;
+  height: 0.72rem;
+  border-radius: 50%;
+  background: #1a1f24;
+  box-shadow: inset 0 0 0 0.16rem #6b737c;
+  animation: spin 0.9s linear infinite;
+}
+
+.sky-wheel-a { left: 0.55rem; }
+.sky-wheel-b { left: 5.5rem; }
+
+.sky-dust {
+  position: absolute;
+  left: -0.6rem;
+  bottom: 0.15rem;
+  width: 1.4rem;
+  height: 0.35rem;
+  border-radius: 999px;
+  background: rgba(90, 101, 112, 0.25);
+  filter: blur(2px);
+}
+
+.booking-ticker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4.5rem;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+
+.booking-ticker-track {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+  animation: ticker 42s linear infinite;
+}
+
+.ticker-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 252, 246, 0.72);
+  border: 1px solid rgba(47, 74, 94, 0.12);
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+}
+
+.ticker-chip em {
+  font-style: normal;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--accent-deep);
+}
+
+.ticker-chip small {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+@keyframes convoy {
+  from { left: -20%; }
+  to { left: 110%; }
+}
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ---- portals / admin ---- */
+.flash {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0 0;
+  padding: 0.85rem 1rem;
+  border-radius: 0.4rem;
+  font-weight: 600;
+}
+
+.flash button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: inherit;
+}
+
+.flash-ok {
+  background: rgba(46, 125, 70, 0.12);
+  color: #1f6b3a;
+}
+
+.flash-error {
+  background: rgba(180, 60, 40, 0.12);
+  color: #8f2f1d;
+}
+
+.portal {
+  padding: 2.2rem 0 3rem;
+}
+
+.panel-form {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.35rem;
+  background: rgba(255, 252, 246, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  backdrop-filter: blur(8px);
+}
+
+.panel-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.panel-form input,
+.panel-form select,
+.panel-form textarea {
+  width: 100%;
+  border: 1px solid rgba(26, 31, 36, 0.16);
+  border-radius: 0.35rem;
+  padding: 0.7rem 0.8rem;
+  background: #fffdf8;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.panel-form input:focus,
+.panel-form select:focus,
+.panel-form textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.admin-login {
+  max-width: 420px;
+}
+
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin-toolbar p {
+  margin: 0;
+  margin-right: auto;
+  font-weight: 600;
+  color: var(--steel);
+}
+
+.admin-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.admin-col h3 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.data-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.data-card {
+  display: grid;
+  gap: 0.25rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.9rem 1rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 252, 246, 0.9);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+button.data-card.active,
+.data-card.suggest {
+  border-color: rgba(196, 92, 26, 0.45);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.data-card strong {
+  font-size: 1rem;
+}
+
+.data-card span {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.data-card .btn {
+  margin-top: 0.45rem;
+  justify-self: start;
+}
+
+.empty {
+  color: var(--ink-soft);
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+.compact .data-card {
+  padding: 0.65rem 0.8rem;
+}
+
+@media (min-width: 720px) {
+  .panel-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .panel-form .span-2 {
+    grid-column: 1 / -1;
+  }
+
+  .admin-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1100px) {
+  .admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-truck,
+  .booking-ticker-track,
+  .sky-road::after,
+  .sky-wheel {
+    animation: none !important;
   }
 }

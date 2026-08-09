@@ -14,6 +14,8 @@ services:
     envVars:
       - key: APP_URL
         value: https://murali-transport.onrender.com
+      - key: ADMIN_PIN
+        sync: false
       # Set in dashboard: Neon pooled URL
       # postgresql://murali:...@...-pooler.../murali?sslmode=require
       - key: DATABASE_URL

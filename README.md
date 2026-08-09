@@ -1,46 +1,35 @@
 # Murali Office Miny Lorry Transport
 
-Website + booking API for **Murali Office Miny Lorry Transport** (Dommeru, Andhra Pradesh).
+End-to-end **lorry booking platform** for Dommeru:
 
-**Address:** 2MFM+F2V, Dommeru, Andhra Pradesh 534342, India  
-**Stack:** same free pattern as AI Tutor Studio — **Render Free** + **Neon Free Postgres**
+1. **Lorry owners** register vehicles (plate, capacity, current location)
+2. **Load requestors** post freight details
+3. **Office admin** receives requests and assigns lorries ranked by location match
+
+**Live:** https://murali-transport.onrender.com  
+**Stack:** Render Free + Neon Free (same as AI Tutor Studio)
 
 ## Quick start
 
 ```bash
-npm install
-npm run dev          # web → http://localhost:5175
+npm install && npm run dev   # http://localhost:5175
 
-cd apps/api
-python3 -m venv .venv && source .venv/bin/activate
+cd apps/api && python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-Omit `DATABASE_URL` for local SQLite (`apps/api/data/murali.db`).
+Admin desk PIN default: `dommeru123` (override with `ADMIN_PIN`).
 
-## Production (free)
+## API highlights
 
-```bash
-./scripts/deploy-free.sh
-```
+| Method | Path | Who |
+|--------|------|-----|
+| POST | `/v1/vehicles` | Owner registers lorry |
+| POST | `/v1/loads` | Requestor posts load |
+| POST | `/v1/admin/login` | Admin PIN → token |
+| GET | `/v1/loads/{id}/suggestions` | Location-ranked lorries |
+| POST | `/v1/assignments` | Admin assigns vehicle |
+| POST | `/v1/assignments/{id}/complete` | Mark delivered |
 
-Then set Render env `DATABASE_URL` to the Neon pooled URL — see [docs/DEPLOY-FREE.md](docs/DEPLOY-FREE.md) and [docs/DATABASE.md](docs/DATABASE.md).
-
-Expected live URL: **https://murali-transport.onrender.com**
-
-## API
-
-| Method | Path | Purpose |
-|--------|------|---------|
-| GET | `/healthz` | Health |
-| GET | `/v1/office` | Office info |
-| POST | `/v1/bookings` | Create freight enquiry |
-| GET | `/v1/bookings` | List enquiries |
-
-## Docker
-
-```bash
-docker compose up --build
-# http://localhost:8000
-```
+See [docs/DEPLOY-FREE.md](docs/DEPLOY-FREE.md) and [docs/DATABASE.md](docs/DATABASE.md).
