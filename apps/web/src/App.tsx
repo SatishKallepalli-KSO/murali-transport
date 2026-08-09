@@ -337,7 +337,6 @@ export default function App() {
               <div className="hero-copy">
                 <p className="hero-kicker">{tx('heroKicker')}</p>
                 <h1 className="hero-name">{tx('heroBrand')}</h1>
-                <p className="hero-sub">{tx('heroSub')}</p>
                 <p className="hero-tagline">{tx('heroTagline')}</p>
                 <div className="hero-actions">
                   <button type="button" className="btn btn-primary" onClick={() => setPortal('request')}>
