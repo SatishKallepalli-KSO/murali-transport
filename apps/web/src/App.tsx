@@ -265,15 +265,10 @@ export default function App() {
       </div>
 
       <div className="topbar">
-        <a className="topbar-phone" href={`tel:${business.phone}`}>
-          ☎ {business.phoneDisplay}
-        </a>
-        <span>
-          {stats
-            ? `${stats.available_vehicles} · ${stats.open_loads} · ${stats.assignments}`
-            : tx('topStatsFallback')}
+        <span className="topbar-banner">
+          Murali Transport Office, Dommeru · ph:{' '}
+          <a href={`tel:${business.phone}`}>9949705008</a>
         </span>
-        <span>{tx('hours')}</span>
       </div>
 
       <header className="nav">

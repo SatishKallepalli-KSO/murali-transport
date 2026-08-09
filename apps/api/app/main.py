@@ -231,12 +231,14 @@ def healthz() -> dict[str, str]:
 def office_info() -> dict:
     return {
         "name": "Murali Office Miny Lorry Transport",
+        "owner": "Murali Kallepalli",
+        "phone": "+919949705008",
         "address": "2MFM+F2V, Dommeru, Andhra Pradesh 534342, India",
         "rating": "4.2",
         "reviews": 27,
         "maps": "https://share.google/mAW3H8LK7Ogq0qrBl",
         "platform": "lorry-booking",
-        "version": "0.2.0",
+        "version": "0.3.0",
     }
 
 
