@@ -39,7 +39,7 @@ const dict = {
     callNow: 'Call now',
     whatsapp: 'WhatsApp',
     heroKicker: 'Dommeru, Andhra Pradesh',
-    heroBrand: 'Murali Transport Office · Miny Lorry Transport',
+    heroBrand: 'Murali Transport Office',
     heroSub: '',
     heroTagline:
       'Post a load or register your lorry. Our office matches cargo to nearby vehicles.',
@@ -152,7 +152,7 @@ const dict = {
     callNow: 'కాల్ చేయండి',
     whatsapp: 'వాట్సాప్',
     heroKicker: 'దొమ్మేరు, ఆంధ్రప్రదేశ్',
-    heroBrand: 'మురళి ట్రాన్స్‌పోర్ట్ ఆఫీస్ · మినీ లారీ ట్రాన్స్‌పోర్ట్',
+    heroBrand: 'మురళి ట్రాన్స్‌పోర్ట్ ఆఫీస్',
     heroSub: '',
     heroTagline:
       'లోడ్ పోస్ట్ చేయండి లేదా లారీ నమోదు చేయండి. ఆఫీస్ సమీప వాహనాలతో సరుకును జత చేస్తుంది.',
