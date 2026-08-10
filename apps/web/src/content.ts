@@ -318,7 +318,7 @@ export const testimonials: Record<Lang, Testimonial[]> = {
       quote: 'For paddy bags to the mill, Murali office found a nearby truck. Saved me calling many drivers.',
     },
     {
-      name: 'Sujatha Reddy',
+      name: 'Prasad Reddy',
       place: 'Dommeru',
       role: 'Kirana shop owner',
       quote: 'I book local grocery runs often. They know the routes and assign the right vehicle size.',
@@ -330,7 +330,7 @@ export const testimonials: Record<Lang, Testimonial[]> = {
       quote: 'Registered my Eicher here. Now I get load calls based on where my vehicle is parked.',
     },
     {
-      name: 'Padmavathi Devi',
+      name: 'Satyanarayana',
       place: 'Tanuku',
       role: 'Rice merchant',
       quote: 'Reliable office desk. Pickup and drop details were shared properly with the driver.',
@@ -342,7 +342,7 @@ export const testimonials: Record<Lang, Testimonial[]> = {
       quote: 'Needed a truck for steel rods to site. Admin matched capacity well and trip went smooth.',
     },
     {
-      name: 'Anusha Kumari',
+      name: 'Nagaraju',
       place: 'Bhimavaram',
       role: 'Warehouse manager',
       quote: 'WhatsApp and phone both work. Booking through the office is easier than hunting lorries myself.',
@@ -368,7 +368,7 @@ export const testimonials: Record<Lang, Testimonial[]> = {
       quote: 'వరి బస్తాలు మిల్లుకు పంపాలంటే మురళి ఆఫీస్ సమీప ట్రక్ ఏర్పాటు చేసింది. చాలా సులభం.',
     },
     {
-      name: 'సుజాతా రెడ్డి',
+      name: 'ప్రసాద్ రెడ్డి',
       place: 'దొమ్మేరు',
       role: 'కిరాణా దుకాణం',
       quote: 'లోకల్ కిరాణా రన్‌లు తరచు బుక్ చేస్తాను. మార్గాలు తెలుసు, సరైన వాహనం కేటాయిస్తారు.',
@@ -380,7 +380,7 @@ export const testimonials: Record<Lang, Testimonial[]> = {
       quote: 'నా ఐచర్ ఇక్కడ రిజిస్టర్ చేశాను. వాహనం ఉన్న స్థలం ఆధారంగా లోడ్ కాల్స్ వస్తున్నాయి.',
     },
     {
-      name: 'పద్మావతి దేవి',
+      name: 'సత్యనారాయణ',
       place: 'తణుకు',
       role: 'బియ్యం వ్యాపారి',
       quote: 'నమ్మకమైన ఆఫీస్. పికప్, డ్రాప్ వివరాలు డ్రైవర్‌కు సరిగ్గా అందాయి.',
@@ -392,7 +392,7 @@ export const testimonials: Record<Lang, Testimonial[]> = {
       quote: 'సైట్‌కు స్టీల్ రాడ్స్ కోసం ట్రక్ కావాలి. కెపాసిటీ సరిగ్గా మ్యాచ్ అయి ట్రిప్ సాఫీగా జరిగింది.',
     },
     {
-      name: 'అనూష కుమారి',
+      name: 'నాగరాజు',
       place: 'భీమవరం',
       role: 'గోదాము మేనేజర్',
       quote: 'వాట్సాప్, ఫోన్ రెండూ పని చేస్తాయి. స్వయంగా లారీ వెతకడం కంటే ఆఫీస్ ద్వారా బుకింగ్ సులభం.',
