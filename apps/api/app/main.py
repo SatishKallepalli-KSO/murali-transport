@@ -401,14 +401,28 @@ def register_vehicle(body: VehicleCreate, db: Session = Depends(get_db)) -> Vehi
 def list_vehicles(
     status: str | None = None,
     location: str | None = None,
-    limit: int = 100,
+    q: str | None = None,
+    limit: int = 200,
+    offset: int = 0,
     db: Session = Depends(get_db),
 ) -> list[Vehicle]:
-    limit = max(1, min(limit, 200))
-    q = db.query(Vehicle)
+    limit = max(1, min(limit, 500))
+    offset = max(0, offset)
+    query = db.query(Vehicle)
     if status:
-        q = q.filter(Vehicle.status == status)
-    rows = q.order_by(Vehicle.updated_at.desc()).limit(limit).all()
+        query = query.filter(Vehicle.status == status)
+    if q and q.strip():
+        term = f"%{q.strip()}%"
+        query = query.filter(
+            (Vehicle.plate_number.ilike(term))
+            | (Vehicle.owner_name.ilike(term))
+            | (Vehicle.owner_phone.ilike(term))
+            | (Vehicle.driver_name.ilike(term))
+            | (Vehicle.driver_phone.ilike(term))
+            | (Vehicle.current_location.ilike(term))
+            | (Vehicle.vehicle_type.ilike(term))
+        )
+    rows = query.order_by(Vehicle.updated_at.desc()).offset(offset).limit(limit).all()
     if location:
         scored = sorted(
             rows,
@@ -471,16 +485,30 @@ def create_load(body: LoadCreate, db: Session = Depends(get_db)) -> LoadOut:
 @app.get("/v1/loads", response_model=list[LoadOut])
 def list_loads(
     status: str | None = None,
-    limit: int = 100,
+    q: str | None = None,
+    limit: int = 200,
+    offset: int = 0,
     db: Session = Depends(get_db),
 ) -> list[LoadOut]:
-    limit = max(1, min(limit, 200))
-    q = db.query(LoadRequest).options(
+    limit = max(1, min(limit, 500))
+    offset = max(0, offset)
+    query = db.query(LoadRequest).options(
         joinedload(LoadRequest.assignment).joinedload(Assignment.vehicle)
     )
     if status:
-        q = q.filter(LoadRequest.status == status)
-    rows = q.order_by(LoadRequest.created_at.desc()).limit(limit).all()
+        query = query.filter(LoadRequest.status == status)
+    if q and q.strip():
+        term = f"%{q.strip()}%"
+        query = query.filter(
+            (LoadRequest.requestor_name.ilike(term))
+            | (LoadRequest.requestor_phone.ilike(term))
+            | (LoadRequest.pickup.ilike(term))
+            | (LoadRequest.dropoff.ilike(term))
+            | (LoadRequest.cargo.ilike(term))
+            | (LoadRequest.preferred_date.ilike(term))
+            | (LoadRequest.notes.ilike(term))
+        )
+    rows = query.order_by(LoadRequest.created_at.desc()).offset(offset).limit(limit).all()
     return [load_to_out(r) for r in rows]
 
 
@@ -611,17 +639,33 @@ def assign_load(
 
 @app.get("/v1/assignments", response_model=list[AssignmentOut])
 def list_assignments(
-    limit: int = 50,
+    q: str | None = None,
+    limit: int = 200,
+    offset: int = 0,
     db: Session = Depends(get_db),
     _: str = Depends(require_admin),
 ) -> list[AssignmentOut]:
-    limit = max(1, min(limit, 200))
+    limit = max(1, min(limit, 500))
+    offset = max(0, offset)
+    query = db.query(Assignment).options(
+        joinedload(Assignment.load), joinedload(Assignment.vehicle)
+    )
+    if q and q.strip():
+        term = f"%{q.strip()}%"
+        query = (
+            query.outerjoin(LoadRequest, Assignment.load_id == LoadRequest.id)
+            .outerjoin(Vehicle, Assignment.vehicle_id == Vehicle.id)
+            .filter(
+                (Vehicle.plate_number.ilike(term))
+                | (LoadRequest.pickup.ilike(term))
+                | (LoadRequest.dropoff.ilike(term))
+                | (LoadRequest.requestor_name.ilike(term))
+                | (Assignment.match_reason.ilike(term))
+                | (Assignment.status.ilike(term))
+            )
+        )
     rows = (
-        db.query(Assignment)
-        .options(joinedload(Assignment.load), joinedload(Assignment.vehicle))
-        .order_by(Assignment.created_at.desc())
-        .limit(limit)
-        .all()
+        query.order_by(Assignment.created_at.desc()).offset(offset).limit(limit).all()
     )
     return [
         AssignmentOut(

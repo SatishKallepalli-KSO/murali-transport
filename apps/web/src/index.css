@@ -768,6 +768,57 @@ main {
   font-size: 0.92rem;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.list-controls {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.list-search input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  font: inherit;
+  color: inherit;
+}
+
+.list-search input:focus {
+  outline: 2px solid rgba(31, 111, 235, 0.35);
+  outline-offset: 1px;
+}
+
+.list-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.list-pager span {
+  margin-right: auto;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.list-pager .btn {
+  padding: 0.4rem 0.75rem;
+  min-height: auto;
+}
+
 .admin-toolbar {
   display: flex;
   flex-wrap: wrap;

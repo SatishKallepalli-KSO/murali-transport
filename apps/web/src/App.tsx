@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useDeferredValue, useEffect, useMemo, useState, type FormEvent } from 'react'
 import {
   adminLogin,
   assignLoad,
@@ -79,6 +79,27 @@ function statusBadge(status: string, labels: { open: string; available: string; 
   return status
 }
 
+const ADMIN_PAGE_SIZE = 8
+
+function matchesQuery(parts: Array<string | number | null | undefined>, query: string) {
+  const q = query.trim().toLowerCase()
+  if (!q) return true
+  return parts.some((part) => String(part ?? '').toLowerCase().includes(q))
+}
+
+function paginateItems<T>(items: T[], page: number, pageSize = ADMIN_PAGE_SIZE) {
+  const total = items.length
+  const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1)
+  const safePage = Math.min(Math.max(1, page), totalPages)
+  const start = (safePage - 1) * pageSize
+  return {
+    total,
+    totalPages,
+    page: safePage,
+    items: items.slice(start, start + pageSize),
+  }
+}
+
 export default function App() {
   const [lang, setLang] = useState<Lang>(() => {
     const saved = localStorage.getItem('murali_lang')
@@ -103,12 +124,175 @@ export default function App() {
   const [suggestions, setSuggestions] = useState<VehicleSuggestion[]>([])
   const [busy, setBusy] = useState(false)
   const [adminTab, setAdminTab] = useState<AdminTab>('snapshot')
+  const [loadSearch, setLoadSearch] = useState('')
+  const [fleetSearch, setFleetSearch] = useState('')
+  const [assignSearch, setAssignSearch] = useState('')
+  const [matchSearch, setMatchSearch] = useState('')
+  const [loadPage, setLoadPage] = useState(1)
+  const [fleetPage, setFleetPage] = useState(1)
+  const [assignPage, setAssignPage] = useState(1)
+  const [matchPage, setMatchPage] = useState(1)
 
-  const openLoadCount = openLoads.filter((l) => l.status === 'open').length
+  const deferredLoadSearch = useDeferredValue(loadSearch)
+  const deferredFleetSearch = useDeferredValue(fleetSearch)
+  const deferredAssignSearch = useDeferredValue(assignSearch)
+  const deferredMatchSearch = useDeferredValue(matchSearch)
+
+  const openLoadRows = useMemo(
+    () => openLoads.filter((l) => l.status === 'open'),
+    [openLoads],
+  )
+  const openLoadCount = openLoadRows.length
   const availableVehicleCount = vehicles.filter((v) => v.status === 'available').length
   const activeTripCount = assignments.filter((a) => a.status === 'assigned').length
 
+  const filteredLoads = useMemo(
+    () =>
+      openLoadRows.filter((load) =>
+        matchesQuery(
+          [
+            load.id,
+            load.pickup,
+            load.dropoff,
+            load.cargo,
+            load.requestor_name,
+            load.requestor_phone,
+            load.preferred_date,
+            load.vehicle_preference,
+          ],
+          deferredLoadSearch,
+        ),
+      ),
+    [openLoadRows, deferredLoadSearch],
+  )
+  const filteredVehicles = useMemo(
+    () =>
+      vehicles.filter((v) =>
+        matchesQuery(
+          [
+            v.plate_number,
+            v.owner_name,
+            v.owner_phone,
+            v.driver_name,
+            v.driver_phone,
+            v.current_location,
+            v.vehicle_type,
+            v.status,
+          ],
+          deferredFleetSearch,
+        ),
+      ),
+    [vehicles, deferredFleetSearch],
+  )
+  const filteredAssignments = useMemo(
+    () =>
+      assignments.filter((a) =>
+        matchesQuery(
+          [
+            a.id,
+            a.load_id,
+            a.status,
+            a.match_reason,
+            a.vehicle?.plate_number,
+            a.load?.pickup,
+            a.load?.dropoff,
+            a.load?.requestor_name,
+          ],
+          deferredAssignSearch,
+        ),
+      ),
+    [assignments, deferredAssignSearch],
+  )
+  const filteredSuggestions = useMemo(
+    () =>
+      suggestions.filter((s) =>
+        matchesQuery(
+          [
+            s.vehicle.plate_number,
+            s.vehicle.owner_name,
+            s.vehicle.owner_phone,
+            s.vehicle.driver_name,
+            s.vehicle.driver_phone,
+            s.vehicle.current_location,
+            s.vehicle.vehicle_type,
+            s.match_reason,
+          ],
+          deferredMatchSearch,
+        ),
+      ),
+    [suggestions, deferredMatchSearch],
+  )
+
+  const pagedLoads = useMemo(() => paginateItems(filteredLoads, loadPage), [filteredLoads, loadPage])
+  const pagedVehicles = useMemo(
+    () => paginateItems(filteredVehicles, fleetPage),
+    [filteredVehicles, fleetPage],
+  )
+  const pagedAssignments = useMemo(
+    () => paginateItems(filteredAssignments, assignPage),
+    [filteredAssignments, assignPage],
+  )
+  const pagedSuggestions = useMemo(
+    () => paginateItems(filteredSuggestions, matchPage),
+    [filteredSuggestions, matchPage],
+  )
+
+  useEffect(() => setLoadPage(1), [deferredLoadSearch])
+  useEffect(() => setFleetPage(1), [deferredFleetSearch])
+  useEffect(() => setAssignPage(1), [deferredAssignSearch])
+  useEffect(() => setMatchPage(1), [deferredMatchSearch, selectedLoadId])
+
   const tx = (key: Parameters<typeof t>[1]) => t(lang, key)
+
+  function listMeta(total: number, page: number, totalPages: number) {
+    return tx('listShowing')
+      .replace('{total}', String(total))
+      .replace('{page}', String(page))
+      .replace('{pages}', String(totalPages))
+  }
+
+  function renderListControls(opts: {
+    value: string
+    onChange: (value: string) => void
+    placeholder: string
+    page: number
+    totalPages: number
+    total: number
+    onPage: (page: number) => void
+  }) {
+    return (
+      <div className="list-controls">
+        <label className="list-search">
+          <span className="sr-only">{tx('searchLabel')}</span>
+          <input
+            type="search"
+            value={opts.value}
+            placeholder={opts.placeholder}
+            onChange={(e) => opts.onChange(e.target.value)}
+          />
+        </label>
+        <div className="list-pager">
+          <span>{listMeta(opts.total, opts.page, opts.totalPages)}</span>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            disabled={opts.page <= 1}
+            onClick={() => opts.onPage(opts.page - 1)}
+          >
+            {tx('prevPage')}
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            disabled={opts.page >= opts.totalPages}
+            onClick={() => opts.onPage(opts.page + 1)}
+          >
+            {tx('nextPage')}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   function switchLang(next: Lang) {
     setLang(next)
@@ -812,8 +996,17 @@ export default function App() {
                         </div>
                         <span className="admin-count">{openLoadCount}</span>
                       </header>
+                      {renderListControls({
+                        value: loadSearch,
+                        onChange: setLoadSearch,
+                        placeholder: tx('searchLoads'),
+                        page: pagedLoads.page,
+                        totalPages: pagedLoads.totalPages,
+                        total: pagedLoads.total,
+                        onPage: setLoadPage,
+                      })}
                       <ul className="data-list">
-                        {openLoads.filter((l) => l.status === 'open').map((load) => (
+                        {pagedLoads.items.map((load) => (
                           <li key={load.id}>
                             <button
                               type="button"
@@ -844,7 +1037,9 @@ export default function App() {
                             </button>
                           </li>
                         ))}
-                        {openLoadCount === 0 && <li className="empty">{tx('noOpen')}</li>}
+                        {pagedLoads.total === 0 && (
+                          <li className="empty">{loadSearch.trim() ? tx('noSearchResults') : tx('noOpen')}</li>
+                        )}
                       </ul>
                     </section>
                   )}
@@ -867,39 +1062,54 @@ export default function App() {
                       {!selectedLoadId ? (
                         <p className="empty select-hint">{tx('selectLoad')}</p>
                       ) : (
-                        <ul className="data-list">
-                          {suggestions.map((s) => (
-                            <li key={s.vehicle.id} className="data-card suggest">
-                              <div className="card-top">
-                                <strong>
-                                  {s.vehicle.plate_number} · {Math.round(s.match_score * 100)}%
-                                </strong>
-                                <span className="badge badge-available">{tx('availableBadge')}</span>
-                              </div>
-                              <span>
-                                {s.vehicle.current_location} · {s.vehicle.capacity_tons}t ·{' '}
-                                {s.vehicle.vehicle_type}
-                              </span>
-                              <span>{s.match_reason}</span>
-                              <span>
-                                {tx('ownerName')}: {s.vehicle.owner_name} · {s.vehicle.owner_phone}
-                              </span>
-                              <span>
-                                {tx('driverName')}: {s.vehicle.driver_name || '—'} ·{' '}
-                                {s.vehicle.driver_phone || '—'}
-                              </span>
-                              <button
-                                type="button"
-                                className="btn btn-primary"
-                                disabled={busy}
-                                onClick={() => void onAssign(s.vehicle.id)}
-                              >
-                                {tx('assignBtn')}
-                              </button>
-                            </li>
-                          ))}
-                          {suggestions.length === 0 && <li className="empty">{tx('noSuggest')}</li>}
-                        </ul>
+                        <>
+                          {renderListControls({
+                            value: matchSearch,
+                            onChange: setMatchSearch,
+                            placeholder: tx('searchFleet'),
+                            page: pagedSuggestions.page,
+                            totalPages: pagedSuggestions.totalPages,
+                            total: pagedSuggestions.total,
+                            onPage: setMatchPage,
+                          })}
+                          <ul className="data-list">
+                            {pagedSuggestions.items.map((s) => (
+                              <li key={s.vehicle.id} className="data-card suggest">
+                                <div className="card-top">
+                                  <strong>
+                                    {s.vehicle.plate_number} · {Math.round(s.match_score * 100)}%
+                                  </strong>
+                                  <span className="badge badge-available">{tx('availableBadge')}</span>
+                                </div>
+                                <span>
+                                  {s.vehicle.current_location} · {s.vehicle.capacity_tons}t ·{' '}
+                                  {s.vehicle.vehicle_type}
+                                </span>
+                                <span>{s.match_reason}</span>
+                                <span>
+                                  {tx('ownerName')}: {s.vehicle.owner_name} · {s.vehicle.owner_phone}
+                                </span>
+                                <span>
+                                  {tx('driverName')}: {s.vehicle.driver_name || '—'} ·{' '}
+                                  {s.vehicle.driver_phone || '—'}
+                                </span>
+                                <button
+                                  type="button"
+                                  className="btn btn-primary"
+                                  disabled={busy}
+                                  onClick={() => void onAssign(s.vehicle.id)}
+                                >
+                                  {tx('assignBtn')}
+                                </button>
+                              </li>
+                            ))}
+                            {pagedSuggestions.total === 0 && (
+                              <li className="empty">
+                                {matchSearch.trim() ? tx('noSearchResults') : tx('noSuggest')}
+                              </li>
+                            )}
+                          </ul>
+                        </>
                       )}
                     </section>
                   )}
@@ -914,8 +1124,17 @@ export default function App() {
                         </div>
                         <span className="admin-count">{vehicles.length}</span>
                       </header>
+                      {renderListControls({
+                        value: fleetSearch,
+                        onChange: setFleetSearch,
+                        placeholder: tx('searchFleet'),
+                        page: pagedVehicles.page,
+                        totalPages: pagedVehicles.totalPages,
+                        total: pagedVehicles.total,
+                        onPage: setFleetPage,
+                      })}
                       <ul className="data-list compact">
-                        {vehicles.map((v) => (
+                        {pagedVehicles.items.map((v) => (
                           <li key={v.id} className="data-card static">
                             <div className="card-top">
                               <strong>{v.plate_number}</strong>
@@ -942,7 +1161,11 @@ export default function App() {
                             </span>
                           </li>
                         ))}
-                        {vehicles.length === 0 && <li className="empty">{tx('noVehicles')}</li>}
+                        {pagedVehicles.total === 0 && (
+                          <li className="empty">
+                            {fleetSearch.trim() ? tx('noSearchResults') : tx('noVehicles')}
+                          </li>
+                        )}
                       </ul>
                     </section>
                   )}
@@ -957,8 +1180,17 @@ export default function App() {
                         </div>
                         <span className="admin-count">{assignments.length}</span>
                       </header>
+                      {renderListControls({
+                        value: assignSearch,
+                        onChange: setAssignSearch,
+                        placeholder: tx('searchAssign'),
+                        page: pagedAssignments.page,
+                        totalPages: pagedAssignments.totalPages,
+                        total: pagedAssignments.total,
+                        onPage: setAssignPage,
+                      })}
                       <ul className="data-list">
-                        {assignments.map((a) => (
+                        {pagedAssignments.items.map((a) => (
                           <li key={a.id} className="data-card static">
                             <div className="card-top">
                               <strong>
@@ -988,7 +1220,11 @@ export default function App() {
                             )}
                           </li>
                         ))}
-                        {assignments.length === 0 && <li className="empty">{tx('noAssign')}</li>}
+                        {pagedAssignments.total === 0 && (
+                          <li className="empty">
+                            {assignSearch.trim() ? tx('noSearchResults') : tx('noAssign')}
+                          </li>
+                        )}
                       </ul>
                     </section>
                   )}

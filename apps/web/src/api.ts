@@ -92,10 +92,18 @@ export type Assignment = {
 
 export const fetchStats = () => api<Stats>('/v1/stats')
 export const fetchActivity = () => api<ActivityItem[]>('/v1/activity?limit=16')
-export const fetchVehicles = (status?: string) =>
-  api<Vehicle[]>(status ? `/v1/vehicles?status=${status}` : '/v1/vehicles')
-export const fetchLoads = (status?: string) =>
-  api<Load[]>(status ? `/v1/loads?status=${status}` : '/v1/loads')
+export const fetchVehicles = (status?: string, limit = 500) => {
+  const params = new URLSearchParams()
+  if (status) params.set('status', status)
+  params.set('limit', String(limit))
+  return api<Vehicle[]>(`/v1/vehicles?${params}`)
+}
+export const fetchLoads = (status?: string, limit = 500) => {
+  const params = new URLSearchParams()
+  if (status) params.set('status', status)
+  params.set('limit', String(limit))
+  return api<Load[]>(`/v1/loads?${params}`)
+}
 
 export const registerVehicle = (body: Record<string, unknown>) =>
   api<Vehicle>('/v1/vehicles', { method: 'POST', body: JSON.stringify(body) })
@@ -124,8 +132,8 @@ export const assignLoad = (
     body: JSON.stringify(body),
   })
 
-export const fetchAssignments = (token: string) =>
-  api<Assignment[]>('/v1/assignments', {
+export const fetchAssignments = (token: string, limit = 500) =>
+  api<Assignment[]>(`/v1/assignments?limit=${limit}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
 
