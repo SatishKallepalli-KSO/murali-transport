@@ -107,6 +107,8 @@ export default function App() {
   })
   const [portal, setPortal] = useState<Portal>('home')
   const [stats, setStats] = useState<Stats | null>(null)
+  const [publicVehicles, setPublicVehicles] = useState<Vehicle[]>([])
+  const [publicLoads, setPublicLoads] = useState<Load[]>([])
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -306,7 +308,14 @@ export default function App() {
 
   async function refreshPublic() {
     try {
-      setStats(await fetchStats())
+      const [nextStats, available, opens] = await Promise.all([
+        fetchStats(),
+        fetchVehicles('available', 24),
+        fetchLoads('open', 24),
+      ])
+      setStats(nextStats)
+      setPublicVehicles(available)
+      setPublicLoads(opens.filter((l) => l.status === 'open'))
     } catch {
       /* ignore */
     }
@@ -591,6 +600,96 @@ export default function App() {
                 <p className="trust-label">{tx('trustAssigned')}</p>
                 <p className="trust-value">{stats?.assignments ?? '—'}</p>
                 <p className="trust-detail">{tx('trustAssignedDetail')}</p>
+              </div>
+            </section>
+
+            <section className="live-board" id="live" aria-label="Live availability">
+              <div className="section-head live-board-head">
+                <h2>{tx('liveBoardTitle')}</h2>
+                <p>{tx('liveBoardIntro')}</p>
+              </div>
+              <div className="live-board-grid">
+                <div className="live-column live-lorries">
+                  <header className="live-column-head">
+                    <div>
+                      <p className="live-kicker">{tx('availableBadge')}</p>
+                      <h3>{tx('liveLorriesTitle')}</h3>
+                    </div>
+                    <span className="live-count">{publicVehicles.length}</span>
+                  </header>
+                  <ul className="live-list">
+                    {publicVehicles.slice(0, 6).map((v, index) => (
+                      <li
+                        key={v.id}
+                        className="live-row"
+                        style={{ animationDelay: `${index * 60}ms` }}
+                      >
+                        <div className="live-row-main">
+                          <strong>{v.plate_number}</strong>
+                          <span>
+                            {tx('liveNear')} {v.current_location}
+                          </span>
+                        </div>
+                        <div className="live-row-meta">
+                          <span>
+                            {tx('liveCapacity')} {v.capacity_tons}t
+                          </span>
+                          <span>{v.vehicle_type.replace(/_/g, ' ')}</span>
+                        </div>
+                      </li>
+                    ))}
+                    {publicVehicles.length === 0 && (
+                      <li className="live-empty">{tx('liveEmptyLorries')}</li>
+                    )}
+                  </ul>
+                  <div className="live-cta">
+                    <p>{tx('liveHaveLorry')}</p>
+                    <button type="button" className="btn btn-dark" onClick={() => setPortal('owner')}>
+                      {tx('ctaRegister')}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="live-column live-loads">
+                  <header className="live-column-head">
+                    <div>
+                      <p className="live-kicker">{tx('openBadge')}</p>
+                      <h3>{tx('liveLoadsTitle')}</h3>
+                    </div>
+                    <span className="live-count">{publicLoads.length}</span>
+                  </header>
+                  <ul className="live-list">
+                    {publicLoads.slice(0, 6).map((load, index) => (
+                      <li
+                        key={load.id}
+                        className="live-row"
+                        style={{ animationDelay: `${index * 60}ms` }}
+                      >
+                        <div className="live-row-main">
+                          <strong>
+                            {load.pickup} → {load.dropoff}
+                          </strong>
+                          <span>
+                            {load.cargo} · {load.weight_tons}t
+                          </span>
+                        </div>
+                        <div className="live-row-meta">
+                          <span>#{load.id}</span>
+                          {load.preferred_date ? <span>{load.preferred_date}</span> : null}
+                        </div>
+                      </li>
+                    ))}
+                    {publicLoads.length === 0 && (
+                      <li className="live-empty">{tx('liveEmptyLoads')}</li>
+                    )}
+                  </ul>
+                  <div className="live-cta">
+                    <p>{tx('liveWantLorry')}</p>
+                    <button type="button" className="btn btn-primary" onClick={() => setPortal('request')}>
+                      {tx('ctaPostLoad')}
+                    </button>
+                  </div>
+                </div>
               </div>
             </section>
 
