@@ -27,17 +27,23 @@ export const address = {
   line: '2MFM+F2V, Dommeru, Andhra Pradesh 534342, India',
 }
 
-/** Schematic Godavari-belt hubs for the home routes map (not GPS-precise). */
+/** Schematic route map (not GPS-precise) — Dommeru hub + AP / Hyderabad / Chennai. */
 export const routeCities = [
-  { id: 'dommeru', en: 'Dommeru', te: 'దొమ్మేరు', x: 430, y: 230, hub: true },
-  { id: 'kovvur', en: 'Kovvur', te: 'కొవ్వూరు', x: 360, y: 200, hub: false },
-  { id: 'rajahmundry', en: 'Rajahmundry', te: 'రాజమండ్రి', x: 560, y: 170, hub: false },
-  { id: 'nidadavole', en: 'Nidadavole', te: 'నిడదవోలు', x: 290, y: 250, hub: false },
-  { id: 'tanuku', en: 'Tanuku', te: 'తణుకు', x: 250, y: 320, hub: false },
-  { id: 'tadepalli', en: 'Tadepalligudem', te: 'తాడేపల్లిగూడెం', x: 200, y: 270, hub: false },
-  { id: 'eluru', en: 'Eluru', te: 'ఏలూరు', x: 120, y: 300, hub: false },
-  { id: 'bhimavaram', en: 'Bhimavaram', te: 'భీమవరం', x: 220, y: 390, hub: false },
-  { id: 'kakinada', en: 'Kakinada', te: 'కాకినాడ', x: 680, y: 210, hub: false },
+  { id: 'hyderabad', en: 'Hyderabad', te: 'హైదరాబాద్', x: 70, y: 150, hub: false },
+  { id: 'vijayawada', en: 'Vijayawada', te: 'విజయవాడ', x: 250, y: 280, hub: false },
+  { id: 'guntur', en: 'Guntur', te: 'గుంటూరు', x: 230, y: 340, hub: false },
+  { id: 'eluru', en: 'Eluru', te: 'ఏలూరు', x: 320, y: 270, hub: false },
+  { id: 'tadepalli', en: 'Tadepalligudem', te: 'తాడేపల్లిగూడెం', x: 380, y: 250, hub: false },
+  { id: 'nidadavole', en: 'Nidadavole', te: 'నిడదవోలు', x: 420, y: 230, hub: false },
+  { id: 'dommeru', en: 'Dommeru', te: 'దొమ్మేరు', x: 500, y: 220, hub: true },
+  { id: 'kovvur', en: 'Kovvur', te: 'కొవ్వూరు', x: 460, y: 190, hub: false },
+  { id: 'rajahmundry', en: 'Rajahmundry', te: 'రాజమండ్రి', x: 580, y: 170, hub: false },
+  { id: 'kakinada', en: 'Kakinada', te: 'కాకినాడ', x: 680, y: 180, hub: false },
+  { id: 'vizag', en: 'Visakhapatnam', te: 'విశాఖపట్నం', x: 760, y: 110, hub: false },
+  { id: 'tanuku', en: 'Tanuku', te: 'తణుకు', x: 400, y: 300, hub: false },
+  { id: 'bhimavaram', en: 'Bhimavaram', te: 'భీమవరం', x: 390, y: 360, hub: false },
+  { id: 'nellore', en: 'Nellore', te: 'నెల్లూరు', x: 280, y: 430, hub: false },
+  { id: 'chennai', en: 'Chennai', te: 'చెన్నై', x: 300, y: 520, hub: false },
 ] as const
 
 export const routeLinks = [
@@ -46,10 +52,17 @@ export const routeLinks = [
   ['dommeru', 'nidadavole'],
   ['dommeru', 'tanuku'],
   ['dommeru', 'tadepalli'],
-  ['nidadavole', 'eluru'],
-  ['tanuku', 'bhimavaram'],
-  ['rajahmundry', 'kakinada'],
   ['kovvur', 'rajahmundry'],
+  ['rajahmundry', 'kakinada'],
+  ['kakinada', 'vizag'],
+  ['nidadavole', 'eluru'],
+  ['eluru', 'vijayawada'],
+  ['tanuku', 'bhimavaram'],
+  ['dommeru', 'vijayawada'],
+  ['vijayawada', 'hyderabad'],
+  ['vijayawada', 'guntur'],
+  ['guntur', 'nellore'],
+  ['nellore', 'chennai'],
 ] as const
 
 const dict = {
@@ -103,10 +116,10 @@ const dict = {
     marketPulse: 'At the office now',
     routesTitle: 'Cities we connect',
     routesIntro:
-      'From our Dommeru office we arrange mini lorries and trucks across the Godavari belt and nearby towns.',
+      'From our Dommeru office we arrange mini lorries and trucks across Andhra Pradesh — and long routes toward Hyderabad and Chennai.',
     routesHub: 'Office hub',
     routesCover: 'Common routes',
-    routesNote: 'Local and inter-town freight from Dommeru — call if your place is nearby.',
+    routesNote: 'Local towns plus Hyderabad and Chennai corridors — call if your place is on the way.',
     ctaPostLoad: 'Post a load',
     ctaRegister: 'Register lorry',
     ctaDirections: 'Get directions',
@@ -289,10 +302,10 @@ const dict = {
     marketPulse: 'ఆఫీస్‌లో ఇప్పుడు',
     routesTitle: 'మేము కలిపే పట్టణాలు',
     routesIntro:
-      'దొమ్మేరు ఆఫీస్ నుండి గోదావరి ప్రాంతం మరియు సమీప పట్టణాలకు మినీ లారీలు, ట్రక్కులు ఏర్పాటు చేస్తాము.',
+      'దొమ్మేరు ఆఫీస్ నుండి ఆంధ్రప్రదేశ్ అంతటా మినీ లారీలు, ట్రక్కులు — హైదరాబాద్, చెన్నై మార్గాలు కూడా.',
     routesHub: 'ఆఫీస్ హబ్',
     routesCover: 'సాధారణ మార్గాలు',
-    routesNote: 'దొమ్మేరు నుండి స్థానిక మరియు పట్టణాల మధ్య సరుకు — మీ ఊరు సమీపంలో ఉంటే కాల్ చేయండి.',
+    routesNote: 'స్థానిక పట్టణాలు మరియు హైదరాబాద్, చెన్నై కారిడార్ — మీ ఊరు మార్గంలో ఉంటే కాల్ చేయండి.',
     ctaPostLoad: 'లోడ్ పోస్ట్ చేయండి',
     ctaRegister: 'లారీ నమోదు',
     ctaDirections: 'దారి చూపించు',

@@ -89,9 +89,10 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 1rem 1.25rem;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 1rem max(1.25rem, calc((100% - var(--max)) / 2));
   background: rgba(255, 255, 255, 0.96);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(12px);
@@ -252,26 +253,39 @@ a:hover {
 }
 
 main {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 0 1.25rem 5rem;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0 0 5rem;
 }
 
-.hero {
-  display: grid;
-  gap: 2rem;
-  padding: 3.25rem 0 2.75rem;
+main > .flash,
+main > .section,
+main > .portal,
+main > .live-board,
+main > .role-paths,
+main > .admin-portal {
+  padding-left: max(1.25rem, calc((100% - var(--max)) / 2));
+  padding-right: max(1.25rem, calc((100% - var(--max)) / 2));
+}
+
+main > .market-pulse,
+main > .find-bar,
+main > .fleet-band,
+main > .routes-map {
+  padding-left: max(1.25rem, calc((100% - var(--max)) / 2));
+  padding-right: max(1.25rem, calc((100% - var(--max)) / 2));
 }
 
 .hero-scenic {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  margin-inline: -1.25rem;
+  margin-inline: 0;
   margin-bottom: 1.5rem;
   min-height: min(78vh, 640px);
-  padding: 3.5rem 1.25rem 4.5rem;
-  border-radius: 0 0 1.6rem 1.6rem;
+  padding: 3.5rem max(1.25rem, calc((100% - var(--max)) / 2)) 4.5rem;
+  border-radius: 0;
   display: grid;
   align-items: end;
   gap: 0;
@@ -308,6 +322,12 @@ main {
   background: linear-gradient(transparent, #eef3f8);
   pointer-events: none;
   z-index: 1;
+}
+
+.hero {
+  display: grid;
+  gap: 2rem;
+  padding: 3.25rem 0 2.75rem;
 }
 
 .hero-copy {
@@ -448,11 +468,12 @@ main {
 
 .market-pulse {
   margin: 0 0 2.25rem;
-  padding: 1.15rem 1.25rem 1.3rem;
-  border-radius: 1.15rem;
+  padding-top: 1.15rem;
+  padding-bottom: 1.3rem;
+  border-radius: 0;
   background: #0b2a4a;
   color: #fff;
-  box-shadow: 0 16px 36px rgba(11, 42, 74, 0.2);
+  box-shadow: none;
 }
 
 .market-pulse-label {
@@ -575,13 +596,14 @@ main {
 
 .find-bar {
   margin: 0 0 2.5rem;
-  padding: 1.4rem 1.3rem 1.5rem;
-  border-radius: 1.2rem;
+  padding-top: 1.4rem;
+  padding-bottom: 1.5rem;
+  border-radius: 0;
   background:
     linear-gradient(135deg, rgba(11, 42, 74, 0.94), rgba(21, 87, 192, 0.92)),
     #0b2a4a;
   color: #fff;
-  box-shadow: 0 18px 40px rgba(11, 42, 74, 0.2);
+  box-shadow: none;
 }
 
 .find-bar h2 {
@@ -684,8 +706,8 @@ main {
 }
 
 .section-alt {
-  margin-inline: -1.25rem;
-  padding-inline: 1.25rem;
+  margin-inline: 0;
+  padding-inline: max(1.25rem, calc((100% - var(--max)) / 2));
   background: var(--paper-soft);
 }
 
@@ -950,8 +972,9 @@ main {
   gap: 1.5rem;
   align-items: center;
   margin: 0.5rem 0 2rem;
-  padding: 1.5rem;
-  border-radius: 1.15rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-radius: 0;
   background: linear-gradient(145deg, #0b2a4a 0%, #1a4570 100%);
   color: #fff;
 }
@@ -988,11 +1011,22 @@ main {
 
 .routes-map {
   margin: 0 0 2.75rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.75rem;
+  background:
+    linear-gradient(180deg, rgba(11, 42, 74, 0.04), transparent 30%),
+    transparent;
 }
 
 .routes-map-layout {
   display: grid;
   gap: 1.35rem;
+}
+
+.routes-canvas {
+  border-radius: 1.1rem;
+  overflow: hidden;
+  box-shadow: 0 18px 40px rgba(11, 42, 74, 0.16);
 }
 
 .routes-copy .section-head {
@@ -1164,14 +1198,14 @@ main {
 
 .testimonials {
   overflow: hidden;
-  margin-inline: -1.25rem;
+  margin-inline: 0;
 }
 
 .testimonials .section-head {
   max-width: var(--max);
   margin-left: auto;
   margin-right: auto;
-  padding: 0 1.25rem;
+  padding: 0;
 }
 
 .testimonial-marquee {
@@ -1878,8 +1912,8 @@ button.data-card.active,
     grid-template-columns: 1fr;
     align-items: end;
     min-height: min(78vh, 680px);
-    padding: 4.5rem 1.5rem 5.5rem;
-    margin-inline: -1.25rem;
+    padding: 4.5rem max(1.25rem, calc((100% - var(--max)) / 2)) 5.5rem;
+    margin-inline: 0;
   }
 
   .hero-scenic-bg img {

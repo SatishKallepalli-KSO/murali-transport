@@ -819,7 +819,7 @@ export default function App() {
                 </div>
 
                 <div className="routes-canvas" role="img" aria-label={tx('routesTitle')}>
-                  <svg viewBox="0 0 800 480" className="routes-svg">
+                  <svg viewBox="0 0 860 560" className="routes-svg">
                     <defs>
                       <linearGradient id="routeRoad" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#ef8b2e" stopOpacity="0.95" />
@@ -830,14 +830,14 @@ export default function App() {
                         <stop offset="100%" stopColor="#0b2a4a" stopOpacity="0" />
                       </radialGradient>
                     </defs>
-                    <rect width="800" height="480" rx="28" fill="#0b2a4a" />
-                    <circle cx="430" cy="230" r="160" fill="url(#routeGlow)" />
+                    <rect width="860" height="560" rx="0" fill="#0b2a4a" />
+                    <circle cx="500" cy="220" r="150" fill="url(#routeGlow)" />
                     <path
                       className="routes-river"
-                      d="M 90 70 C 220 120, 300 90, 420 140 S 620 120, 760 180"
+                      d="M 120 90 C 260 140, 360 100, 500 150 S 700 130, 820 170"
                       fill="none"
                       stroke="rgba(125, 211, 252, 0.28)"
-                      strokeWidth="18"
+                      strokeWidth="16"
                       strokeLinecap="round"
                     />
                     {routeLinks.map(([fromId, toId]) => {
