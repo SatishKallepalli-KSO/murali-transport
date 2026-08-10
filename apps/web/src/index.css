@@ -1111,6 +1111,12 @@ main > .routes-map {
   font-weight: 800;
 }
 
+.routes-node.major .routes-label {
+  fill: #ffe0b0;
+  font-size: 13px;
+  font-weight: 750;
+}
+
 @keyframes route-dash {
   to {
     stroke-dashoffset: -180;

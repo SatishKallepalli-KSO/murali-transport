@@ -489,7 +489,7 @@ export default function App() {
   ]
 
   const cityById = Object.fromEntries(routeCities.map((c) => [c.id, c]))
-  const spokeCities = routeCities.filter((c) => !c.hub)
+  const majorCities = routeCities.filter((c) => c.major)
 
   return (
     <div className={`site lang-${lang}`}>
@@ -803,7 +803,7 @@ export default function App() {
                   <p className="routes-hub-name">Dommeru</p>
                   <p className="routes-cover-label">{tx('routesCover')}</p>
                   <ul className="routes-city-list">
-                    {spokeCities.map((city) => (
+                    {majorCities.map((city) => (
                       <li key={city.id}>{lang === 'te' ? city.te : city.en}</li>
                     ))}
                   </ul>
@@ -859,14 +859,23 @@ export default function App() {
                       )
                     })}
                     {routeCities.map((city) => (
-                      <g key={city.id} className={city.hub ? 'routes-node hub' : 'routes-node'}>
+                      <g
+                        key={city.id}
+                        className={[
+                          'routes-node',
+                          city.hub ? 'hub' : '',
+                          city.major ? 'major' : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                      >
                         <circle
                           cx={city.x}
                           cy={city.y}
-                          r={city.hub ? 16 : 9}
-                          fill={city.hub ? '#ef8b2e' : '#9ec5ff'}
+                          r={city.hub ? 16 : city.major ? 11 : 7}
+                          fill={city.hub ? '#ef8b2e' : city.major ? '#ffc57a' : '#9ec5ff'}
                           stroke="#fff"
-                          strokeWidth={city.hub ? 3 : 2}
+                          strokeWidth={city.hub || city.major ? 3 : 2}
                         />
                         {city.hub ? (
                           <circle
@@ -882,7 +891,7 @@ export default function App() {
                         ) : null}
                         <text
                           x={city.x}
-                          y={city.y + (city.hub ? 36 : 26)}
+                          y={city.y + (city.hub ? 36 : city.major ? 30 : 22)}
                           textAnchor="middle"
                           className="routes-label"
                         >

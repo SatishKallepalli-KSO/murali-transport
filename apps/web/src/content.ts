@@ -27,23 +27,25 @@ export const address = {
   line: '2MFM+F2V, Dommeru, Andhra Pradesh 534342, India',
 }
 
-/** Schematic route map (not GPS-precise) — Dommeru hub + AP / Hyderabad / Chennai. */
+/** Schematic route map (not GPS-precise) — Dommeru office hub to major cities. */
 export const routeCities = [
-  { id: 'hyderabad', en: 'Hyderabad', te: 'హైదరాబాద్', x: 70, y: 150, hub: false },
-  { id: 'vijayawada', en: 'Vijayawada', te: 'విజయవాడ', x: 250, y: 280, hub: false },
-  { id: 'guntur', en: 'Guntur', te: 'గుంటూరు', x: 230, y: 340, hub: false },
-  { id: 'eluru', en: 'Eluru', te: 'ఏలూరు', x: 320, y: 270, hub: false },
-  { id: 'tadepalli', en: 'Tadepalligudem', te: 'తాడేపల్లిగూడెం', x: 380, y: 250, hub: false },
-  { id: 'nidadavole', en: 'Nidadavole', te: 'నిడదవోలు', x: 420, y: 230, hub: false },
-  { id: 'dommeru', en: 'Dommeru', te: 'దొమ్మేరు', x: 500, y: 220, hub: true },
-  { id: 'kovvur', en: 'Kovvur', te: 'కొవ్వూరు', x: 460, y: 190, hub: false },
-  { id: 'rajahmundry', en: 'Rajahmundry', te: 'రాజమండ్రి', x: 580, y: 170, hub: false },
-  { id: 'kakinada', en: 'Kakinada', te: 'కాకినాడ', x: 680, y: 180, hub: false },
-  { id: 'vizag', en: 'Visakhapatnam', te: 'విశాఖపట్నం', x: 760, y: 110, hub: false },
-  { id: 'tanuku', en: 'Tanuku', te: 'తణుకు', x: 400, y: 300, hub: false },
-  { id: 'bhimavaram', en: 'Bhimavaram', te: 'భీమవరం', x: 390, y: 360, hub: false },
-  { id: 'nellore', en: 'Nellore', te: 'నెల్లూరు', x: 280, y: 430, hub: false },
-  { id: 'chennai', en: 'Chennai', te: 'చెన్నై', x: 300, y: 520, hub: false },
+  { id: 'hyderabad', en: 'Hyderabad', te: 'హైదరాబాద్', x: 70, y: 150, hub: false, major: true },
+  { id: 'warangal', en: 'Warangal', te: 'వరంగల్', x: 140, y: 120, hub: false, major: true },
+  { id: 'vijayawada', en: 'Vijayawada', te: 'విజయవాడ', x: 250, y: 280, hub: false, major: true },
+  { id: 'guntur', en: 'Guntur', te: 'గుంటూరు', x: 230, y: 340, hub: false, major: true },
+  { id: 'eluru', en: 'Eluru', te: 'ఏలూరు', x: 320, y: 270, hub: false, major: false },
+  { id: 'tadepalli', en: 'Tadepalligudem', te: 'తాడేపల్లిగూడెం', x: 380, y: 250, hub: false, major: false },
+  { id: 'nidadavole', en: 'Nidadavole', te: 'నిడదవోలు', x: 420, y: 230, hub: false, major: false },
+  { id: 'dommeru', en: 'Dommeru', te: 'దొమ్మేరు', x: 500, y: 220, hub: true, major: false },
+  { id: 'kovvur', en: 'Kovvur', te: 'కొవ్వూరు', x: 460, y: 190, hub: false, major: false },
+  { id: 'rajahmundry', en: 'Rajahmundry', te: 'రాజమండ్రి', x: 580, y: 170, hub: false, major: true },
+  { id: 'kakinada', en: 'Kakinada', te: 'కాకినాడ', x: 680, y: 180, hub: false, major: true },
+  { id: 'vizag', en: 'Visakhapatnam', te: 'విశాఖపట్నం', x: 760, y: 110, hub: false, major: true },
+  { id: 'tanuku', en: 'Tanuku', te: 'తణుకు', x: 400, y: 300, hub: false, major: false },
+  { id: 'bhimavaram', en: 'Bhimavaram', te: 'భీమవరం', x: 390, y: 360, hub: false, major: false },
+  { id: 'nellore', en: 'Nellore', te: 'నెల్లూరు', x: 280, y: 430, hub: false, major: true },
+  { id: 'tirupati', en: 'Tirupati', te: 'తిరుపతి', x: 200, y: 480, hub: false, major: true },
+  { id: 'chennai', en: 'Chennai', te: 'చెన్నై', x: 300, y: 520, hub: false, major: true },
 ] as const
 
 export const routeLinks = [
@@ -60,9 +62,12 @@ export const routeLinks = [
   ['tanuku', 'bhimavaram'],
   ['dommeru', 'vijayawada'],
   ['vijayawada', 'hyderabad'],
+  ['hyderabad', 'warangal'],
   ['vijayawada', 'guntur'],
   ['guntur', 'nellore'],
+  ['nellore', 'tirupati'],
   ['nellore', 'chennai'],
+  ['tirupati', 'chennai'],
 ] as const
 
 const dict = {
@@ -115,11 +120,10 @@ const dict = {
     liveColWhen: 'When',
     marketPulse: 'At the office now',
     routesTitle: 'Cities we connect',
-    routesIntro:
-      'From our Dommeru office we arrange mini lorries and trucks across Andhra Pradesh — and long routes toward Hyderabad and Chennai.',
-    routesHub: 'Office hub',
-    routesCover: 'Common routes',
-    routesNote: 'Local towns plus Hyderabad and Chennai corridors — call if your place is on the way.',
+    routesIntro: 'Our office is in Dommeru. From Dommeru we arrange mini lorries and trucks to major hubs.',
+    routesHub: 'Office location',
+    routesCover: 'Major hubs',
+    routesNote: 'Need another destination? Call the Dommeru office and we will arrange it.',
     ctaPostLoad: 'Post a load',
     ctaRegister: 'Register lorry',
     ctaDirections: 'Get directions',
@@ -127,7 +131,7 @@ const dict = {
     servicesIntro: 'Standard freight desk services for traders, farms, shops, and industries.',
     service1Title: 'Lorry / truck booking',
     service1Body:
-      'Book mini lorries and trucks for local and long-distance cargo across the Godavari belt and beyond.',
+      'Book mini lorries and trucks for local and long-distance cargo to major hubs from Dommeru.',
     service2Title: 'Load posting',
     service2Body:
       'Share pickup, drop, cargo, and weight. Our office receives the request and arranges a suitable vehicle.',
@@ -146,7 +150,7 @@ const dict = {
     how3Title: 'Assign & dispatch',
     how3Body: 'Admin assigns the vehicle and shares driver / trip details for delivery.',
     testimonialsTitle: 'What customers say',
-    testimonialsIntro: 'Local traders, farmers, and lorry owners from the Godavari belt.',
+    testimonialsIntro: 'Local traders, farmers, and lorry owners who book with our Dommeru office.',
     aboutTitle: 'About us',
     aboutIntro:
       'Murali Office Miny Lorry Transport is a local commercial logistics booking office in Dommeru. We connect goods owners with mini lorries and trucks for safe, timely freight movement.',
@@ -301,11 +305,10 @@ const dict = {
     liveColWhen: 'ఎప్పుడు',
     marketPulse: 'ఆఫీస్‌లో ఇప్పుడు',
     routesTitle: 'మేము కలిపే పట్టణాలు',
-    routesIntro:
-      'దొమ్మేరు ఆఫీస్ నుండి ఆంధ్రప్రదేశ్ అంతటా మినీ లారీలు, ట్రక్కులు — హైదరాబాద్, చెన్నై మార్గాలు కూడా.',
-    routesHub: 'ఆఫీస్ హబ్',
-    routesCover: 'సాధారణ మార్గాలు',
-    routesNote: 'స్థానిక పట్టణాలు మరియు హైదరాబాద్, చెన్నై కారిడార్ — మీ ఊరు మార్గంలో ఉంటే కాల్ చేయండి.',
+    routesIntro: 'మా ఆఫీస్ దొమ్మేరులో ఉంది. దొమ్మేరు నుండి ప్రధాన హబ్‌లకు మినీ లారీలు, ట్రక్కులు ఏర్పాటు చేస్తాము.',
+    routesHub: 'ఆఫీస్ స్థానం',
+    routesCover: 'ప్రధాన హబ్‌లు',
+    routesNote: 'మరో గమ్యం కావాలా? దొమ్మేరు ఆఫీస్‌కు కాల్ చేయండి — మేము ఏర్పాటు చేస్తాము.',
     ctaPostLoad: 'లోడ్ పోస్ట్ చేయండి',
     ctaRegister: 'లారీ నమోదు',
     ctaDirections: 'దారి చూపించు',
@@ -313,7 +316,7 @@ const dict = {
     servicesIntro: 'వ్యాపారులు, రైతులు, దుకాణాలు, పరిశ్రమల కోసం ప్రామాణిక ఫ్రైట్ డెస్క్ సేవలు.',
     service1Title: 'లారీ / ట్రక్ బుకింగ్',
     service1Body:
-      'గోదావరి ప్రాంతం మరియు ఇతర మార్గాల్లో స్థానిక మరియు దూరపు సరుకు కోసం మినీ లారీలు, ట్రక్కులు బుక్ చేయండి.',
+      'దొమ్మేరు నుండి ప్రధాన హబ్‌లకు స్థానిక మరియు దూరపు సరుకు కోసం మినీ లారీలు, ట్రక్కులు బుక్ చేయండి.',
     service2Title: 'లోడ్ పోస్టింగ్',
     service2Body:
       'పికప్, డ్రాప్, సరుకు, బరువు వివరాలు ఇవ్వండి. ఆఫీస్ అభ్యర్థన అందుకొని సరైన వాహనం ఏర్పాటు చేస్తుంది.',
@@ -332,7 +335,7 @@ const dict = {
     how3Title: 'అసైన్ & డిస్పాచ్',
     how3Body: 'అడ్మిన్ వాహనం కేటాయించి డ్రైవర్ / ట్రిప్ వివరాలు పంపుతారు.',
     testimonialsTitle: 'వినియోగదారుల అభిప్రాయాలు',
-    testimonialsIntro: 'గోదావరి ప్రాంతం వ్యాపారులు, రైతులు, లారీ యజమానుల మాటలు.',
+    testimonialsIntro: 'దొమ్మేరు ఆఫీస్‌తో బుక్ చేసే వ్యాపారులు, రైతులు, లారీ యజమానుల మాటలు.',
     aboutTitle: 'మా గురించి',
     aboutIntro:
       'మురళి ఆఫీస్ మినీ లారీ ట్రాన్స్‌పోర్ట్ దొమ్మేరులోని స్థానిక వాణిజ్య లాజిస్టిక్స్ బుకింగ్ ఆఫీస్. సరుకు యజమానులను మినీ లారీలు/ట్రక్కులతో కలుపుతుంది.',
