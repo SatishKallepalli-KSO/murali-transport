@@ -114,6 +114,8 @@ export default function App() {
 
   const [loadForm, setLoadForm] = useState(emptyLoad)
   const [vehicleForm, setVehicleForm] = useState(emptyVehicle)
+  const [findPickup, setFindPickup] = useState('')
+  const [findType, setFindType] = useState('any')
 
   const [adminPin, setAdminPin] = useState('')
   const [adminToken, setAdminToken] = useState(
@@ -564,6 +566,7 @@ export default function App() {
             <section className="hero">
               <div className="hero-copy">
                 <p className="hero-kicker">{tx('heroKicker')}</p>
+                <p className="hero-sub">{tx('heroSub')}</p>
                 <h1 className="hero-name">{tx('heroBrand')}</h1>
                 <p className="hero-tagline">{tx('heroTagline')}</p>
                 <div className="hero-actions">
@@ -583,24 +586,89 @@ export default function App() {
               </div>
             </section>
 
-            <section className="stats-band trust" aria-label="Live platform stats">
-              <div className="trust-item">
-                <p className="trust-label">{tx('trustFleet')}</p>
-                <p className="trust-value">{stats?.vehicles ?? '—'}</p>
-                <p className="trust-detail">
-                  {stats?.available_vehicles ?? 0} {tx('trustAvailable')}
-                </p>
+            <section className="market-pulse" aria-label="Market pulse">
+              <p className="market-pulse-label">
+                <span className="pulse-dot" aria-hidden="true" />
+                {tx('marketPulse')}
+              </p>
+              <div className="market-pulse-grid">
+                <div>
+                  <strong>{stats?.available_vehicles ?? publicVehicles.length}</strong>
+                  <span>{tx('snapAvailable')}</span>
+                </div>
+                <div>
+                  <strong>{stats?.open_loads ?? publicLoads.length}</strong>
+                  <span>{tx('snapOpen')}</span>
+                </div>
+                <div>
+                  <strong>{stats?.assignments ?? 0}</strong>
+                  <span>{tx('snapAssigned')}</span>
+                </div>
+                <div>
+                  <strong>{stats?.vehicles ?? '—'}</strong>
+                  <span>{tx('snapFleet')}</span>
+                </div>
               </div>
-              <div className="trust-item">
-                <p className="trust-label">{tx('trustOpen')}</p>
-                <p className="trust-value">{stats?.open_loads ?? '—'}</p>
-                <p className="trust-detail">{tx('trustOpenDetail')}</p>
+            </section>
+
+            <section className="role-paths" aria-label="Audience paths">
+              <div className="section-head">
+                <h2>{tx('roleTitle')}</h2>
               </div>
-              <div className="trust-item">
-                <p className="trust-label">{tx('trustAssigned')}</p>
-                <p className="trust-value">{stats?.assignments ?? '—'}</p>
-                <p className="trust-detail">{tx('trustAssignedDetail')}</p>
+              <div className="role-grid">
+                <button type="button" className="role-tile role-shipper" onClick={() => setPortal('request')}>
+                  <span className="role-index">01</span>
+                  <strong>{tx('roleShipperTitle')}</strong>
+                  <span>{tx('roleShipperBody')}</span>
+                </button>
+                <button type="button" className="role-tile role-carrier" onClick={() => setPortal('owner')}>
+                  <span className="role-index">02</span>
+                  <strong>{tx('roleCarrierTitle')}</strong>
+                  <span>{tx('roleCarrierBody')}</span>
+                </button>
+                <a className="role-tile role-office" href={`tel:${business.phone}`}>
+                  <span className="role-index">03</span>
+                  <strong>{tx('roleOfficeTitle')}</strong>
+                  <span>{tx('roleOfficeBody')}</span>
+                </a>
               </div>
+            </section>
+
+            <section className="find-bar" aria-label="Quick find">
+              <h2>{tx('findTitle')}</h2>
+              <form
+                className="find-form"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  setLoadForm((prev) => ({
+                    ...prev,
+                    pickup: findPickup || prev.pickup,
+                    vehicle_preference: findType,
+                  }))
+                  setPortal('request')
+                }}
+              >
+                <label>
+                  {tx('findPickupLabel')}
+                  <input
+                    value={findPickup}
+                    placeholder={tx('findPickupPh')}
+                    onChange={(e) => setFindPickup(e.target.value)}
+                  />
+                </label>
+                <label>
+                  {tx('findEquipLabel')}
+                  <select value={findType} onChange={(e) => setFindType(e.target.value)}>
+                    <option value="any">{tx('any')}</option>
+                    <option value="mini_lorry">{tx('mini')}</option>
+                    <option value="truck">{tx('truck')}</option>
+                    <option value="part_load">{tx('partLoad')}</option>
+                  </select>
+                </label>
+                <button className="btn btn-primary" type="submit">
+                  {tx('findBtn')}
+                </button>
+              </form>
             </section>
 
             <section className="live-board" id="live" aria-label="Live availability">
@@ -617,31 +685,30 @@ export default function App() {
                     </div>
                     <span className="live-count">{publicVehicles.length}</span>
                   </header>
-                  <ul className="live-list">
+                  <div className="board-table" role="table" aria-label={tx('liveLorriesTitle')}>
+                    <div className="board-head" role="row">
+                      <span role="columnheader">{tx('liveColPlate')}</span>
+                      <span role="columnheader">{tx('liveColLoc')}</span>
+                      <span role="columnheader">{tx('liveColCap')}</span>
+                      <span role="columnheader">{tx('liveColType')}</span>
+                    </div>
                     {publicVehicles.slice(0, 6).map((v, index) => (
-                      <li
+                      <div
+                        className="board-row"
+                        role="row"
                         key={v.id}
-                        className="live-row"
-                        style={{ animationDelay: `${index * 60}ms` }}
+                        style={{ animationDelay: `${index * 50}ms` }}
                       >
-                        <div className="live-row-main">
-                          <strong>{v.plate_number}</strong>
-                          <span>
-                            {tx('liveNear')} {v.current_location}
-                          </span>
-                        </div>
-                        <div className="live-row-meta">
-                          <span>
-                            {tx('liveCapacity')} {v.capacity_tons}t
-                          </span>
-                          <span>{v.vehicle_type.replace(/_/g, ' ')}</span>
-                        </div>
-                      </li>
+                        <strong role="cell">{v.plate_number}</strong>
+                        <span role="cell">{v.current_location}</span>
+                        <span role="cell">{v.capacity_tons}t</span>
+                        <span role="cell">{v.vehicle_type.replace(/_/g, ' ')}</span>
+                      </div>
                     ))}
                     {publicVehicles.length === 0 && (
-                      <li className="live-empty">{tx('liveEmptyLorries')}</li>
+                      <p className="live-empty">{tx('liveEmptyLorries')}</p>
                     )}
-                  </ul>
+                  </div>
                   <div className="live-cta">
                     <p>{tx('liveHaveLorry')}</p>
                     <button type="button" className="btn btn-dark" onClick={() => setPortal('owner')}>
@@ -658,31 +725,32 @@ export default function App() {
                     </div>
                     <span className="live-count">{publicLoads.length}</span>
                   </header>
-                  <ul className="live-list">
+                  <div className="board-table" role="table" aria-label={tx('liveLoadsTitle')}>
+                    <div className="board-head" role="row">
+                      <span role="columnheader">{tx('liveColRoute')}</span>
+                      <span role="columnheader">{tx('liveColCargo')}</span>
+                      <span role="columnheader">{tx('liveColCap')}</span>
+                      <span role="columnheader">{tx('liveColWhen')}</span>
+                    </div>
                     {publicLoads.slice(0, 6).map((load, index) => (
-                      <li
+                      <div
+                        className="board-row"
+                        role="row"
                         key={load.id}
-                        className="live-row"
-                        style={{ animationDelay: `${index * 60}ms` }}
+                        style={{ animationDelay: `${index * 50}ms` }}
                       >
-                        <div className="live-row-main">
-                          <strong>
-                            {load.pickup} → {load.dropoff}
-                          </strong>
-                          <span>
-                            {load.cargo} · {load.weight_tons}t
-                          </span>
-                        </div>
-                        <div className="live-row-meta">
-                          <span>#{load.id}</span>
-                          {load.preferred_date ? <span>{load.preferred_date}</span> : null}
-                        </div>
-                      </li>
+                        <strong role="cell">
+                          {load.pickup} → {load.dropoff}
+                        </strong>
+                        <span role="cell">{load.cargo}</span>
+                        <span role="cell">{load.weight_tons}t</span>
+                        <span role="cell">{load.preferred_date || '—'}</span>
+                      </div>
                     ))}
                     {publicLoads.length === 0 && (
-                      <li className="live-empty">{tx('liveEmptyLoads')}</li>
+                      <p className="live-empty">{tx('liveEmptyLoads')}</p>
                     )}
-                  </ul>
+                  </div>
                   <div className="live-cta">
                     <p>{tx('liveWantLorry')}</p>
                     <button type="button" className="btn btn-primary" onClick={() => setPortal('request')}>
@@ -691,23 +759,6 @@ export default function App() {
                   </div>
                 </div>
               </div>
-            </section>
-
-            <section className="quick-actions" aria-label="Quick actions">
-              <button type="button" className="quick-card" onClick={() => setPortal('request')}>
-                <strong>{tx('ctaPostLoad')}</strong>
-                <span>{tx('service2Body')}</span>
-              </button>
-              <button type="button" className="quick-card" onClick={() => setPortal('owner')}>
-                <strong>{tx('ctaRegister')}</strong>
-                <span>{tx('service3Body')}</span>
-              </button>
-              <a className="quick-card" href={waHref(lang)} target="_blank" rel="noreferrer">
-                <strong>{tx('whatsapp')}</strong>
-                <span>
-                  {business.phoneDisplay} · {business.phoneAltDisplay}
-                </span>
-              </a>
             </section>
 
             <section className="section" id="services">
