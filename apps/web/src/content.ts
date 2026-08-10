@@ -45,7 +45,7 @@ const dict = {
     heroSub: 'Mini lorry & truck booking',
     heroTagline:
       'Post cargo or list your lorry. We match loads to nearby vehicles — fast and clear.',
-    roleTitle: 'Who are you today?',
+    roleTitle: 'How can we help?',
     roleShipperTitle: 'I have a load',
     roleShipperBody: 'Post pickup, drop, and cargo. We assign a nearby lorry.',
     roleCarrierTitle: 'I have a lorry',
@@ -225,7 +225,7 @@ const dict = {
     heroSub: 'మినీ లారీ & ట్రక్ బుకింగ్',
     heroTagline:
       'సరుకు పోస్ట్ చేయండి లేదా లారీ నమోదు చేయండి. సమీప వాహనాలతో వేగంగా జత చేస్తాము.',
-    roleTitle: 'మీరు ఎవరు?',
+    roleTitle: 'మేము ఎలా సహాయం చేయగలం?',
     roleShipperTitle: 'నాకు లోడ్ ఉంది',
     roleShipperBody: 'పికప్, డ్రాప్, సరుకు ఇవ్వండి. సమీప లారీ కేటాయిస్తాము.',
     roleCarrierTitle: 'నాకు లారీ ఉంది',
