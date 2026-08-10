@@ -237,6 +237,8 @@ def office_info() -> dict:
         "name": "Murali Office Miny Lorry Transport",
         "owner": "Murali Kallepalli",
         "phone": "+919949705008",
+        "phone_alt": "+918885075008",
+        "phones": ["+919949705008", "+918885075008"],
         "address": "2MFM+F2V, Dommeru, Andhra Pradesh 534342, India",
         "rating": "4.2",
         "reviews": 27,

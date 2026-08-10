@@ -45,6 +45,16 @@ const emptyVehicle = {
   notes: '',
 }
 
+function PhoneLinks({ className }: { className?: string }) {
+  return (
+    <span className={className ? `phone-links ${className}` : 'phone-links'}>
+      <a href={`tel:${business.phone}`}>{business.phoneDisplay}</a>
+      <span aria-hidden="true"> · </span>
+      <a href={`tel:${business.phoneAlt}`}>{business.phoneAltDisplay}</a>
+    </span>
+  )
+}
+
 function waHref(lang: Lang) {
   const text =
     lang === 'te'
@@ -286,8 +296,7 @@ export default function App() {
     <div className={`site lang-${lang}`}>
       <div className="topbar">
         <span className="topbar-banner">
-          Murali Transport Office, Dommeru · ph:{' '}
-          <a href={`tel:${business.phone}`}>9949705008</a>
+          Murali Transport Office, Dommeru · ph: <PhoneLinks />
         </span>
       </div>
 
@@ -411,7 +420,9 @@ export default function App() {
               </button>
               <a className="quick-card" href={waHref(lang)} target="_blank" rel="noreferrer">
                 <strong>{tx('whatsapp')}</strong>
-                <span>9949705008</span>
+                <span>
+                  {business.phoneDisplay} · {business.phoneAltDisplay}
+                </span>
               </a>
             </section>
 
@@ -504,7 +515,7 @@ export default function App() {
                 <div>
                   <dt>{tx('aboutPhoneLabel')}</dt>
                   <dd>
-                    <a href={`tel:${business.phone}`}>{business.phoneDisplay}</a>
+                    <PhoneLinks />
                   </dd>
                 </div>
                 <div>
@@ -540,7 +551,7 @@ export default function App() {
                   <div>
                     <dt>{tx('aboutPhoneLabel')}</dt>
                     <dd>
-                      <a href={`tel:${business.phone}`}>{business.phoneDisplay}</a>
+                      <PhoneLinks />
                     </dd>
                   </div>
                   <div>
@@ -992,7 +1003,7 @@ export default function App() {
             <strong>{business.name}</strong>
             <p>{business.owner}</p>
             <p>
-              <a href={`tel:${business.phone}`}>9949705008</a>
+              <PhoneLinks />
             </p>
             <p>{address.line}</p>
           </div>
