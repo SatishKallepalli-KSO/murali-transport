@@ -776,21 +776,133 @@ main {
   font-weight: 700;
 }
 
-.admin-snapshot {
-  margin-bottom: 1.35rem;
-  padding: 1.15rem 1.25rem 1.25rem;
-  border-radius: 1.1rem;
-  border: 1px solid var(--line);
-  background:
-    linear-gradient(135deg, rgba(15, 42, 74, 0.06), rgba(255, 197, 122, 0.12)),
-    #fff;
+.admin-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-bottom: 1rem;
 }
 
-.admin-snapshot-title {
-  margin: 0 0 0.85rem;
-  font-size: 1.05rem;
+.admin-tab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.85rem;
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-tab em {
+  font-style: normal;
+  min-width: 1.55rem;
+  height: 1.55rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.12);
+  font-size: 0.82rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
+}
+
+.admin-tab.active {
+  box-shadow: 0 6px 18px rgba(11, 42, 74, 0.12);
+  transform: translateY(-1px);
+}
+
+.admin-tab.tab-snapshot {
+  background: #e8eef8;
+  color: #0b2a4a;
+  border-color: #c5d3e8;
+}
+
+.admin-tab.tab-loads {
+  background: #dce8ff;
+  color: #1d4ed8;
+  border-color: #b7ccff;
+}
+
+.admin-tab.tab-match {
+  background: #ffe8cc;
+  color: #9a4b00;
+  border-color: #ffd09a;
+}
+
+.admin-tab.tab-fleet {
+  background: #d8f3e7;
+  color: #047857;
+  border-color: #a7e4c8;
+}
+
+.admin-tab.tab-assign {
+  background: #efe4ff;
+  color: #6b21a8;
+  border-color: #d8bfff;
+}
+
+.admin-tab.active.tab-snapshot {
+  background: #0b2a4a;
+  color: #fff;
+  border-color: #0b2a4a;
+}
+
+.admin-tab.active.tab-loads {
+  background: #1d4ed8;
+  color: #fff;
+  border-color: #1d4ed8;
+}
+
+.admin-tab.active.tab-match {
+  background: #d97316;
+  color: #fff;
+  border-color: #d97316;
+}
+
+.admin-tab.active.tab-fleet {
+  background: #047857;
+  color: #fff;
+  border-color: #047857;
+}
+
+.admin-tab.active.tab-assign {
+  background: #6b21a8;
+  color: #fff;
+  border-color: #6b21a8;
+}
+
+.admin-tab.active em {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.admin-tab-panel {
+  border-radius: 1.15rem;
+  padding: 0.35rem;
+  min-height: 320px;
+}
+
+.admin-tab-panel.theme-snapshot {
+  background: linear-gradient(160deg, #e8eef8, #f4f7fb);
+}
+
+.admin-tab-panel.theme-loads {
+  background: linear-gradient(160deg, #dce8ff, #eef4ff);
+}
+
+.admin-tab-panel.theme-match {
+  background: linear-gradient(160deg, #ffe8cc, #fff4e6);
+}
+
+.admin-tab-panel.theme-fleet {
+  background: linear-gradient(160deg, #d8f3e7, #eefaf4);
+}
+
+.admin-tab-panel.theme-assign {
+  background: linear-gradient(160deg, #efe4ff, #f7f1ff);
 }
 
 .admin-snapshot-grid {
@@ -806,6 +918,10 @@ main {
   border-radius: 0.85rem;
   border: 1px solid var(--line);
   background: #fff;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
 }
 
 .snap-value {
@@ -838,19 +954,18 @@ main {
   border-top: 3px solid var(--brand);
 }
 
-.admin-workspace {
-  display: grid;
-  gap: 1.15rem;
-}
-
 .admin-panel {
   display: grid;
   gap: 0.9rem;
   padding: 1.1rem 1.15rem 1.2rem;
-  border-radius: 1.1rem;
-  border: 1px solid var(--line);
-  background: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgba(20, 32, 51, 0.08);
+  background: rgba(255, 255, 255, 0.88);
   min-height: 280px;
+}
+
+.panel-snapshot {
+  border-left: 4px solid #0b2a4a;
 }
 
 .panel-loads {
@@ -866,7 +981,7 @@ main {
 }
 
 .panel-assign {
-  border-left: 4px solid var(--brand);
+  border-left: 4px solid #6b21a8;
 }
 
 .admin-panel-head {
@@ -1093,12 +1208,12 @@ button.data-card.active,
     grid-column: 1 / -1;
   }
 
-  .admin-snapshot-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  .admin-tabs {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
-  .admin-workspace {
-    grid-template-columns: 1fr 1fr;
+  .admin-snapshot-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .fleet-band {
