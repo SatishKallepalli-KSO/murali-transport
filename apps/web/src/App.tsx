@@ -52,6 +52,22 @@ function waHref(lang: Lang) {
   return `https://wa.me/${business.whatsapp}?text=${encodeURIComponent(text)}`
 }
 
+function todayISO() {
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function statusBadge(status: string, labels: { open: string; available: string; assigned: string }) {
+  const key = status.toLowerCase()
+  if (key === 'open') return labels.open
+  if (key === 'available') return labels.available
+  if (key === 'assigned') return labels.assigned
+  return status
+}
+
 export default function App() {
   const [lang, setLang] = useState<Lang>(() => {
     const saved = localStorage.getItem('murali_lang')
@@ -573,7 +589,12 @@ export default function App() {
               </label>
               <label>
                 {tx('preferredDate')}
-                <input value={loadForm.preferred_date} onChange={(e) => setLoadForm({ ...loadForm, preferred_date: e.target.value })} />
+                <input
+                  type="date"
+                  min={todayISO()}
+                  value={loadForm.preferred_date}
+                  onChange={(e) => setLoadForm({ ...loadForm, preferred_date: e.target.value })}
+                />
               </label>
               <label className="span-2">
                 {tx('notes')}
@@ -676,17 +697,54 @@ export default function App() {
               <>
                 <div className="admin-toolbar">
                   <p>{tx('deskActive')}</p>
-                  <button type="button" className="btn btn-ghost" onClick={logoutAdmin}>
-                    {tx('lockDesk')}
-                  </button>
                   <button type="button" className="btn btn-ghost" onClick={() => void refreshAdmin(adminToken)}>
                     {tx('refresh')}
                   </button>
+                  <button type="button" className="btn btn-ghost" onClick={logoutAdmin}>
+                    {tx('lockDesk')}
+                  </button>
                 </div>
 
-                <div className="admin-grid">
-                  <div className="admin-col">
-                    <h3>{tx('openLoads')}</h3>
+                <div className="admin-snapshot">
+                  <h3 className="admin-snapshot-title">{tx('snapshotTitle')}</h3>
+                  <div className="admin-snapshot-grid">
+                    <div className="snap-tile snap-loads">
+                      <span className="snap-value">
+                        {openLoads.filter((l) => l.status === 'open').length}
+                      </span>
+                      <span className="snap-label">{tx('snapOpen')}</span>
+                    </div>
+                    <div className="snap-tile snap-available">
+                      <span className="snap-value">
+                        {vehicles.filter((v) => v.status === 'available').length}
+                      </span>
+                      <span className="snap-label">{tx('snapAvailable')}</span>
+                    </div>
+                    <div className="snap-tile snap-trips">
+                      <span className="snap-value">
+                        {assignments.filter((a) => a.status === 'assigned').length}
+                      </span>
+                      <span className="snap-label">{tx('snapAssigned')}</span>
+                    </div>
+                    <div className="snap-tile snap-fleet">
+                      <span className="snap-value">{vehicles.length}</span>
+                      <span className="snap-label">{tx('snapFleet')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="admin-workspace">
+                  <section className="admin-panel panel-loads">
+                    <header className="admin-panel-head">
+                      <div>
+                        <p className="admin-panel-kicker">{tx('openBadge')}</p>
+                        <h3>{tx('openLoads')}</h3>
+                        <p className="admin-panel-hint">{tx('panelLoadsHint')}</p>
+                      </div>
+                      <span className="admin-count">
+                        {openLoads.filter((l) => l.status === 'open').length}
+                      </span>
+                    </header>
                     <ul className="data-list">
                       {openLoads.filter((l) => l.status === 'open').map((load) => (
                         <li key={load.id}>
@@ -695,13 +753,26 @@ export default function App() {
                             className={selectedLoadId === load.id ? 'data-card active' : 'data-card'}
                             onClick={() => setSelectedLoadId(load.id)}
                           >
-                            <strong>
-                              #{load.id} · {load.pickup} → {load.dropoff}
-                            </strong>
+                            <div className="card-top">
+                              <strong>
+                                #{load.id} · {load.pickup} → {load.dropoff}
+                              </strong>
+                              <span className="badge badge-open">{tx('openBadge')}</span>
+                            </div>
                             <span>
-                              {load.cargo} · {load.weight_tons}t · {load.requestor_name}
+                              {load.cargo} · {load.weight_tons}t · {load.vehicle_preference}
                             </span>
-                            <span>{load.requestor_phone}</span>
+                            <span>
+                              {tx('requestor')}: {load.requestor_name} · {load.requestor_phone}
+                            </span>
+                            {load.preferred_date ? (
+                              <span>
+                                {tx('loadDate')}: {load.preferred_date}
+                              </span>
+                            ) : null}
+                            <span className="card-action">
+                              {selectedLoadId === load.id ? tx('selectedLoad') : tx('pickLoad')}
+                            </span>
                           </button>
                         </li>
                       ))}
@@ -709,29 +780,41 @@ export default function App() {
                         <li className="empty">{tx('noOpen')}</li>
                       )}
                     </ul>
-                  </div>
+                  </section>
 
-                  <div className="admin-col">
-                    <h3>
-                      {tx('suggested')}
-                      {selectedLoadId ? ` #${selectedLoadId}` : ''}
-                    </h3>
+                  <section className="admin-panel panel-match">
+                    <header className="admin-panel-head">
+                      <div>
+                        <p className="admin-panel-kicker">
+                          {selectedLoadId ? `#${selectedLoadId}` : '—'}
+                        </p>
+                        <h3>
+                          {tx('suggested')}
+                          {selectedLoadId ? ` · #${selectedLoadId}` : ''}
+                        </h3>
+                        <p className="admin-panel-hint">{tx('panelMatchHint')}</p>
+                      </div>
+                      <span className="admin-count">{suggestions.length}</span>
+                    </header>
                     {!selectedLoadId ? (
-                      <p className="empty">{tx('selectLoad')}</p>
+                      <p className="empty select-hint">{tx('selectLoad')}</p>
                     ) : (
                       <ul className="data-list">
                         {suggestions.map((s) => (
                           <li key={s.vehicle.id} className="data-card suggest">
-                            <strong>
-                              {s.vehicle.plate_number} · {Math.round(s.match_score * 100)}%
-                            </strong>
+                            <div className="card-top">
+                              <strong>
+                                {s.vehicle.plate_number} · {Math.round(s.match_score * 100)}%
+                              </strong>
+                              <span className="badge badge-available">{tx('availableBadge')}</span>
+                            </div>
                             <span>
                               {s.vehicle.current_location} · {s.vehicle.capacity_tons}t ·{' '}
                               {s.vehicle.vehicle_type}
                             </span>
                             <span>{s.match_reason}</span>
                             <span>
-                              {s.vehicle.owner_name} · {s.vehicle.owner_phone}
+                              {tx('ownerName')}: {s.vehicle.owner_name} · {s.vehicle.owner_phone}
                             </span>
                             <span>
                               {tx('driverName')}: {s.vehicle.driver_name || '—'} ·{' '}
@@ -750,18 +833,36 @@ export default function App() {
                         {suggestions.length === 0 && <li className="empty">{tx('noSuggest')}</li>}
                       </ul>
                     )}
-                  </div>
+                  </section>
 
-                  <div className="admin-col">
-                    <h3>{tx('fleetSnap')}</h3>
+                  <section className="admin-panel panel-fleet">
+                    <header className="admin-panel-head">
+                      <div>
+                        <p className="admin-panel-kicker">{tx('fleetSnap')}</p>
+                        <h3>{tx('fleetSnap')}</h3>
+                        <p className="admin-panel-hint">{tx('panelFleetHint')}</p>
+                      </div>
+                      <span className="admin-count">{vehicles.length}</span>
+                    </header>
                     <ul className="data-list compact">
                       {vehicles.map((v) => (
-                        <li key={v.id} className="data-card">
-                          <strong>
-                            {v.plate_number} · {v.status}
-                          </strong>
+                        <li key={v.id} className="data-card static">
+                          <div className="card-top">
+                            <strong>{v.plate_number}</strong>
+                            <span
+                              className={
+                                v.status === 'available' ? 'badge badge-available' : 'badge badge-assigned'
+                              }
+                            >
+                              {statusBadge(v.status, {
+                                open: tx('openBadge'),
+                                available: tx('availableBadge'),
+                                assigned: tx('assignedBadge'),
+                              })}
+                            </span>
+                          </div>
                           <span>
-                            {v.current_location} · {v.capacity_tons}t
+                            {v.current_location} · {v.capacity_tons}t · {v.vehicle_type}
                           </span>
                           <span>
                             {tx('ownerName')}: {v.owner_name} · {v.owner_phone}
@@ -773,18 +874,34 @@ export default function App() {
                       ))}
                       {vehicles.length === 0 && <li className="empty">{tx('noVehicles')}</li>}
                     </ul>
-                  </div>
+                  </section>
 
-                  <div className="admin-col">
-                    <h3>{tx('assignments')}</h3>
+                  <section className="admin-panel panel-assign">
+                    <header className="admin-panel-head">
+                      <div>
+                        <p className="admin-panel-kicker">{tx('assignments')}</p>
+                        <h3>{tx('assignments')}</h3>
+                        <p className="admin-panel-hint">{tx('panelAssignHint')}</p>
+                      </div>
+                      <span className="admin-count">{assignments.length}</span>
+                    </header>
                     <ul className="data-list">
                       {assignments.map((a) => (
-                        <li key={a.id} className="data-card">
-                          <strong>
-                            #{a.id} · {a.vehicle?.plate_number} → #{a.load_id}
-                          </strong>
+                        <li key={a.id} className="data-card static">
+                          <div className="card-top">
+                            <strong>
+                              #{a.id} · {a.vehicle?.plate_number ?? '—'} → Load #{a.load_id}
+                            </strong>
+                            <span
+                              className={
+                                a.status === 'assigned' ? 'badge badge-assigned' : 'badge badge-done'
+                              }
+                            >
+                              {a.status}
+                            </span>
+                          </div>
                           <span>
-                            {a.load?.pickup} → {a.load?.dropoff} · {a.status}
+                            {a.load?.pickup} → {a.load?.dropoff}
                           </span>
                           <span>{a.match_reason}</span>
                           {a.status === 'assigned' && (
@@ -801,7 +918,7 @@ export default function App() {
                       ))}
                       {assignments.length === 0 && <li className="empty">{tx('noAssign')}</li>}
                     </ul>
-                  </div>
+                  </section>
                 </div>
               </>
             )}
