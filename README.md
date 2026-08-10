@@ -6,8 +6,19 @@ End-to-end **lorry booking platform** for Dommeru:
 2. **Load requestors** post freight details
 3. **Office admin** receives requests and assigns lorries ranked by location match
 
-**Live:** https://murali-transport.onrender.com  
-**Stack:** Render Free + Neon Free (same as AI Tutor Studio)
+**Live:** https://muralitransport.com  
+**Fallback:** https://murali-transport.onrender.com  
+**Stack:** Render Free + Neon Free · Cloudflare DNS for the custom domain
+
+## Documentation
+
+| Doc | Description |
+|-----|-------------|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, API, data model, security |
+| [docs/USER-FLOWS.md](docs/USER-FLOWS.md) | User journeys and state diagrams |
+| [docs/DEPLOY-FREE.md](docs/DEPLOY-FREE.md) | Deploy on Render + Neon |
+| [docs/DATABASE.md](docs/DATABASE.md) | Neon connection and backups |
+| [docs/README.md](docs/README.md) | Docs index |
 
 ## Quick start
 
@@ -32,4 +43,6 @@ Admin desk PIN default: `dommeru123` (override with `ADMIN_PIN`).
 | POST | `/v1/assignments` | Admin assigns vehicle |
 | POST | `/v1/assignments/{id}/complete` | Mark delivered |
 
-See [docs/DEPLOY-FREE.md](docs/DEPLOY-FREE.md) and [docs/DATABASE.md](docs/DATABASE.md).
+## Suspend the site
+
+Render Dashboard → service **murali-transport** → **Suspend**. Resume anytime. The Cloudflare domain is billed separately.
