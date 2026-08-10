@@ -762,6 +762,12 @@ main {
   max-width: 420px;
 }
 
+.admin-staff-note {
+  margin: 0.65rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
 .admin-toolbar {
   display: flex;
   flex-wrap: wrap;

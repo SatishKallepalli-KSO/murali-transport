@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import os
 import secrets
+from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+from time import time
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -25,6 +27,10 @@ STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 ADMIN_PIN = os.getenv("ADMIN_PIN", "dommeru123")
 # In-memory session tokens for admin desk (fine for single free instance)
 _admin_tokens: set[str] = set()
+# IP -> failed login timestamps (rate limit)
+_login_failures: dict[str, list[float]] = defaultdict(list)
+LOGIN_MAX_ATTEMPTS = int(os.getenv("ADMIN_LOGIN_MAX_ATTEMPTS", "5"))
+LOGIN_WINDOW_SEC = int(os.getenv("ADMIN_LOGIN_WINDOW_SEC", str(15 * 60)))
 
 app = FastAPI(
     title="Murali Transport API",
@@ -306,11 +312,53 @@ def recent_activity(limit: int = 12, db: Session = Depends(get_db)) -> list[dict
 # ---------- admin auth ----------
 
 
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip() or "unknown"
+    if request.client and request.client.host:
+        return request.client.host
+    return "unknown"
+
+
+def _prune_failures(ip: str, now: float) -> list[float]:
+    recent = [t for t in _login_failures.get(ip, []) if now - t < LOGIN_WINDOW_SEC]
+    if recent:
+        _login_failures[ip] = recent
+    else:
+        _login_failures.pop(ip, None)
+    return recent
+
+
+def _enforce_login_rate_limit(ip: str) -> None:
+    now = time()
+    recent = _prune_failures(ip, now)
+    if len(recent) >= LOGIN_MAX_ATTEMPTS:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many failed login attempts. Try again in 15 minutes.",
+        )
+
+
 @app.post("/v1/admin/login", response_model=AdminLoginOut)
-def admin_login(body: AdminLogin) -> AdminLoginOut:
-    if not secrets.compare_digest(body.pin.strip(), ADMIN_PIN):
-        raise HTTPException(status_code=401, detail="Incorrect admin PIN")
-    token = secrets.token_urlsafe(24)
+def admin_login(body: AdminLogin, request: Request) -> AdminLoginOut:
+    ip = _client_ip(request)
+    _enforce_login_rate_limit(ip)
+    submitted = body.pin.strip()
+    # Constant-time compare; pad empty to avoid length oracle on blank PIN
+    if not secrets.compare_digest(submitted, ADMIN_PIN):
+        _login_failures[ip].append(time())
+        remaining = max(0, LOGIN_MAX_ATTEMPTS - len(_prune_failures(ip, time())))
+        raise HTTPException(
+            status_code=401,
+            detail=(
+                "Incorrect admin PIN"
+                if remaining > 0
+                else "Too many failed login attempts. Try again in 15 minutes."
+            ),
+        )
+    _login_failures.pop(ip, None)
+    token = secrets.token_urlsafe(32)
     _admin_tokens.add(token)
     return AdminLoginOut(access_token=token)
 
