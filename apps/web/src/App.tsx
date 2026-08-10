@@ -16,7 +16,7 @@ import {
   type Vehicle,
   type VehicleSuggestion,
 } from './api'
-import { address, business, t, testimonials, type Lang } from './content'
+import { address, business, routeCities, routeLinks, t, testimonials, type Lang } from './content'
 
 type Portal = 'home' | 'request' | 'owner' | 'admin' | 'about'
 type AdminTab = 'snapshot' | 'loads' | 'match' | 'fleet' | 'assign'
@@ -488,6 +488,9 @@ export default function App() {
     { title: tx('service4Title'), body: tx('service4Body') },
   ]
 
+  const cityById = Object.fromEntries(routeCities.map((c) => [c.id, c]))
+  const spokeCities = routeCities.filter((c) => !c.hub)
+
   return (
     <div className={`site lang-${lang}`}>
       <div className="topbar">
@@ -786,6 +789,109 @@ export default function App() {
                 <p className="fleet-kicker">Eicher · Mini lorry & truck</p>
                 <h2>{tx('fleetTitle')}</h2>
                 <p>{tx('fleetBody')}</p>
+              </div>
+            </section>
+
+            <section className="routes-map" id="routes" aria-label="Service routes">
+              <div className="routes-map-layout">
+                <div className="routes-copy">
+                  <div className="section-head">
+                    <h2>{tx('routesTitle')}</h2>
+                    <p>{tx('routesIntro')}</p>
+                  </div>
+                  <p className="routes-hub-label">{tx('routesHub')}</p>
+                  <p className="routes-hub-name">Dommeru</p>
+                  <p className="routes-cover-label">{tx('routesCover')}</p>
+                  <ul className="routes-city-list">
+                    {spokeCities.map((city) => (
+                      <li key={city.id}>{lang === 'te' ? city.te : city.en}</li>
+                    ))}
+                  </ul>
+                  <p className="routes-note">{tx('routesNote')}</p>
+                  <div className="location-actions">
+                    <a className="btn btn-primary" href={business.mapsShareUrl} target="_blank" rel="noreferrer">
+                      {tx('ctaDirections')}
+                    </a>
+                    <a className="btn btn-ghost" href={`tel:${business.phone}`}>
+                      {tx('callNow')}
+                    </a>
+                  </div>
+                </div>
+
+                <div className="routes-canvas" role="img" aria-label={tx('routesTitle')}>
+                  <svg viewBox="0 0 800 480" className="routes-svg">
+                    <defs>
+                      <linearGradient id="routeRoad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#ef8b2e" stopOpacity="0.95" />
+                        <stop offset="100%" stopColor="#1f6feb" stopOpacity="0.85" />
+                      </linearGradient>
+                      <radialGradient id="routeGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#ffc57a" stopOpacity="0.35" />
+                        <stop offset="100%" stopColor="#0b2a4a" stopOpacity="0" />
+                      </radialGradient>
+                    </defs>
+                    <rect width="800" height="480" rx="28" fill="#0b2a4a" />
+                    <circle cx="430" cy="230" r="160" fill="url(#routeGlow)" />
+                    <path
+                      className="routes-river"
+                      d="M 90 70 C 220 120, 300 90, 420 140 S 620 120, 760 180"
+                      fill="none"
+                      stroke="rgba(125, 211, 252, 0.28)"
+                      strokeWidth="18"
+                      strokeLinecap="round"
+                    />
+                    {routeLinks.map(([fromId, toId]) => {
+                      const from = cityById[fromId]
+                      const to = cityById[toId]
+                      if (!from || !to) return null
+                      return (
+                        <line
+                          key={`${fromId}-${toId}`}
+                          className="routes-link"
+                          x1={from.x}
+                          y1={from.y}
+                          x2={to.x}
+                          y2={to.y}
+                          stroke="url(#routeRoad)"
+                          strokeWidth="3"
+                          strokeDasharray="8 10"
+                        />
+                      )
+                    })}
+                    {routeCities.map((city) => (
+                      <g key={city.id} className={city.hub ? 'routes-node hub' : 'routes-node'}>
+                        <circle
+                          cx={city.x}
+                          cy={city.y}
+                          r={city.hub ? 16 : 9}
+                          fill={city.hub ? '#ef8b2e' : '#9ec5ff'}
+                          stroke="#fff"
+                          strokeWidth={city.hub ? 3 : 2}
+                        />
+                        {city.hub ? (
+                          <circle
+                            cx={city.x}
+                            cy={city.y}
+                            r="26"
+                            fill="none"
+                            stroke="#ef8b2e"
+                            strokeOpacity="0.45"
+                            strokeWidth="2"
+                            className="routes-hub-ring"
+                          />
+                        ) : null}
+                        <text
+                          x={city.x}
+                          y={city.y + (city.hub ? 36 : 26)}
+                          textAnchor="middle"
+                          className="routes-label"
+                        >
+                          {lang === 'te' ? city.te : city.en}
+                        </text>
+                      </g>
+                    ))}
+                  </svg>
+                </div>
               </div>
             </section>
 

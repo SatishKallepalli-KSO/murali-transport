@@ -27,6 +27,31 @@ export const address = {
   line: '2MFM+F2V, Dommeru, Andhra Pradesh 534342, India',
 }
 
+/** Schematic Godavari-belt hubs for the home routes map (not GPS-precise). */
+export const routeCities = [
+  { id: 'dommeru', en: 'Dommeru', te: 'దొమ్మేరు', x: 430, y: 230, hub: true },
+  { id: 'kovvur', en: 'Kovvur', te: 'కొవ్వూరు', x: 360, y: 200, hub: false },
+  { id: 'rajahmundry', en: 'Rajahmundry', te: 'రాజమండ్రి', x: 560, y: 170, hub: false },
+  { id: 'nidadavole', en: 'Nidadavole', te: 'నిడదవోలు', x: 290, y: 250, hub: false },
+  { id: 'tanuku', en: 'Tanuku', te: 'తణుకు', x: 250, y: 320, hub: false },
+  { id: 'tadepalli', en: 'Tadepalligudem', te: 'తాడేపల్లిగూడెం', x: 200, y: 270, hub: false },
+  { id: 'eluru', en: 'Eluru', te: 'ఏలూరు', x: 120, y: 300, hub: false },
+  { id: 'bhimavaram', en: 'Bhimavaram', te: 'భీమవరం', x: 220, y: 390, hub: false },
+  { id: 'kakinada', en: 'Kakinada', te: 'కాకినాడ', x: 680, y: 210, hub: false },
+] as const
+
+export const routeLinks = [
+  ['dommeru', 'kovvur'],
+  ['dommeru', 'rajahmundry'],
+  ['dommeru', 'nidadavole'],
+  ['dommeru', 'tanuku'],
+  ['dommeru', 'tadepalli'],
+  ['nidadavole', 'eluru'],
+  ['tanuku', 'bhimavaram'],
+  ['rajahmundry', 'kakinada'],
+  ['kovvur', 'rajahmundry'],
+] as const
+
 const dict = {
   en: {
     topStatsFallback: 'Trusted lorry booking office · Dommeru',
@@ -76,6 +101,12 @@ const dict = {
     liveColCargo: 'Cargo',
     liveColWhen: 'When',
     marketPulse: 'At the office now',
+    routesTitle: 'Cities we connect',
+    routesIntro:
+      'From our Dommeru office we arrange mini lorries and trucks across the Godavari belt and nearby towns.',
+    routesHub: 'Office hub',
+    routesCover: 'Common routes',
+    routesNote: 'Local and inter-town freight from Dommeru — call if your place is nearby.',
     ctaPostLoad: 'Post a load',
     ctaRegister: 'Register lorry',
     ctaDirections: 'Get directions',
@@ -256,6 +287,12 @@ const dict = {
     liveColCargo: 'సరుకు',
     liveColWhen: 'ఎప్పుడు',
     marketPulse: 'ఆఫీస్‌లో ఇప్పుడు',
+    routesTitle: 'మేము కలిపే పట్టణాలు',
+    routesIntro:
+      'దొమ్మేరు ఆఫీస్ నుండి గోదావరి ప్రాంతం మరియు సమీప పట్టణాలకు మినీ లారీలు, ట్రక్కులు ఏర్పాటు చేస్తాము.',
+    routesHub: 'ఆఫీస్ హబ్',
+    routesCover: 'సాధారణ మార్గాలు',
+    routesNote: 'దొమ్మేరు నుండి స్థానిక మరియు పట్టణాల మధ్య సరుకు — మీ ఊరు సమీపంలో ఉంటే కాల్ చేయండి.',
     ctaPostLoad: 'లోడ్ పోస్ట్ చేయండి',
     ctaRegister: 'లారీ నమోదు',
     ctaDirections: 'దారి చూపించు',
