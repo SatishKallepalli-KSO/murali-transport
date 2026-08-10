@@ -41,6 +41,8 @@ export type Vehicle = {
   id: number
   owner_name: string
   owner_phone: string
+  driver_name: string
+  driver_phone: string
   plate_number: string
   vehicle_type: string
   capacity_tons: number

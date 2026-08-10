@@ -74,6 +74,8 @@ class BookingOut(BaseModel):
 class VehicleCreate(BaseModel):
     owner_name: str = Field(min_length=2, max_length=120)
     owner_phone: str = Field(min_length=7, max_length=32)
+    driver_name: str = Field(min_length=2, max_length=120)
+    driver_phone: str = Field(min_length=7, max_length=32)
     plate_number: str = Field(min_length=4, max_length=32)
     vehicle_type: str = Field(default="mini_lorry", max_length=64)
     capacity_tons: float = Field(default=1.0, gt=0, le=50)
@@ -90,6 +92,8 @@ class VehicleOut(BaseModel):
     id: int
     owner_name: str
     owner_phone: str
+    driver_name: str
+    driver_phone: str
     plate_number: str
     vehicle_type: str
     capacity_tons: float
@@ -328,6 +332,8 @@ def register_vehicle(body: VehicleCreate, db: Session = Depends(get_db)) -> Vehi
     row = Vehicle(
         owner_name=body.owner_name.strip(),
         owner_phone=body.owner_phone.strip(),
+        driver_name=body.driver_name.strip(),
+        driver_phone=body.driver_phone.strip(),
         plate_number=plate,
         vehicle_type=body.vehicle_type.strip() or "mini_lorry",
         capacity_tons=body.capacity_tons,

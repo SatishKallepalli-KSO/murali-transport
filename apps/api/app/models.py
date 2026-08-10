@@ -44,6 +44,8 @@ class Vehicle(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     owner_name: Mapped[str] = mapped_column(String(120), nullable=False)
     owner_phone: Mapped[str] = mapped_column(String(32), nullable=False)
+    driver_name: Mapped[str] = mapped_column(String(120), nullable=False, default="")
+    driver_phone: Mapped[str] = mapped_column(String(32), nullable=False, default="")
     plate_number: Mapped[str] = mapped_column(String(32), nullable=False, unique=True)
     vehicle_type: Mapped[str] = mapped_column(String(64), nullable=False, default="mini_lorry")
     capacity_tons: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)

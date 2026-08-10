@@ -35,6 +35,8 @@ const emptyLoad = {
 const emptyVehicle = {
   owner_name: '',
   owner_phone: '',
+  driver_name: '',
+  driver_phone: '',
   plate_number: '',
   vehicle_type: 'mini_lorry',
   capacity_tons: '2',
@@ -605,6 +607,14 @@ export default function App() {
                 <input required value={vehicleForm.owner_phone} onChange={(e) => setVehicleForm({ ...vehicleForm, owner_phone: e.target.value })} />
               </label>
               <label>
+                {tx('driverName')}
+                <input required value={vehicleForm.driver_name} onChange={(e) => setVehicleForm({ ...vehicleForm, driver_name: e.target.value })} />
+              </label>
+              <label>
+                {tx('driverPhone')}
+                <input required value={vehicleForm.driver_phone} onChange={(e) => setVehicleForm({ ...vehicleForm, driver_phone: e.target.value })} />
+              </label>
+              <label>
                 {tx('plate')}
                 <input required value={vehicleForm.plate_number} onChange={(e) => setVehicleForm({ ...vehicleForm, plate_number: e.target.value })} placeholder="AP39XX1234" />
               </label>
@@ -723,6 +733,10 @@ export default function App() {
                             <span>
                               {s.vehicle.owner_name} · {s.vehicle.owner_phone}
                             </span>
+                            <span>
+                              {tx('driverName')}: {s.vehicle.driver_name || '—'} ·{' '}
+                              {s.vehicle.driver_phone || '—'}
+                            </span>
                             <button
                               type="button"
                               className="btn btn-primary"
@@ -748,6 +762,12 @@ export default function App() {
                           </strong>
                           <span>
                             {v.current_location} · {v.capacity_tons}t
+                          </span>
+                          <span>
+                            {tx('ownerName')}: {v.owner_name} · {v.owner_phone}
+                          </span>
+                          <span>
+                            {tx('driverName')}: {v.driver_name || '—'} · {v.driver_phone || '—'}
                           </span>
                         </li>
                       ))}
