@@ -563,8 +563,15 @@ export default function App() {
 
         {portal === 'home' && (
           <>
-            <section className="hero">
-              <div className="hero-copy">
+            <section className="hero hero-scenic" aria-label="Murali Transport Office">
+              <div className="hero-scenic-bg" aria-hidden="true">
+                <img
+                  src="/eicher-highway-hero.jpg"
+                  alt="Eicher lorry on the highway — Murali Transport Office Dommeru"
+                />
+              </div>
+              <div className="hero-scenic-shade" aria-hidden="true" />
+              <div className="hero-copy hero-copy-on-media">
                 <p className="hero-kicker">{tx('heroKicker')}</p>
                 <p className="hero-sub">{tx('heroSub')}</p>
                 <h1 className="hero-name">{tx('heroBrand')}</h1>
@@ -573,16 +580,13 @@ export default function App() {
                   <button type="button" className="btn btn-primary" onClick={() => setPortal('request')}>
                     {tx('ctaPostLoad')}
                   </button>
-                  <button type="button" className="btn btn-dark" onClick={() => setPortal('owner')}>
+                  <button type="button" className="btn btn-light" onClick={() => setPortal('owner')}>
                     {tx('ctaRegister')}
                   </button>
-                  <a className="btn btn-ghost" href={`tel:${business.phone}`}>
+                  <a className="btn btn-ghost-light" href={`tel:${business.phone}`}>
                     {tx('callNow')}
                   </a>
                 </div>
-              </div>
-              <div className="hero-media">
-                <img src="/eicher-hero.jpg" alt="Eicher lorry — Murali Transport Office Dommeru" />
               </div>
             </section>
 
