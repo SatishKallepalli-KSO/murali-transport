@@ -16,6 +16,7 @@ End-to-end **lorry booking platform** for Dommeru:
 |-----|-------------|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, API, data model, security |
 | [docs/USER-FLOWS.md](docs/USER-FLOWS.md) | User journeys and state diagrams |
+| [docs/CI.md](docs/CI.md) | CI workflow setup |
 | [docs/SECURITY.md](docs/SECURITY.md) | PIN, PII redaction, rate limits |
 | [docs/DEPLOY-FREE.md](docs/DEPLOY-FREE.md) | Deploy on Render + Neon |
 | [docs/DATABASE.md](docs/DATABASE.md) | Neon connection and backups |
