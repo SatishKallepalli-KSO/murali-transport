@@ -103,27 +103,12 @@ export default function App() {
   const [suggestions, setSuggestions] = useState<VehicleSuggestion[]>([])
   const [busy, setBusy] = useState(false)
   const [adminTab, setAdminTab] = useState<AdminTab>('snapshot')
-  const [deskAccess, setDeskAccess] = useState(
-    () => localStorage.getItem('murali_desk_access') === '1',
-  )
 
   const openLoadCount = openLoads.filter((l) => l.status === 'open').length
   const availableVehicleCount = vehicles.filter((v) => v.status === 'available').length
   const activeTripCount = assignments.filter((a) => a.status === 'assigned').length
-  const showAdminNav = deskAccess || Boolean(adminToken)
 
   const tx = (key: Parameters<typeof t>[1]) => t(lang, key)
-
-  function openDeskGate() {
-    setDeskAccess(true)
-    localStorage.setItem('murali_desk_access', '1')
-    setPortal('admin')
-  }
-
-  function closeDeskGate() {
-    setDeskAccess(false)
-    localStorage.removeItem('murali_desk_access')
-  }
 
   function switchLang(next: Lang) {
     setLang(next)
@@ -134,19 +119,6 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = lang === 'te' ? 'te' : 'en'
   }, [lang])
-
-  useEffect(() => {
-    function syncDeskHash() {
-      const hash = window.location.hash.replace(/^#/, '').toLowerCase()
-      if (hash === 'desk' || hash === 'admin-desk') {
-        openDeskGate()
-      }
-    }
-    syncDeskHash()
-    window.addEventListener('hashchange', syncDeskHash)
-    return () => window.removeEventListener('hashchange', syncDeskHash)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   async function refreshPublic() {
     try {
@@ -357,11 +329,9 @@ export default function App() {
           <button type="button" className={portal === 'owner' ? 'active' : ''} onClick={() => setPortal('owner')}>
             {tx('navOwner')}
           </button>
-          {showAdminNav && (
-            <button type="button" className={portal === 'admin' ? 'active' : ''} onClick={() => setPortal('admin')}>
-              {tx('navAdmin')}
-            </button>
-          )}
+          <button type="button" className={portal === 'admin' ? 'active' : ''} onClick={() => setPortal('admin')}>
+            {tx('navAdmin')}
+          </button>
         </nav>
         <div className="nav-end">
           <div className="lang-switch" role="group" aria-label="Language">
@@ -739,7 +709,7 @@ export default function App() {
           </section>
         )}
 
-        {portal === 'admin' && showAdminNav && (
+        {portal === 'admin' && (
           <section className="portal admin-portal">
             <div className="section-head">
               <h2>{tx('adminTitle')}</h2>
@@ -772,18 +742,7 @@ export default function App() {
                   <button type="button" className="btn btn-ghost" onClick={() => void refreshAdmin(adminToken)}>
                     {tx('refresh')}
                   </button>
-                  <button
-                    type="button"
-                    className="btn btn-ghost"
-                    onClick={() => {
-                      logoutAdmin()
-                      closeDeskGate()
-                      setPortal('home')
-                      if (window.location.hash.toLowerCase().includes('desk')) {
-                        window.history.replaceState(null, '', window.location.pathname)
-                      }
-                    }}
-                  >
+                  <button type="button" className="btn btn-ghost" onClick={logoutAdmin}>
                     {tx('lockDesk')}
                   </button>
                 </div>
