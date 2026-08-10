@@ -11,6 +11,7 @@ __pycache__
 coverage
 apps/api/data/
 apps/api/static/
+apps/api/tests/_pytest_murali.db
 backups/
 *.sql
 *.sql.gz

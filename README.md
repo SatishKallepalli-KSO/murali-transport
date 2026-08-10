@@ -16,6 +16,7 @@ End-to-end **lorry booking platform** for Dommeru:
 |-----|-------------|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, API, data model, security |
 | [docs/USER-FLOWS.md](docs/USER-FLOWS.md) | User journeys and state diagrams |
+| [docs/SECURITY.md](docs/SECURITY.md) | PIN, PII redaction, rate limits |
 | [docs/DEPLOY-FREE.md](docs/DEPLOY-FREE.md) | Deploy on Render + Neon |
 | [docs/DATABASE.md](docs/DATABASE.md) | Neon connection and backups |
 | [docs/README.md](docs/README.md) | Docs index |
@@ -30,7 +31,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-Admin desk PIN default: `dommeru123` (override with `ADMIN_PIN`).
+Admin desk PIN: set `ADMIN_PIN` (8+ characters). Do **not** use old documented defaults. Local-only: `ALLOW_INSECURE_DEFAULT_PIN=1`.
 
 ## API highlights
 
@@ -39,9 +40,20 @@ Admin desk PIN default: `dommeru123` (override with `ADMIN_PIN`).
 | POST | `/v1/vehicles` | Owner registers lorry |
 | POST | `/v1/loads` | Requestor posts load |
 | POST | `/v1/admin/login` | Admin PIN → token |
-| GET | `/v1/loads/{id}/suggestions` | Location-ranked lorries |
+| GET | `/v1/loads/{id}/suggestions` | Location-ranked lorries (admin) |
 | POST | `/v1/assignments` | Admin assigns vehicle |
 | POST | `/v1/assignments/{id}/complete` | Mark delivered |
+
+Public list endpoints return **redacted** PII (no phones). Pass admin Bearer for full records.
+
+## Tests & CI
+
+```bash
+npm run lint && npm run build
+cd apps/api && pip install -r requirements.txt && pytest -q
+```
+
+GitHub Actions runs lint, build, and API tests on every push/PR.
 
 ## Suspend the site
 

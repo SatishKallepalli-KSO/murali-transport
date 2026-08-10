@@ -1,0 +1,166 @@
+"""Pytest suite for API auth, redaction, and assignment."""
+
+from __future__ import annotations
+
+import os
+from pathlib import Path
+
+# Must set before app/db import
+_TEST_DIR = Path(__file__).resolve().parent
+_TEST_DB = _TEST_DIR / "_pytest_murali.db"
+if _TEST_DB.exists():
+    _TEST_DB.unlink()
+
+os.environ["ADMIN_PIN"] = "test-admin-pin-strong1"
+os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DB}"
+os.environ.pop("RENDER", None)
+os.environ.pop("RENDER_SERVICE_ID", None)
+os.environ.pop("ALLOW_INSECURE_DEFAULT_PIN", None)
+
+import app.auth as auth_mod  # noqa: E402
+import app.db as db_mod  # noqa: E402
+
+auth_mod._cached_pin = None
+
+from fastapi.testclient import TestClient  # noqa: E402
+from app.db import init_db  # noqa: E402
+from app.main import app  # noqa: E402
+from app.matching import location_match_score  # noqa: E402
+
+init_db()
+client = TestClient(app)
+
+
+def _admin_token() -> str:
+    res = client.post("/v1/admin/login", json={"pin": "test-admin-pin-strong1"})
+    assert res.status_code == 200, res.text
+    return res.json()["access_token"]
+
+
+def test_healthz() -> None:
+    res = client.get("/healthz")
+    assert res.status_code == 200
+    assert res.json()["status"] == "ok"
+
+
+def test_location_match_exact() -> None:
+    score, reason = location_match_score("Dommeru", "Dommeru")
+    assert score == 1.0
+    assert "Exact" in reason
+
+
+def test_public_vehicle_list_redacts_pii() -> None:
+    create = client.post(
+        "/v1/vehicles",
+        json={
+            "owner_name": "Ravi Kumar",
+            "owner_phone": "9999999999",
+            "driver_name": "Driver One",
+            "driver_phone": "8888888888",
+            "plate_number": "AP39AB1234",
+            "vehicle_type": "mini_lorry",
+            "capacity_tons": 2,
+            "current_location": "Dommeru",
+            "notes": "secret note",
+        },
+    )
+    assert create.status_code == 201, create.text
+
+    public = client.get("/v1/vehicles")
+    assert public.status_code == 200
+    rows = public.json()
+    assert rows
+    row = next(r for r in rows if "1234" in r["plate_number"] or "**" in r["plate_number"])
+    assert row["owner_phone"] == ""
+    assert row["driver_phone"] == ""
+    assert "9999999999" not in row["owner_phone"]
+    assert row["notes"] == ""
+    assert "*" in row["plate_number"]
+    assert "secret" not in row["notes"]
+
+
+def test_admin_sees_full_vehicle() -> None:
+    token = _admin_token()
+    res = client.get("/v1/vehicles", headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    rows = res.json()
+    assert any(r.get("owner_phone") == "9999999999" for r in rows)
+
+
+def test_patch_location_requires_admin() -> None:
+    listed = client.get("/v1/vehicles").json()
+    assert listed
+    vid = listed[0]["id"]
+    denied = client.patch(
+        f"/v1/vehicles/{vid}/location",
+        json={"current_location": "Kovvur"},
+    )
+    assert denied.status_code == 401
+
+    token = _admin_token()
+    ok = client.patch(
+        f"/v1/vehicles/{vid}/location",
+        json={"current_location": "Kovvur"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert ok.status_code == 200
+    assert ok.json()["current_location"] == "Kovvur"
+
+
+def test_bookings_list_requires_admin() -> None:
+    assert client.get("/v1/bookings").status_code == 401
+    token = _admin_token()
+    assert client.get(
+        "/v1/bookings",
+        headers={"Authorization": f"Bearer {token}"},
+    ).status_code == 200
+
+
+def test_wrong_pin() -> None:
+    res = client.post("/v1/admin/login", json={"pin": "wrong-pin-value"})
+    assert res.status_code == 401
+
+
+def test_assign_and_complete() -> None:
+    token = _admin_token()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    load = client.post(
+        "/v1/loads",
+        json={
+            "requestor_name": "Sita",
+            "requestor_phone": "7777777777",
+            "pickup": "Dommeru",
+            "dropoff": "Rajahmundry",
+            "cargo": "Rice",
+            "weight_tons": 1.5,
+            "vehicle_preference": "any",
+        },
+    )
+    assert load.status_code == 201, load.text
+    load_id = load.json()["id"]
+
+    vehicles = client.get("/v1/vehicles", headers=headers).json()
+    vehicle = next(v for v in vehicles if v["status"] == "available")
+    assigned = client.post(
+        "/v1/assignments",
+        headers=headers,
+        json={"load_id": load_id, "vehicle_id": vehicle["id"]},
+    )
+    assert assigned.status_code == 201, assigned.text
+    assignment_id = assigned.json()["id"]
+
+    done = client.post(
+        f"/v1/assignments/{assignment_id}/complete",
+        headers=headers,
+    )
+    assert done.status_code == 200
+    assert done.json()["status"] == "completed"
+
+
+def test_public_load_redacts_phone() -> None:
+    res = client.get("/v1/loads?status=open")
+    assert res.status_code == 200
+    for row in res.json():
+        assert row["requestor_phone"] == ""
+        assert row["requestor_name"] == "Customer"

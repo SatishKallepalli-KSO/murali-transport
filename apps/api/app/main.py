@@ -4,223 +4,76 @@ from __future__ import annotations
 
 import os
 import secrets
-from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
-from time import time
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session, joinedload
 
+from app.auth import (
+    get_admin_pin,
+    issue_token,
+    optional_admin,
+    require_admin,
+    revoke_token,
+)
 from app.db import get_db, init_db
 from app.matching import location_match_score
 from app.models import Assignment, BookingEnquiry, LoadRequest, Vehicle, utcnow
+from app.rate_limit import (
+    clear_login_failures,
+    client_ip,
+    enforce_login,
+    enforce_public_write,
+    login_failures_remaining,
+    record_login_failure,
+)
+from app.schemas import (
+    AdminLogin,
+    AdminLoginOut,
+    AssignBody,
+    AssignmentOut,
+    BookingCreate,
+    BookingOut,
+    LoadCreate,
+    LoadOut,
+    VehicleCreate,
+    VehicleOut,
+    VehicleSuggestion,
+    VehicleUpdateLocation,
+    load_to_out,
+    redact_vehicle,
+)
 
 load_dotenv()
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
-ADMIN_PIN = os.getenv("ADMIN_PIN", "dommeru123")
-# In-memory session tokens for admin desk (fine for single free instance)
-_admin_tokens: set[str] = set()
-# IP -> failed login timestamps (rate limit)
-_login_failures: dict[str, list[float]] = defaultdict(list)
-LOGIN_MAX_ATTEMPTS = int(os.getenv("ADMIN_LOGIN_MAX_ATTEMPTS", "5"))
-LOGIN_WINDOW_SEC = int(os.getenv("ADMIN_LOGIN_WINDOW_SEC", str(15 * 60)))
+APP_URL = (os.getenv("APP_URL") or "").rstrip("/")
 
 app = FastAPI(
     title="Murali Transport API",
-    version="0.2.0",
+    version="0.4.0",
     description="Lorry booking platform — owners, load requestors, and office admin",
 )
 
+_cors_origins = [
+    o.strip()
+    for o in (os.getenv("CORS_ORIGINS") or "*").split(",")
+    if o.strip()
+]
+# Same-origin Docker deploy does not need credentials+wildcard; keep simple.
+_allow_credentials = "*" not in _cors_origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_cors_origins,
+    allow_credentials=_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# ---------- schemas ----------
-
-
-class BookingCreate(BaseModel):
-    name: str = Field(min_length=2, max_length=120)
-    phone: str = Field(min_length=7, max_length=32)
-    pickup: str = Field(min_length=2, max_length=255)
-    dropoff: str = Field(min_length=2, max_length=255)
-    vehicle_type: str = Field(default="mini_lorry", max_length=64)
-    cargo: str = Field(default="", max_length=255)
-    preferred_date: str = Field(default="", max_length=64)
-    notes: str = Field(default="", max_length=2000)
-
-
-class BookingOut(BaseModel):
-    id: int
-    name: str
-    phone: str
-    pickup: str
-    dropoff: str
-    vehicle_type: str
-    cargo: str
-    preferred_date: str
-    notes: str
-    status: str
-    created_at: datetime
-
-    model_config = {"from_attributes": True}
-
-
-class VehicleCreate(BaseModel):
-    owner_name: str = Field(min_length=2, max_length=120)
-    owner_phone: str = Field(min_length=7, max_length=32)
-    driver_name: str = Field(min_length=2, max_length=120)
-    driver_phone: str = Field(min_length=7, max_length=32)
-    plate_number: str = Field(min_length=4, max_length=32)
-    vehicle_type: str = Field(default="mini_lorry", max_length=64)
-    capacity_tons: float = Field(default=1.0, gt=0, le=50)
-    current_location: str = Field(default="Dommeru", min_length=2, max_length=255)
-    notes: str = Field(default="", max_length=2000)
-
-
-class VehicleUpdateLocation(BaseModel):
-    current_location: str = Field(min_length=2, max_length=255)
-    status: str | None = Field(default=None, max_length=32)
-
-
-class VehicleOut(BaseModel):
-    id: int
-    owner_name: str
-    owner_phone: str
-    driver_name: str
-    driver_phone: str
-    plate_number: str
-    vehicle_type: str
-    capacity_tons: float
-    current_location: str
-    status: str
-    notes: str
-    created_at: datetime
-    updated_at: datetime
-
-    model_config = {"from_attributes": True}
-
-
-class LoadCreate(BaseModel):
-    requestor_name: str = Field(min_length=2, max_length=120)
-    requestor_phone: str = Field(min_length=7, max_length=32)
-    pickup: str = Field(min_length=2, max_length=255)
-    dropoff: str = Field(min_length=2, max_length=255)
-    cargo: str = Field(min_length=1, max_length=255)
-    weight_tons: float = Field(default=1.0, gt=0, le=50)
-    vehicle_preference: str = Field(default="any", max_length=64)
-    preferred_date: str = Field(default="", max_length=64)
-    notes: str = Field(default="", max_length=2000)
-
-
-class LoadOut(BaseModel):
-    id: int
-    requestor_name: str
-    requestor_phone: str
-    pickup: str
-    dropoff: str
-    cargo: str
-    weight_tons: float
-    vehicle_preference: str
-    preferred_date: str
-    notes: str
-    status: str
-    created_at: datetime
-    updated_at: datetime
-    assigned_vehicle_id: int | None = None
-    assigned_plate: str | None = None
-
-    model_config = {"from_attributes": True}
-
-
-class VehicleSuggestion(BaseModel):
-    vehicle: VehicleOut
-    match_score: float
-    match_reason: str
-
-
-class AssignBody(BaseModel):
-    load_id: int
-    vehicle_id: int
-    notes: str = Field(default="", max_length=2000)
-
-
-class AssignmentOut(BaseModel):
-    id: int
-    load_id: int
-    vehicle_id: int
-    assigned_by: str
-    match_score: float
-    match_reason: str
-    status: str
-    notes: str
-    created_at: datetime
-    load: LoadOut | None = None
-    vehicle: VehicleOut | None = None
-
-    model_config = {"from_attributes": True}
-
-
-class AdminLogin(BaseModel):
-    pin: str = Field(min_length=4, max_length=64)
-
-
-class AdminLoginOut(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-
-
-# ---------- helpers ----------
-
-
-def require_admin(authorization: str | None = Header(default=None)) -> str:
-    if not authorization or not authorization.lower().startswith("bearer "):
-        raise HTTPException(status_code=401, detail="Admin login required")
-    token = authorization.split(" ", 1)[1].strip()
-    if token not in _admin_tokens:
-        raise HTTPException(status_code=401, detail="Invalid or expired admin session")
-    return token
-
-
-def load_to_out(row: LoadRequest) -> LoadOut:
-    plate = None
-    vehicle_id = None
-    if row.assignment and row.assignment.vehicle:
-        plate = row.assignment.vehicle.plate_number
-        vehicle_id = row.assignment.vehicle_id
-    elif row.assignment:
-        vehicle_id = row.assignment.vehicle_id
-    return LoadOut(
-        id=row.id,
-        requestor_name=row.requestor_name,
-        requestor_phone=row.requestor_phone,
-        pickup=row.pickup,
-        dropoff=row.dropoff,
-        cargo=row.cargo,
-        weight_tons=row.weight_tons,
-        vehicle_preference=row.vehicle_preference,
-        preferred_date=row.preferred_date,
-        notes=row.notes,
-        status=row.status,
-        created_at=row.created_at,
-        updated_at=row.updated_at,
-        assigned_vehicle_id=vehicle_id,
-        assigned_plate=plate,
-    )
-
-
-# ---------- lifecycle ----------
 
 
 @app.on_event("startup")
@@ -250,7 +103,8 @@ def office_info() -> dict:
         "reviews": 27,
         "maps": "https://share.google/mAW3H8LK7Ogq0qrBl",
         "platform": "lorry-booking",
-        "version": "0.3.0",
+        "version": "0.4.0",
+        "app_url": APP_URL or None,
     }
 
 
@@ -272,7 +126,9 @@ def platform_stats(db: Session = Depends(get_db)) -> dict:
 
 @app.get("/v1/activity")
 def recent_activity(limit: int = 12, db: Session = Depends(get_db)) -> list[dict]:
-    """Public ticker feed for the animated landing backdrop."""
+    """Public ticker — no phones or full plates."""
+    from app.schemas import mask_plate
+
     limit = max(1, min(limit, 30))
     items: list[dict] = []
 
@@ -299,7 +155,7 @@ def recent_activity(limit: int = 12, db: Session = Depends(get_db)) -> list[dict
             {
                 "kind": "vehicle",
                 "id": vehicle.id,
-                "title": f"{vehicle.plate_number} · {vehicle.vehicle_type}",
+                "title": f"{mask_plate(vehicle.plate_number)} · {vehicle.vehicle_type}",
                 "detail": f"{vehicle.current_location} · {vehicle.status}",
                 "at": vehicle.created_at.isoformat(),
             }
@@ -309,46 +165,14 @@ def recent_activity(limit: int = 12, db: Session = Depends(get_db)) -> list[dict
     return items[:limit]
 
 
-# ---------- admin auth ----------
-
-
-def _client_ip(request: Request) -> str:
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip() or "unknown"
-    if request.client and request.client.host:
-        return request.client.host
-    return "unknown"
-
-
-def _prune_failures(ip: str, now: float) -> list[float]:
-    recent = [t for t in _login_failures.get(ip, []) if now - t < LOGIN_WINDOW_SEC]
-    if recent:
-        _login_failures[ip] = recent
-    else:
-        _login_failures.pop(ip, None)
-    return recent
-
-
-def _enforce_login_rate_limit(ip: str) -> None:
-    now = time()
-    recent = _prune_failures(ip, now)
-    if len(recent) >= LOGIN_MAX_ATTEMPTS:
-        raise HTTPException(
-            status_code=429,
-            detail="Too many failed login attempts. Try again in 15 minutes.",
-        )
-
-
 @app.post("/v1/admin/login", response_model=AdminLoginOut)
 def admin_login(body: AdminLogin, request: Request) -> AdminLoginOut:
-    ip = _client_ip(request)
-    _enforce_login_rate_limit(ip)
+    ip = client_ip(request)
+    enforce_login(ip)
     submitted = body.pin.strip()
-    # Constant-time compare; pad empty to avoid length oracle on blank PIN
-    if not secrets.compare_digest(submitted, ADMIN_PIN):
-        _login_failures[ip].append(time())
-        remaining = max(0, LOGIN_MAX_ATTEMPTS - len(_prune_failures(ip, time())))
+    if not secrets.compare_digest(submitted, get_admin_pin()):
+        record_login_failure(ip)
+        remaining = login_failures_remaining(ip)
         raise HTTPException(
             status_code=401,
             detail=(
@@ -357,24 +181,24 @@ def admin_login(body: AdminLogin, request: Request) -> AdminLoginOut:
                 else "Too many failed login attempts. Try again in 15 minutes."
             ),
         )
-    _login_failures.pop(ip, None)
-    token = secrets.token_urlsafe(32)
-    _admin_tokens.add(token)
-    return AdminLoginOut(access_token=token)
+    clear_login_failures(ip)
+    return AdminLoginOut(access_token=issue_token())
 
 
 @app.post("/v1/admin/logout")
 def admin_logout(authorization: str | None = Header(default=None)) -> dict[str, str]:
     if authorization and authorization.lower().startswith("bearer "):
-        _admin_tokens.discard(authorization.split(" ", 1)[1].strip())
+        revoke_token(authorization.split(" ", 1)[1].strip())
     return {"status": "ok"}
 
 
-# ---------- vehicles (owners) ----------
-
-
 @app.post("/v1/vehicles", response_model=VehicleOut, status_code=201)
-def register_vehicle(body: VehicleCreate, db: Session = Depends(get_db)) -> Vehicle:
+def register_vehicle(
+    body: VehicleCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> VehicleOut:
+    enforce_public_write(request, "vehicles")
     plate = body.plate_number.strip().upper().replace(" ", "")
     existing = db.query(Vehicle).filter(Vehicle.plate_number == plate).first()
     if existing:
@@ -394,7 +218,8 @@ def register_vehicle(body: VehicleCreate, db: Session = Depends(get_db)) -> Vehi
     db.add(row)
     db.commit()
     db.refresh(row)
-    return row
+    # Confirm to submitter with full record once; public lists stay redacted.
+    return VehicleOut.model_validate(row)
 
 
 @app.get("/v1/vehicles", response_model=list[VehicleOut])
@@ -405,13 +230,19 @@ def list_vehicles(
     limit: int = 200,
     offset: int = 0,
     db: Session = Depends(get_db),
-) -> list[Vehicle]:
+    admin: str | None = Depends(optional_admin),
+) -> list[VehicleOut]:
     limit = max(1, min(limit, 500))
     offset = max(0, offset)
     query = db.query(Vehicle)
     if status:
         query = query.filter(Vehicle.status == status)
     if q and q.strip():
+        if not admin:
+            raise HTTPException(
+                status_code=401,
+                detail="Admin login required to search private vehicle fields",
+            )
         term = f"%{q.strip()}%"
         query = query.filter(
             (Vehicle.plate_number.ilike(term))
@@ -424,21 +255,28 @@ def list_vehicles(
         )
     rows = query.order_by(Vehicle.updated_at.desc()).offset(offset).limit(limit).all()
     if location:
-        scored = sorted(
+        rows = sorted(
             rows,
             key=lambda v: location_match_score(v.current_location, location)[0],
             reverse=True,
         )
-        return scored
-    return rows
+    out = [VehicleOut.model_validate(r) for r in rows]
+    if admin:
+        return out
+    return [redact_vehicle(v) for v in out]
 
 
 @app.get("/v1/vehicles/{vehicle_id}", response_model=VehicleOut)
-def get_vehicle(vehicle_id: int, db: Session = Depends(get_db)) -> Vehicle:
+def get_vehicle(
+    vehicle_id: int,
+    db: Session = Depends(get_db),
+    admin: str | None = Depends(optional_admin),
+) -> VehicleOut:
     row = db.get(Vehicle, vehicle_id)
     if not row:
         raise HTTPException(status_code=404, detail="Vehicle not found")
-    return row
+    out = VehicleOut.model_validate(row)
+    return out if admin else redact_vehicle(out)
 
 
 @app.patch("/v1/vehicles/{vehicle_id}/location", response_model=VehicleOut)
@@ -446,7 +284,8 @@ def update_vehicle_location(
     vehicle_id: int,
     body: VehicleUpdateLocation,
     db: Session = Depends(get_db),
-) -> Vehicle:
+    _: str = Depends(require_admin),
+) -> VehicleOut:
     row = db.get(Vehicle, vehicle_id)
     if not row:
         raise HTTPException(status_code=404, detail="Vehicle not found")
@@ -456,14 +295,16 @@ def update_vehicle_location(
     row.updated_at = utcnow()
     db.commit()
     db.refresh(row)
-    return row
-
-
-# ---------- loads (requestors) ----------
+    return VehicleOut.model_validate(row)
 
 
 @app.post("/v1/loads", response_model=LoadOut, status_code=201)
-def create_load(body: LoadCreate, db: Session = Depends(get_db)) -> LoadOut:
+def create_load(
+    body: LoadCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> LoadOut:
+    enforce_public_write(request, "loads")
     row = LoadRequest(
         requestor_name=body.requestor_name.strip(),
         requestor_phone=body.requestor_phone.strip(),
@@ -479,7 +320,7 @@ def create_load(body: LoadCreate, db: Session = Depends(get_db)) -> LoadOut:
     db.add(row)
     db.commit()
     db.refresh(row)
-    return load_to_out(row)
+    return load_to_out(row, public=False)
 
 
 @app.get("/v1/loads", response_model=list[LoadOut])
@@ -489,6 +330,7 @@ def list_loads(
     limit: int = 200,
     offset: int = 0,
     db: Session = Depends(get_db),
+    admin: str | None = Depends(optional_admin),
 ) -> list[LoadOut]:
     limit = max(1, min(limit, 500))
     offset = max(0, offset)
@@ -498,6 +340,11 @@ def list_loads(
     if status:
         query = query.filter(LoadRequest.status == status)
     if q and q.strip():
+        if not admin:
+            raise HTTPException(
+                status_code=401,
+                detail="Admin login required to search private load fields",
+            )
         term = f"%{q.strip()}%"
         query = query.filter(
             (LoadRequest.requestor_name.ilike(term))
@@ -509,11 +356,15 @@ def list_loads(
             | (LoadRequest.notes.ilike(term))
         )
     rows = query.order_by(LoadRequest.created_at.desc()).offset(offset).limit(limit).all()
-    return [load_to_out(r) for r in rows]
+    return [load_to_out(r, public=admin is None) for r in rows]
 
 
 @app.get("/v1/loads/{load_id}", response_model=LoadOut)
-def get_load(load_id: int, db: Session = Depends(get_db)) -> LoadOut:
+def get_load(
+    load_id: int,
+    db: Session = Depends(get_db),
+    admin: str | None = Depends(optional_admin),
+) -> LoadOut:
     row = (
         db.query(LoadRequest)
         .options(joinedload(LoadRequest.assignment).joinedload(Assignment.vehicle))
@@ -522,7 +373,7 @@ def get_load(load_id: int, db: Session = Depends(get_db)) -> LoadOut:
     )
     if not row:
         raise HTTPException(status_code=404, detail="Load not found")
-    return load_to_out(row)
+    return load_to_out(row, public=admin is None)
 
 
 @app.get("/v1/loads/{load_id}/suggestions", response_model=list[VehicleSuggestion])
@@ -547,7 +398,6 @@ def suggest_vehicles_for_load(
             load.vehicle_preference not in ("", "any")
             and vehicle.vehicle_type != load.vehicle_preference
         ):
-            # Still allow, but lower score via reason note
             score, reason = location_match_score(vehicle.current_location, load.pickup)
             score *= 0.7
             reason = f"{reason} · type differs ({vehicle.vehicle_type})"
@@ -564,7 +414,20 @@ def suggest_vehicles_for_load(
     return suggestions
 
 
-# ---------- assignments (admin) ----------
+def _assignment_out(row: Assignment) -> AssignmentOut:
+    return AssignmentOut(
+        id=row.id,
+        load_id=row.load_id,
+        vehicle_id=row.vehicle_id,
+        assigned_by=row.assigned_by,
+        match_score=row.match_score,
+        match_reason=row.match_reason,
+        status=row.status,
+        notes=row.notes,
+        created_at=row.created_at,
+        load=load_to_out(row.load) if row.load else None,
+        vehicle=VehicleOut.model_validate(row.vehicle) if row.vehicle else None,
+    )
 
 
 @app.post("/v1/assignments", response_model=AssignmentOut, status_code=201)
@@ -622,19 +485,7 @@ def assign_load(
         .first()
     )
     assert assignment is not None
-    return AssignmentOut(
-        id=assignment.id,
-        load_id=assignment.load_id,
-        vehicle_id=assignment.vehicle_id,
-        assigned_by=assignment.assigned_by,
-        match_score=assignment.match_score,
-        match_reason=assignment.match_reason,
-        status=assignment.status,
-        notes=assignment.notes,
-        created_at=assignment.created_at,
-        load=load_to_out(assignment.load),
-        vehicle=VehicleOut.model_validate(assignment.vehicle),
-    )
+    return _assignment_out(assignment)
 
 
 @app.get("/v1/assignments", response_model=list[AssignmentOut])
@@ -667,22 +518,7 @@ def list_assignments(
     rows = (
         query.order_by(Assignment.created_at.desc()).offset(offset).limit(limit).all()
     )
-    return [
-        AssignmentOut(
-            id=r.id,
-            load_id=r.load_id,
-            vehicle_id=r.vehicle_id,
-            assigned_by=r.assigned_by,
-            match_score=r.match_score,
-            match_reason=r.match_reason,
-            status=r.status,
-            notes=r.notes,
-            created_at=r.created_at,
-            load=load_to_out(r.load) if r.load else None,
-            vehicle=VehicleOut.model_validate(r.vehicle) if r.vehicle else None,
-        )
-        for r in rows
-    ]
+    return [_assignment_out(r) for r in rows]
 
 
 @app.post("/v1/assignments/{assignment_id}/complete", response_model=AssignmentOut)
@@ -710,27 +546,16 @@ def complete_assignment(
         row.vehicle.updated_at = utcnow()
     db.commit()
     db.refresh(row)
-    return AssignmentOut(
-        id=row.id,
-        load_id=row.load_id,
-        vehicle_id=row.vehicle_id,
-        assigned_by=row.assigned_by,
-        match_score=row.match_score,
-        match_reason=row.match_reason,
-        status=row.status,
-        notes=row.notes,
-        created_at=row.created_at,
-        load=load_to_out(row.load) if row.load else None,
-        vehicle=VehicleOut.model_validate(row.vehicle) if row.vehicle else None,
-    )
-
-
-# ---------- legacy bookings ----------
+    return _assignment_out(row)
 
 
 @app.post("/v1/bookings", response_model=BookingOut, status_code=201)
-def create_booking(body: BookingCreate, db: Session = Depends(get_db)) -> BookingEnquiry:
-    """Compat: also creates a LoadRequest so admin desk sees it."""
+def create_booking(
+    body: BookingCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> BookingEnquiry:
+    enforce_public_write(request, "bookings")
     enquiry = BookingEnquiry(
         name=body.name.strip(),
         phone=body.phone.strip(),
@@ -762,7 +587,11 @@ def create_booking(body: BookingCreate, db: Session = Depends(get_db)) -> Bookin
 
 
 @app.get("/v1/bookings", response_model=list[BookingOut])
-def list_bookings(limit: int = 50, db: Session = Depends(get_db)) -> list[BookingEnquiry]:
+def list_bookings(
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_admin),
+) -> list[BookingEnquiry]:
     limit = max(1, min(limit, 200))
     return (
         db.query(BookingEnquiry)
@@ -773,14 +602,15 @@ def list_bookings(limit: int = 50, db: Session = Depends(get_db)) -> list[Bookin
 
 
 @app.get("/v1/bookings/{booking_id}", response_model=BookingOut)
-def get_booking(booking_id: int, db: Session = Depends(get_db)) -> BookingEnquiry:
+def get_booking(
+    booking_id: int,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_admin),
+) -> BookingEnquiry:
     row = db.get(BookingEnquiry, booking_id)
     if not row:
         raise HTTPException(status_code=404, detail="Booking not found")
     return row
-
-
-# ---------- static SPA ----------
 
 
 if STATIC_DIR.exists():

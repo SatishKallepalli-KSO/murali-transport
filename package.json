@@ -11,7 +11,9 @@
     "dev:web": "npm run dev --workspace=@murali-transport/web",
     "build": "npm run build --workspace=@murali-transport/web",
     "preview": "npm run preview --workspace=@murali-transport/web",
-    "lint": "npm run lint --workspace=@murali-transport/web"
+    "lint": "npm run lint --workspace=@murali-transport/web",
+    "typecheck": "npm run build --workspace=@murali-transport/web",
+    "test:api": "cd apps/api && python3 -m pytest -q"
   },
   "engines": {
     "node": ">=20"

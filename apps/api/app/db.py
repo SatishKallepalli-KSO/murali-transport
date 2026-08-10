@@ -1,4 +1,4 @@
-"""SQLite / Postgres persistence for freight booking enquiries."""
+"""Alembic migrations + create_all safety net for existing Neon DBs."""
 
 from __future__ import annotations
 
@@ -13,7 +13,6 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATA_DIR / 'murali.db'}")
 
-# Render/Postgres URLs sometimes use postgres://
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
@@ -35,7 +34,6 @@ def get_db():
 
 
 def _ensure_column(table: str, column: str, ddl: str) -> None:
-    """Add a missing column on existing tables (create_all won't alter)."""
     insp = inspect(engine)
     if table not in insp.get_table_names():
         return
@@ -46,9 +44,33 @@ def _ensure_column(table: str, column: str, ddl: str) -> None:
         conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {ddl}"))
 
 
+def run_migrations() -> None:
+    """Apply Alembic migrations when alembic is available."""
+    try:
+        from alembic import command
+        from alembic.config import Config
+    except ImportError:
+        return
+
+    root = Path(__file__).resolve().parent.parent
+    ini = root / "alembic.ini"
+    if not ini.exists():
+        return
+    cfg = Config(str(ini))
+    cfg.set_main_option("sqlalchemy.url", DATABASE_URL)
+    command.upgrade(cfg, "head")
+
+
 def init_db() -> None:
     from app import models  # noqa: F401
 
+    # Prefer Alembic; keep create_all for first boot / legacy DBs.
+    try:
+        run_migrations()
+    except Exception:
+        # Existing Neon DBs may already have tables before alembic_version —
+        # fall through to create_all / column ensure.
+        pass
     Base.metadata.create_all(bind=engine)
     _ensure_column("vehicles", "driver_name", "driver_name VARCHAR(120) DEFAULT ''")
     _ensure_column("vehicles", "driver_phone", "driver_phone VARCHAR(32) DEFAULT ''")

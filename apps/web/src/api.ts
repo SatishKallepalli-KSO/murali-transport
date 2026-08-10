@@ -1,4 +1,4 @@
-const apiBase = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
+const apiBase = import.meta.env.VITE_API_BASE ?? ''
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${apiBase}${path}`, {
@@ -19,6 +19,10 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(detail || `Request failed (${res.status})`)
   }
   return res.json() as Promise<T>
+}
+
+function authHeaders(token?: string): HeadersInit | undefined {
+  return token ? { Authorization: `Bearer ${token}` } : undefined
 }
 
 export type Stats = {
@@ -92,17 +96,23 @@ export type Assignment = {
 
 export const fetchStats = () => api<Stats>('/v1/stats')
 export const fetchActivity = () => api<ActivityItem[]>('/v1/activity?limit=16')
-export const fetchVehicles = (status?: string, limit = 500) => {
+
+export const fetchVehicles = (status?: string, limit = 500, token?: string) => {
   const params = new URLSearchParams()
   if (status) params.set('status', status)
   params.set('limit', String(limit))
-  return api<Vehicle[]>(`/v1/vehicles?${params}`)
+  return api<Vehicle[]>(`/v1/vehicles?${params}`, {
+    headers: authHeaders(token),
+  })
 }
-export const fetchLoads = (status?: string, limit = 500) => {
+
+export const fetchLoads = (status?: string, limit = 500, token?: string) => {
   const params = new URLSearchParams()
   if (status) params.set('status', status)
   params.set('limit', String(limit))
-  return api<Load[]>(`/v1/loads?${params}`)
+  return api<Load[]>(`/v1/loads?${params}`, {
+    headers: authHeaders(token),
+  })
 }
 
 export const registerVehicle = (body: Record<string, unknown>) =>
@@ -115,6 +125,12 @@ export const adminLogin = (pin: string) =>
   api<{ access_token: string }>('/v1/admin/login', {
     method: 'POST',
     body: JSON.stringify({ pin }),
+  })
+
+export const adminLogout = (token: string) =>
+  api<Record<string, string>>('/v1/admin/logout', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
   })
 
 export const fetchSuggestions = (loadId: number, token: string) =>

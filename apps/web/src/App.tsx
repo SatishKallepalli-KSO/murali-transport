@@ -1,6 +1,7 @@
-import { useDeferredValue, useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import {
   adminLogin,
+  adminLogout,
   assignLoad,
   completeAssignment,
   createLoad,
@@ -16,10 +17,39 @@ import {
   type Vehicle,
   type VehicleSuggestion,
 } from './api'
-import { address, business, routeCities, routeLinks, t, testimonials, type Lang } from './content'
+import { PhoneLinks } from './components/PhoneLinks'
+import { address, business, t, type Lang } from './content'
+import { AdminPortal, type AdminTab } from './portals/AdminPortal'
+import { AboutPortal } from './portals/AboutPortal'
+import { HomePortal } from './portals/HomePortal'
+import { OwnerPortal } from './portals/OwnerPortal'
+import { RequestPortal } from './portals/RequestPortal'
 
 type Portal = 'home' | 'request' | 'owner' | 'admin' | 'about'
-type AdminTab = 'snapshot' | 'loads' | 'match' | 'fleet' | 'assign'
+
+const ADMIN_TOKEN_KEY = 'murali_admin_token'
+
+function readAdminToken(): string {
+  const fromSession = sessionStorage.getItem(ADMIN_TOKEN_KEY)
+  if (fromSession) return fromSession
+  const fromLocal = localStorage.getItem(ADMIN_TOKEN_KEY)
+  if (fromLocal) {
+    sessionStorage.setItem(ADMIN_TOKEN_KEY, fromLocal)
+    localStorage.removeItem(ADMIN_TOKEN_KEY)
+    return fromLocal
+  }
+  return ''
+}
+
+function writeAdminToken(token: string) {
+  sessionStorage.setItem(ADMIN_TOKEN_KEY, token)
+  localStorage.removeItem(ADMIN_TOKEN_KEY)
+}
+
+function clearAdminToken() {
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY)
+  localStorage.removeItem(ADMIN_TOKEN_KEY)
+}
 
 const emptyLoad = {
   requestor_name: '',
@@ -45,61 +75,6 @@ const emptyVehicle = {
   notes: '',
 }
 
-function PhoneLinks({ className }: { className?: string }) {
-  return (
-    <span className={className ? `phone-links ${className}` : 'phone-links'}>
-      <a href={`tel:${business.phone}`}>{business.phoneDisplay}</a>
-      <span aria-hidden="true"> · </span>
-      <a href={`tel:${business.phoneAlt}`}>{business.phoneAltDisplay}</a>
-    </span>
-  )
-}
-
-function waHref(lang: Lang) {
-  const text =
-    lang === 'te'
-      ? `నమస్కారం, ${business.shortName} (దొమ్మేరు) నుండి లారీ/ట్రక్ బుక్ చేయాలనుకుంటున్నాను.`
-      : `Namaste, I want to book a mini lorry / truck from ${business.shortName} (Dommeru).`
-  return `https://wa.me/${business.whatsapp}?text=${encodeURIComponent(text)}`
-}
-
-function todayISO() {
-  const d = new Date()
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
-function statusBadge(status: string, labels: { open: string; available: string; assigned: string }) {
-  const key = status.toLowerCase()
-  if (key === 'open') return labels.open
-  if (key === 'available') return labels.available
-  if (key === 'assigned') return labels.assigned
-  return status
-}
-
-const ADMIN_PAGE_SIZE = 8
-
-function matchesQuery(parts: Array<string | number | null | undefined>, query: string) {
-  const q = query.trim().toLowerCase()
-  if (!q) return true
-  return parts.some((part) => String(part ?? '').toLowerCase().includes(q))
-}
-
-function paginateItems<T>(items: T[], page: number, pageSize = ADMIN_PAGE_SIZE) {
-  const total = items.length
-  const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1)
-  const safePage = Math.min(Math.max(1, page), totalPages)
-  const start = (safePage - 1) * pageSize
-  return {
-    total,
-    totalPages,
-    page: safePage,
-    items: items.slice(start, start + pageSize),
-  }
-}
-
 export default function App() {
   const [lang, setLang] = useState<Lang>(() => {
     const saved = localStorage.getItem('murali_lang')
@@ -118,9 +93,7 @@ export default function App() {
   const [findType, setFindType] = useState('any')
 
   const [adminPin, setAdminPin] = useState('')
-  const [adminToken, setAdminToken] = useState(
-    () => localStorage.getItem('murali_admin_token') ?? '',
-  )
+  const [adminToken, setAdminToken] = useState(readAdminToken)
   const [openLoads, setOpenLoads] = useState<Load[]>([])
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [assignments, setAssignments] = useState<Assignment[]>([])
@@ -128,175 +101,8 @@ export default function App() {
   const [suggestions, setSuggestions] = useState<VehicleSuggestion[]>([])
   const [busy, setBusy] = useState(false)
   const [adminTab, setAdminTab] = useState<AdminTab>('snapshot')
-  const [loadSearch, setLoadSearch] = useState('')
-  const [fleetSearch, setFleetSearch] = useState('')
-  const [assignSearch, setAssignSearch] = useState('')
-  const [matchSearch, setMatchSearch] = useState('')
-  const [loadPage, setLoadPage] = useState(1)
-  const [fleetPage, setFleetPage] = useState(1)
-  const [assignPage, setAssignPage] = useState(1)
-  const [matchPage, setMatchPage] = useState(1)
-
-  const deferredLoadSearch = useDeferredValue(loadSearch)
-  const deferredFleetSearch = useDeferredValue(fleetSearch)
-  const deferredAssignSearch = useDeferredValue(assignSearch)
-  const deferredMatchSearch = useDeferredValue(matchSearch)
-
-  const openLoadRows = useMemo(
-    () => openLoads.filter((l) => l.status === 'open'),
-    [openLoads],
-  )
-  const openLoadCount = openLoadRows.length
-  const availableVehicleCount = vehicles.filter((v) => v.status === 'available').length
-  const activeTripCount = assignments.filter((a) => a.status === 'assigned').length
-
-  const filteredLoads = useMemo(
-    () =>
-      openLoadRows.filter((load) =>
-        matchesQuery(
-          [
-            load.id,
-            load.pickup,
-            load.dropoff,
-            load.cargo,
-            load.requestor_name,
-            load.requestor_phone,
-            load.preferred_date,
-            load.vehicle_preference,
-          ],
-          deferredLoadSearch,
-        ),
-      ),
-    [openLoadRows, deferredLoadSearch],
-  )
-  const filteredVehicles = useMemo(
-    () =>
-      vehicles.filter((v) =>
-        matchesQuery(
-          [
-            v.plate_number,
-            v.owner_name,
-            v.owner_phone,
-            v.driver_name,
-            v.driver_phone,
-            v.current_location,
-            v.vehicle_type,
-            v.status,
-          ],
-          deferredFleetSearch,
-        ),
-      ),
-    [vehicles, deferredFleetSearch],
-  )
-  const filteredAssignments = useMemo(
-    () =>
-      assignments.filter((a) =>
-        matchesQuery(
-          [
-            a.id,
-            a.load_id,
-            a.status,
-            a.match_reason,
-            a.vehicle?.plate_number,
-            a.load?.pickup,
-            a.load?.dropoff,
-            a.load?.requestor_name,
-          ],
-          deferredAssignSearch,
-        ),
-      ),
-    [assignments, deferredAssignSearch],
-  )
-  const filteredSuggestions = useMemo(
-    () =>
-      suggestions.filter((s) =>
-        matchesQuery(
-          [
-            s.vehicle.plate_number,
-            s.vehicle.owner_name,
-            s.vehicle.owner_phone,
-            s.vehicle.driver_name,
-            s.vehicle.driver_phone,
-            s.vehicle.current_location,
-            s.vehicle.vehicle_type,
-            s.match_reason,
-          ],
-          deferredMatchSearch,
-        ),
-      ),
-    [suggestions, deferredMatchSearch],
-  )
-
-  const pagedLoads = useMemo(() => paginateItems(filteredLoads, loadPage), [filteredLoads, loadPage])
-  const pagedVehicles = useMemo(
-    () => paginateItems(filteredVehicles, fleetPage),
-    [filteredVehicles, fleetPage],
-  )
-  const pagedAssignments = useMemo(
-    () => paginateItems(filteredAssignments, assignPage),
-    [filteredAssignments, assignPage],
-  )
-  const pagedSuggestions = useMemo(
-    () => paginateItems(filteredSuggestions, matchPage),
-    [filteredSuggestions, matchPage],
-  )
-
-  useEffect(() => setLoadPage(1), [deferredLoadSearch])
-  useEffect(() => setFleetPage(1), [deferredFleetSearch])
-  useEffect(() => setAssignPage(1), [deferredAssignSearch])
-  useEffect(() => setMatchPage(1), [deferredMatchSearch, selectedLoadId])
 
   const tx = (key: Parameters<typeof t>[1]) => t(lang, key)
-
-  function listMeta(total: number, page: number, totalPages: number) {
-    return tx('listShowing')
-      .replace('{total}', String(total))
-      .replace('{page}', String(page))
-      .replace('{pages}', String(totalPages))
-  }
-
-  function renderListControls(opts: {
-    value: string
-    onChange: (value: string) => void
-    placeholder: string
-    page: number
-    totalPages: number
-    total: number
-    onPage: (page: number) => void
-  }) {
-    return (
-      <div className="list-controls">
-        <label className="list-search">
-          <span className="sr-only">{tx('searchLabel')}</span>
-          <input
-            type="search"
-            value={opts.value}
-            placeholder={opts.placeholder}
-            onChange={(e) => opts.onChange(e.target.value)}
-          />
-        </label>
-        <div className="list-pager">
-          <span>{listMeta(opts.total, opts.page, opts.totalPages)}</span>
-          <button
-            type="button"
-            className="btn btn-ghost"
-            disabled={opts.page <= 1}
-            onClick={() => opts.onPage(opts.page - 1)}
-          >
-            {tx('prevPage')}
-          </button>
-          <button
-            type="button"
-            className="btn btn-ghost"
-            disabled={opts.page >= opts.totalPages}
-            onClick={() => opts.onPage(opts.page + 1)}
-          >
-            {tx('nextPage')}
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   function switchLang(next: Lang) {
     setLang(next)
@@ -325,8 +131,8 @@ export default function App() {
 
   async function refreshAdmin(token: string) {
     const [loads, fleet, assigns] = await Promise.all([
-      fetchLoads(),
-      fetchVehicles(),
+      fetchLoads(undefined, 500, token),
+      fetchVehicles(undefined, 500, token),
       fetchAssignments(token),
     ])
     setOpenLoads(loads)
@@ -345,7 +151,7 @@ export default function App() {
     void refreshAdmin(adminToken).catch((err) => {
       setError(err instanceof Error ? err.message : 'Admin session expired')
       setAdminToken('')
-      localStorage.removeItem('murali_admin_token')
+      clearAdminToken()
     })
   }, [adminToken, portal])
 
@@ -417,7 +223,7 @@ export default function App() {
     try {
       const { access_token } = await adminLogin(adminPin)
       setAdminToken(access_token)
-      localStorage.setItem('murali_admin_token', access_token)
+      writeAdminToken(access_token)
       setAdminPin('')
       setMessage(lang === 'te' ? 'అడ్మిన్ డెస్క్ అన్‌లాక్ అయింది.' : 'Admin desk unlocked.')
       await refreshAdmin(access_token)
@@ -474,22 +280,17 @@ export default function App() {
   }
 
   function logoutAdmin() {
+    if (adminToken) {
+      void adminLogout(adminToken).catch(() => {
+        /* fire-and-forget */
+      })
+    }
     setAdminToken('')
-    localStorage.removeItem('murali_admin_token')
+    clearAdminToken()
     setSelectedLoadId(null)
     setSuggestions([])
     setAdminTab('snapshot')
   }
-
-  const services = [
-    { title: tx('service1Title'), body: tx('service1Body') },
-    { title: tx('service2Title'), body: tx('service2Body') },
-    { title: tx('service3Title'), body: tx('service3Body') },
-    { title: tx('service4Title'), body: tx('service4Body') },
-  ]
-
-  const cityById = Object.fromEntries(routeCities.map((c) => [c.id, c]))
-  const majorCities = routeCities.filter((c) => c.major)
 
   return (
     <div className={`site lang-${lang}`}>
@@ -565,942 +366,64 @@ export default function App() {
         )}
 
         {portal === 'home' && (
-          <>
-            <section className="hero hero-scenic" aria-label="Murali Transport Office">
-              <div className="hero-scenic-bg" aria-hidden="true">
-                <img
-                  src="/eicher-highway-hero.jpg"
-                  alt="Eicher lorry on the highway — Murali Transport Office Dommeru"
-                />
-              </div>
-              <div className="hero-scenic-shade" aria-hidden="true" />
-              <div className="hero-copy hero-copy-on-media">
-                <p className="hero-kicker">{tx('heroKicker')}</p>
-                <p className="hero-sub">{tx('heroSub')}</p>
-                <h1 className="hero-name">{tx('heroBrand')}</h1>
-                <p className="hero-tagline">{tx('heroTagline')}</p>
-                <div className="hero-actions">
-                  <button type="button" className="btn btn-primary" onClick={() => setPortal('request')}>
-                    {tx('ctaPostLoad')}
-                  </button>
-                  <button type="button" className="btn btn-light" onClick={() => setPortal('owner')}>
-                    {tx('ctaRegister')}
-                  </button>
-                  <a className="btn btn-ghost-light" href={`tel:${business.phone}`}>
-                    {tx('callNow')}
-                  </a>
-                </div>
-              </div>
-            </section>
-
-            <section className="market-pulse" aria-label="Market pulse">
-              <p className="market-pulse-label">
-                <span className="pulse-dot" aria-hidden="true" />
-                {tx('marketPulse')}
-              </p>
-              <div className="market-pulse-grid">
-                <div>
-                  <strong>{stats?.available_vehicles ?? publicVehicles.length}</strong>
-                  <span>{tx('snapAvailable')}</span>
-                </div>
-                <div>
-                  <strong>{stats?.open_loads ?? publicLoads.length}</strong>
-                  <span>{tx('snapOpen')}</span>
-                </div>
-                <div>
-                  <strong>{stats?.assignments ?? 0}</strong>
-                  <span>{tx('snapAssigned')}</span>
-                </div>
-                <div>
-                  <strong>{stats?.vehicles ?? '—'}</strong>
-                  <span>{tx('snapFleet')}</span>
-                </div>
-              </div>
-            </section>
-
-            <section className="role-paths" aria-label="Audience paths">
-              <div className="section-head">
-                <h2>{tx('roleTitle')}</h2>
-              </div>
-              <div className="role-grid">
-                <button type="button" className="role-tile role-shipper" onClick={() => setPortal('request')}>
-                  <span className="role-index">01</span>
-                  <strong>{tx('roleShipperTitle')}</strong>
-                  <span>{tx('roleShipperBody')}</span>
-                </button>
-                <button type="button" className="role-tile role-carrier" onClick={() => setPortal('owner')}>
-                  <span className="role-index">02</span>
-                  <strong>{tx('roleCarrierTitle')}</strong>
-                  <span>{tx('roleCarrierBody')}</span>
-                </button>
-                <a className="role-tile role-office" href={`tel:${business.phone}`}>
-                  <span className="role-index">03</span>
-                  <strong>{tx('roleOfficeTitle')}</strong>
-                  <span>{tx('roleOfficeBody')}</span>
-                </a>
-              </div>
-            </section>
-
-            <section className="find-bar" aria-label="Quick find">
-              <h2>{tx('findTitle')}</h2>
-              <form
-                className="find-form"
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  setLoadForm((prev) => ({
-                    ...prev,
-                    pickup: findPickup || prev.pickup,
-                    vehicle_preference: findType,
-                  }))
-                  setPortal('request')
-                }}
-              >
-                <label>
-                  {tx('findPickupLabel')}
-                  <input
-                    value={findPickup}
-                    placeholder={tx('findPickupPh')}
-                    onChange={(e) => setFindPickup(e.target.value)}
-                  />
-                </label>
-                <label>
-                  {tx('findEquipLabel')}
-                  <select value={findType} onChange={(e) => setFindType(e.target.value)}>
-                    <option value="any">{tx('any')}</option>
-                    <option value="mini_lorry">{tx('mini')}</option>
-                    <option value="truck">{tx('truck')}</option>
-                    <option value="part_load">{tx('partLoad')}</option>
-                  </select>
-                </label>
-                <button className="btn btn-primary" type="submit">
-                  {tx('findBtn')}
-                </button>
-              </form>
-            </section>
-
-            <section className="live-board" id="live" aria-label="Live availability">
-              <div className="section-head live-board-head">
-                <h2>{tx('liveBoardTitle')}</h2>
-                <p>{tx('liveBoardIntro')}</p>
-              </div>
-              <div className="live-board-grid">
-                <div className="live-column live-lorries">
-                  <header className="live-column-head">
-                    <div>
-                      <p className="live-kicker">{tx('availableBadge')}</p>
-                      <h3>{tx('liveLorriesTitle')}</h3>
-                    </div>
-                    <span className="live-count">{publicVehicles.length}</span>
-                  </header>
-                  <div className="board-table" role="table" aria-label={tx('liveLorriesTitle')}>
-                    <div className="board-head" role="row">
-                      <span role="columnheader">{tx('liveColPlate')}</span>
-                      <span role="columnheader">{tx('liveColLoc')}</span>
-                      <span role="columnheader">{tx('liveColCap')}</span>
-                      <span role="columnheader">{tx('liveColType')}</span>
-                    </div>
-                    {publicVehicles.slice(0, 6).map((v, index) => (
-                      <div
-                        className="board-row"
-                        role="row"
-                        key={v.id}
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <strong role="cell">{v.plate_number}</strong>
-                        <span role="cell">{v.current_location}</span>
-                        <span role="cell">{v.capacity_tons}t</span>
-                        <span role="cell">{v.vehicle_type.replace(/_/g, ' ')}</span>
-                      </div>
-                    ))}
-                    {publicVehicles.length === 0 && (
-                      <p className="live-empty">{tx('liveEmptyLorries')}</p>
-                    )}
-                  </div>
-                  <div className="live-cta">
-                    <p>{tx('liveHaveLorry')}</p>
-                    <button type="button" className="btn btn-dark" onClick={() => setPortal('owner')}>
-                      {tx('ctaRegister')}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="live-column live-loads">
-                  <header className="live-column-head">
-                    <div>
-                      <p className="live-kicker">{tx('openBadge')}</p>
-                      <h3>{tx('liveLoadsTitle')}</h3>
-                    </div>
-                    <span className="live-count">{publicLoads.length}</span>
-                  </header>
-                  <div className="board-table" role="table" aria-label={tx('liveLoadsTitle')}>
-                    <div className="board-head" role="row">
-                      <span role="columnheader">{tx('liveColRoute')}</span>
-                      <span role="columnheader">{tx('liveColCargo')}</span>
-                      <span role="columnheader">{tx('liveColCap')}</span>
-                      <span role="columnheader">{tx('liveColWhen')}</span>
-                    </div>
-                    {publicLoads.slice(0, 6).map((load, index) => (
-                      <div
-                        className="board-row"
-                        role="row"
-                        key={load.id}
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <strong role="cell">
-                          {load.pickup} → {load.dropoff}
-                        </strong>
-                        <span role="cell">{load.cargo}</span>
-                        <span role="cell">{load.weight_tons}t</span>
-                        <span role="cell">{load.preferred_date || '—'}</span>
-                      </div>
-                    ))}
-                    {publicLoads.length === 0 && (
-                      <p className="live-empty">{tx('liveEmptyLoads')}</p>
-                    )}
-                  </div>
-                  <div className="live-cta">
-                    <p>{tx('liveWantLorry')}</p>
-                    <button type="button" className="btn btn-primary" onClick={() => setPortal('request')}>
-                      {tx('ctaPostLoad')}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className="section" id="services">
-              <div className="section-head">
-                <h2>{tx('servicesTitle')}</h2>
-                <p>{tx('servicesIntro')}</p>
-              </div>
-              <div className="service-grid">
-                {services.map((service) => (
-                  <article key={service.title} className="service-item">
-                    <h3>{service.title}</h3>
-                    <p>{service.body}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-
-            <section className="fleet-band" aria-label="Fleet highlight">
-              <img src="/eicher-lorry.png" alt="Eicher lorry" />
-              <div>
-                <p className="fleet-kicker">Eicher · Mini lorry & truck</p>
-                <h2>{tx('fleetTitle')}</h2>
-                <p>{tx('fleetBody')}</p>
-              </div>
-            </section>
-
-            <section className="routes-map" id="routes" aria-label="Service routes">
-              <div className="routes-map-layout">
-                <div className="routes-copy">
-                  <div className="section-head">
-                    <h2>{tx('routesTitle')}</h2>
-                    <p>{tx('routesIntro')}</p>
-                  </div>
-                  <p className="routes-hub-label">{tx('routesHub')}</p>
-                  <p className="routes-hub-name">Dommeru</p>
-                  <p className="routes-cover-label">{tx('routesCover')}</p>
-                  <ul className="routes-city-list">
-                    {majorCities.map((city) => (
-                      <li key={city.id}>{lang === 'te' ? city.te : city.en}</li>
-                    ))}
-                  </ul>
-                  <p className="routes-note">{tx('routesNote')}</p>
-                  <div className="location-actions">
-                    <a className="btn btn-primary" href={business.mapsShareUrl} target="_blank" rel="noreferrer">
-                      {tx('ctaDirections')}
-                    </a>
-                    <a className="btn btn-ghost" href={`tel:${business.phone}`}>
-                      {tx('callNow')}
-                    </a>
-                  </div>
-                </div>
-
-                <div className="routes-canvas" role="img" aria-label={tx('routesTitle')}>
-                  <svg viewBox="0 0 860 560" className="routes-svg">
-                    <defs>
-                      <linearGradient id="routeRoad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#ef8b2e" stopOpacity="0.95" />
-                        <stop offset="100%" stopColor="#1f6feb" stopOpacity="0.85" />
-                      </linearGradient>
-                      <radialGradient id="routeGlow" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="#ffc57a" stopOpacity="0.35" />
-                        <stop offset="100%" stopColor="#0b2a4a" stopOpacity="0" />
-                      </radialGradient>
-                    </defs>
-                    <rect width="860" height="560" rx="0" fill="#0b2a4a" />
-                    <circle cx="500" cy="220" r="150" fill="url(#routeGlow)" />
-                    <path
-                      className="routes-river"
-                      d="M 120 90 C 260 140, 360 100, 500 150 S 700 130, 820 170"
-                      fill="none"
-                      stroke="rgba(125, 211, 252, 0.28)"
-                      strokeWidth="16"
-                      strokeLinecap="round"
-                    />
-                    {routeLinks.map(([fromId, toId]) => {
-                      const from = cityById[fromId]
-                      const to = cityById[toId]
-                      if (!from || !to) return null
-                      return (
-                        <line
-                          key={`${fromId}-${toId}`}
-                          className="routes-link"
-                          x1={from.x}
-                          y1={from.y}
-                          x2={to.x}
-                          y2={to.y}
-                          stroke="url(#routeRoad)"
-                          strokeWidth="3"
-                          strokeDasharray="8 10"
-                        />
-                      )
-                    })}
-                    {routeCities.map((city) => (
-                      <g
-                        key={city.id}
-                        className={[
-                          'routes-node',
-                          city.hub ? 'hub' : '',
-                          city.major ? 'major' : '',
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
-                      >
-                        <circle
-                          cx={city.x}
-                          cy={city.y}
-                          r={city.hub ? 16 : city.major ? 11 : 7}
-                          fill={city.hub ? '#ef8b2e' : city.major ? '#ffc57a' : '#9ec5ff'}
-                          stroke="#fff"
-                          strokeWidth={city.hub || city.major ? 3 : 2}
-                        />
-                        {city.hub ? (
-                          <circle
-                            cx={city.x}
-                            cy={city.y}
-                            r="26"
-                            fill="none"
-                            stroke="#ef8b2e"
-                            strokeOpacity="0.45"
-                            strokeWidth="2"
-                            className="routes-hub-ring"
-                          />
-                        ) : null}
-                        <text
-                          x={city.x}
-                          y={city.y + (city.hub ? 36 : city.major ? 30 : 22)}
-                          textAnchor="middle"
-                          className="routes-label"
-                        >
-                          {lang === 'te' ? city.te : city.en}
-                        </text>
-                      </g>
-                    ))}
-                  </svg>
-                </div>
-              </div>
-            </section>
-
-            <section className="section">
-              <div className="section-head">
-                <h2>{tx('howTitle')}</h2>
-                <p>{tx('howIntro')}</p>
-              </div>
-              <ol className="steps">
-                <li className="step">
-                  <span className="step-num">01</span>
-                  <div>
-                    <h3>{tx('how1Title')}</h3>
-                    <p>{tx('how1Body')}</p>
-                  </div>
-                </li>
-                <li className="step">
-                  <span className="step-num">02</span>
-                  <div>
-                    <h3>{tx('how2Title')}</h3>
-                    <p>{tx('how2Body')}</p>
-                  </div>
-                </li>
-                <li className="step">
-                  <span className="step-num">03</span>
-                  <div>
-                    <h3>{tx('how3Title')}</h3>
-                    <p>{tx('how3Body')}</p>
-                  </div>
-                </li>
-              </ol>
-            </section>
-
-            <section className="section testimonials" aria-label="Customer testimonials">
-              <div className="section-head">
-                <h2>{tx('testimonialsTitle')}</h2>
-                <p>{tx('testimonialsIntro')}</p>
-              </div>
-              <div className="testimonial-marquee" aria-live="off">
-                <div className="testimonial-track">
-                  {[...testimonials[lang], ...testimonials[lang]].map((item, index) => (
-                    <figure className="testimonial-card" key={`${item.name}-${index}`}>
-                      <blockquote>{item.quote}</blockquote>
-                      <figcaption>
-                        <strong>{item.name}</strong>
-                        <span>
-                          {item.role} · {item.place}
-                        </span>
-                      </figcaption>
-                    </figure>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            <section className="section section-alt about-preview">
-              <div className="section-head">
-                <h2>{tx('aboutTitle')}</h2>
-                <p>{tx('aboutIntro')}</p>
-              </div>
-              <dl className="about-facts">
-                <div>
-                  <dt>{tx('aboutOwnerLabel')}</dt>
-                  <dd>{business.owner}</dd>
-                </div>
-                <div>
-                  <dt>{tx('aboutPhoneLabel')}</dt>
-                  <dd>
-                    <PhoneLinks />
-                  </dd>
-                </div>
-                <div>
-                  <dt>{tx('aboutAddressLabel')}</dt>
-                  <dd>{address.line}</dd>
-                </div>
-              </dl>
-              <div className="location-actions">
-                <button type="button" className="btn btn-primary" onClick={() => setPortal('about')}>
-                  {tx('navAbout')}
-                </button>
-                <a className="btn btn-ghost" href={business.mapsShareUrl} target="_blank" rel="noreferrer">
-                  {tx('ctaDirections')}
-                </a>
-              </div>
-            </section>
-          </>
+          <HomePortal
+            lang={lang}
+            tx={tx}
+            stats={stats}
+            publicVehicles={publicVehicles}
+            publicLoads={publicLoads}
+            findPickup={findPickup}
+            setFindPickup={setFindPickup}
+            findType={findType}
+            setFindType={setFindType}
+            setLoadForm={setLoadForm}
+            setPortal={setPortal}
+          />
         )}
 
-        {portal === 'about' && (
-          <section className="portal about-page">
-            <div className="section-head">
-              <h2>{tx('aboutTitle')}</h2>
-              <p>{tx('aboutIntro')}</p>
-            </div>
-            <div className="about-layout">
-              <div className="about-card">
-                <dl className="about-facts">
-                  <div>
-                    <dt>{tx('aboutOwnerLabel')}</dt>
-                    <dd>{business.owner}</dd>
-                  </div>
-                  <div>
-                    <dt>{tx('aboutPhoneLabel')}</dt>
-                    <dd>
-                      <PhoneLinks />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>{tx('aboutAddressLabel')}</dt>
-                    <dd>{address.line}</dd>
-                  </div>
-                  <div>
-                    <dt>{tx('aboutHoursLabel')}</dt>
-                    <dd>{tx('aboutHoursValue')}</dd>
-                  </div>
-                  <div>
-                    <dt>Google</dt>
-                    <dd>
-                      {business.rating}★ · {business.reviewCount} reviews
-                    </dd>
-                  </div>
-                </dl>
-                <p className="about-body">{tx('aboutBody')}</p>
-                <div className="location-actions">
-                  <a className="btn btn-primary" href={`tel:${business.phone}`}>
-                    {tx('callNow')}
-                  </a>
-                  <a className="btn btn-ghost" href={waHref(lang)} target="_blank" rel="noreferrer">
-                    {tx('whatsapp')}
-                  </a>
-                  <a className="btn btn-ghost" href={business.mapsShareUrl} target="_blank" rel="noreferrer">
-                    {tx('ctaDirections')}
-                  </a>
-                </div>
-              </div>
-              <img className="about-photo" src="/eicher-lorry.png" alt="Office fleet lorry" />
-            </div>
-          </section>
-        )}
+        {portal === 'about' && <AboutPortal lang={lang} tx={tx} />}
 
         {portal === 'request' && (
-          <section className="portal">
-            <div className="section-head">
-              <h2>{tx('postTitle')}</h2>
-              <p>{tx('postIntro')}</p>
-            </div>
-            <form className="panel-form" onSubmit={onCreateLoad}>
-              <label>
-                {tx('name')}
-                <input required value={loadForm.requestor_name} onChange={(e) => setLoadForm({ ...loadForm, requestor_name: e.target.value })} />
-              </label>
-              <label>
-                {tx('phone')}
-                <input required value={loadForm.requestor_phone} onChange={(e) => setLoadForm({ ...loadForm, requestor_phone: e.target.value })} />
-              </label>
-              <label>
-                {tx('pickup')}
-                <input required value={loadForm.pickup} onChange={(e) => setLoadForm({ ...loadForm, pickup: e.target.value })} placeholder="Dommeru" />
-              </label>
-              <label>
-                {tx('dropoff')}
-                <input required value={loadForm.dropoff} onChange={(e) => setLoadForm({ ...loadForm, dropoff: e.target.value })} />
-              </label>
-              <label>
-                {tx('cargo')}
-                <input required value={loadForm.cargo} onChange={(e) => setLoadForm({ ...loadForm, cargo: e.target.value })} />
-              </label>
-              <label>
-                {tx('weight')}
-                <input required type="number" min="0.1" step="0.1" value={loadForm.weight_tons} onChange={(e) => setLoadForm({ ...loadForm, weight_tons: e.target.value })} />
-              </label>
-              <label>
-                {tx('vehiclePref')}
-                <select value={loadForm.vehicle_preference} onChange={(e) => setLoadForm({ ...loadForm, vehicle_preference: e.target.value })}>
-                  <option value="any">{tx('any')}</option>
-                  <option value="mini_lorry">{tx('mini')}</option>
-                  <option value="truck">{tx('truck')}</option>
-                  <option value="part_load">{tx('partLoad')}</option>
-                </select>
-              </label>
-              <label>
-                {tx('preferredDate')}
-                <input
-                  type="date"
-                  min={todayISO()}
-                  value={loadForm.preferred_date}
-                  onChange={(e) => setLoadForm({ ...loadForm, preferred_date: e.target.value })}
-                />
-              </label>
-              <label className="span-2">
-                {tx('notes')}
-                <textarea rows={3} value={loadForm.notes} onChange={(e) => setLoadForm({ ...loadForm, notes: e.target.value })} />
-              </label>
-              <div className="form-actions span-2">
-                <button className="btn btn-primary" type="submit" disabled={busy}>
-                  {busy ? tx('posting') : tx('submitLoad')}
-                </button>
-                <a className="btn btn-ghost" href={`tel:${business.phone}`}>
-                  {tx('callNow')}
-                </a>
-              </div>
-            </form>
-          </section>
+          <RequestPortal
+            tx={tx}
+            loadForm={loadForm}
+            setLoadForm={setLoadForm}
+            busy={busy}
+            onCreateLoad={onCreateLoad}
+          />
         )}
 
         {portal === 'owner' && (
-          <section className="portal">
-            <div className="section-head">
-              <h2>{tx('ownerTitle')}</h2>
-              <p>{tx('ownerIntro')}</p>
-            </div>
-            <form className="panel-form" onSubmit={onRegisterVehicle}>
-              <label>
-                {tx('ownerName')}
-                <input required value={vehicleForm.owner_name} onChange={(e) => setVehicleForm({ ...vehicleForm, owner_name: e.target.value })} />
-              </label>
-              <label>
-                {tx('ownerPhone')}
-                <input required value={vehicleForm.owner_phone} onChange={(e) => setVehicleForm({ ...vehicleForm, owner_phone: e.target.value })} />
-              </label>
-              <label>
-                {tx('driverName')}
-                <input required value={vehicleForm.driver_name} onChange={(e) => setVehicleForm({ ...vehicleForm, driver_name: e.target.value })} />
-              </label>
-              <label>
-                {tx('driverPhone')}
-                <input required value={vehicleForm.driver_phone} onChange={(e) => setVehicleForm({ ...vehicleForm, driver_phone: e.target.value })} />
-              </label>
-              <label>
-                {tx('plate')}
-                <input required value={vehicleForm.plate_number} onChange={(e) => setVehicleForm({ ...vehicleForm, plate_number: e.target.value })} placeholder="AP39XX1234" />
-              </label>
-              <label>
-                {tx('vehicleType')}
-                <select value={vehicleForm.vehicle_type} onChange={(e) => setVehicleForm({ ...vehicleForm, vehicle_type: e.target.value })}>
-                  <option value="mini_lorry">{tx('mini')}</option>
-                  <option value="truck">{tx('truck')}</option>
-                  <option value="trailer">{tx('trailer')}</option>
-                </select>
-              </label>
-              <label>
-                {tx('capacity')}
-                <input required type="number" min="0.5" step="0.5" value={vehicleForm.capacity_tons} onChange={(e) => setVehicleForm({ ...vehicleForm, capacity_tons: e.target.value })} />
-              </label>
-              <label>
-                {tx('currentLoc')}
-                <input required value={vehicleForm.current_location} onChange={(e) => setVehicleForm({ ...vehicleForm, current_location: e.target.value })} />
-              </label>
-              <label className="span-2">
-                {tx('notes')}
-                <textarea rows={3} value={vehicleForm.notes} onChange={(e) => setVehicleForm({ ...vehicleForm, notes: e.target.value })} />
-              </label>
-              <div className="form-actions span-2">
-                <button className="btn btn-primary" type="submit" disabled={busy}>
-                  {busy ? tx('saving') : tx('registerBtn')}
-                </button>
-              </div>
-            </form>
-          </section>
+          <OwnerPortal
+            tx={tx}
+            vehicleForm={vehicleForm}
+            setVehicleForm={setVehicleForm}
+            busy={busy}
+            onRegisterVehicle={onRegisterVehicle}
+          />
         )}
 
         {portal === 'admin' && (
-          <section className="portal admin-portal">
-            <div className="section-head">
-              <h2>{tx('adminTitle')}</h2>
-              <p>{tx('adminIntro')}</p>
-              <p className="admin-staff-note">{tx('adminStaffNote')}</p>
-            </div>
-
-            {!adminToken ? (
-              <form className="panel-form admin-login" onSubmit={onAdminLogin}>
-                <label className="span-2">
-                  {tx('adminPin')}
-                  <input
-                    required
-                    type="password"
-                    value={adminPin}
-                    onChange={(e) => setAdminPin(e.target.value)}
-                    autoComplete="current-password"
-                  />
-                </label>
-                <div className="form-actions span-2">
-                  <button className="btn btn-primary" type="submit" disabled={busy}>
-                    {busy ? '…' : tx('unlockDesk')}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <>
-                <div className="admin-toolbar">
-                  <p>{tx('deskActive')}</p>
-                  <button type="button" className="btn btn-ghost" onClick={() => void refreshAdmin(adminToken)}>
-                    {tx('refresh')}
-                  </button>
-                  <button type="button" className="btn btn-ghost" onClick={logoutAdmin}>
-                    {tx('lockDesk')}
-                  </button>
-                </div>
-
-                <div className="admin-tabs" role="tablist" aria-label="Admin desk sections">
-                  {(
-                    [
-                      { id: 'snapshot' as const, label: tx('tabSnapshot'), count: null },
-                      { id: 'loads' as const, label: tx('tabLoads'), count: openLoadCount },
-                      { id: 'match' as const, label: tx('tabMatch'), count: selectedLoadId ? suggestions.length : null },
-                      { id: 'fleet' as const, label: tx('tabFleet'), count: vehicles.length },
-                      { id: 'assign' as const, label: tx('tabAssign'), count: assignments.length },
-                    ] as const
-                  ).map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={adminTab === tab.id}
-                      className={`admin-tab tab-${tab.id}${adminTab === tab.id ? ' active' : ''}`}
-                      onClick={() => setAdminTab(tab.id)}
-                    >
-                      <span>{tab.label}</span>
-                      {tab.count != null ? <em>{tab.count}</em> : null}
-                    </button>
-                  ))}
-                </div>
-
-                <div className={`admin-tab-panel theme-${adminTab}`} role="tabpanel">
-                  {adminTab === 'snapshot' && (
-                    <section className="admin-panel panel-snapshot">
-                      <header className="admin-panel-head">
-                        <div>
-                          <p className="admin-panel-kicker">{tx('tabSnapshot')}</p>
-                          <h3>{tx('snapshotTitle')}</h3>
-                          <p className="admin-panel-hint">{tx('snapHint')}</p>
-                        </div>
-                      </header>
-                      <div className="admin-snapshot-grid">
-                        <button type="button" className="snap-tile snap-loads" onClick={() => setAdminTab('loads')}>
-                          <span className="snap-value">{openLoadCount}</span>
-                          <span className="snap-label">{tx('snapOpen')}</span>
-                        </button>
-                        <button type="button" className="snap-tile snap-available" onClick={() => setAdminTab('fleet')}>
-                          <span className="snap-value">{availableVehicleCount}</span>
-                          <span className="snap-label">{tx('snapAvailable')}</span>
-                        </button>
-                        <button type="button" className="snap-tile snap-trips" onClick={() => setAdminTab('assign')}>
-                          <span className="snap-value">{activeTripCount}</span>
-                          <span className="snap-label">{tx('snapAssigned')}</span>
-                        </button>
-                        <button type="button" className="snap-tile snap-fleet" onClick={() => setAdminTab('fleet')}>
-                          <span className="snap-value">{vehicles.length}</span>
-                          <span className="snap-label">{tx('snapFleet')}</span>
-                        </button>
-                      </div>
-                    </section>
-                  )}
-
-                  {adminTab === 'loads' && (
-                    <section className="admin-panel panel-loads">
-                      <header className="admin-panel-head">
-                        <div>
-                          <p className="admin-panel-kicker">{tx('openBadge')}</p>
-                          <h3>{tx('openLoads')}</h3>
-                          <p className="admin-panel-hint">{tx('panelLoadsHint')}</p>
-                        </div>
-                        <span className="admin-count">{openLoadCount}</span>
-                      </header>
-                      {renderListControls({
-                        value: loadSearch,
-                        onChange: setLoadSearch,
-                        placeholder: tx('searchLoads'),
-                        page: pagedLoads.page,
-                        totalPages: pagedLoads.totalPages,
-                        total: pagedLoads.total,
-                        onPage: setLoadPage,
-                      })}
-                      <ul className="data-list">
-                        {pagedLoads.items.map((load) => (
-                          <li key={load.id}>
-                            <button
-                              type="button"
-                              className={selectedLoadId === load.id ? 'data-card active' : 'data-card'}
-                              onClick={() => {
-                                setSelectedLoadId(load.id)
-                                setAdminTab('match')
-                              }}
-                            >
-                              <div className="card-top">
-                                <strong>
-                                  #{load.id} · {load.pickup} → {load.dropoff}
-                                </strong>
-                                <span className="badge badge-open">{tx('openBadge')}</span>
-                              </div>
-                              <span>
-                                {load.cargo} · {load.weight_tons}t · {load.vehicle_preference}
-                              </span>
-                              <span>
-                                {tx('requestor')}: {load.requestor_name} · {load.requestor_phone}
-                              </span>
-                              {load.preferred_date ? (
-                                <span>
-                                  {tx('loadDate')}: {load.preferred_date}
-                                </span>
-                              ) : null}
-                              <span className="card-action">{tx('pickLoad')} → {tx('tabMatch')}</span>
-                            </button>
-                          </li>
-                        ))}
-                        {pagedLoads.total === 0 && (
-                          <li className="empty">{loadSearch.trim() ? tx('noSearchResults') : tx('noOpen')}</li>
-                        )}
-                      </ul>
-                    </section>
-                  )}
-
-                  {adminTab === 'match' && (
-                    <section className="admin-panel panel-match">
-                      <header className="admin-panel-head">
-                        <div>
-                          <p className="admin-panel-kicker">
-                            {selectedLoadId ? `#${selectedLoadId}` : '—'}
-                          </p>
-                          <h3>
-                            {tx('suggested')}
-                            {selectedLoadId ? ` · #${selectedLoadId}` : ''}
-                          </h3>
-                          <p className="admin-panel-hint">{tx('panelMatchHint')}</p>
-                        </div>
-                        <span className="admin-count">{suggestions.length}</span>
-                      </header>
-                      {!selectedLoadId ? (
-                        <p className="empty select-hint">{tx('selectLoad')}</p>
-                      ) : (
-                        <>
-                          {renderListControls({
-                            value: matchSearch,
-                            onChange: setMatchSearch,
-                            placeholder: tx('searchFleet'),
-                            page: pagedSuggestions.page,
-                            totalPages: pagedSuggestions.totalPages,
-                            total: pagedSuggestions.total,
-                            onPage: setMatchPage,
-                          })}
-                          <ul className="data-list">
-                            {pagedSuggestions.items.map((s) => (
-                              <li key={s.vehicle.id} className="data-card suggest">
-                                <div className="card-top">
-                                  <strong>
-                                    {s.vehicle.plate_number} · {Math.round(s.match_score * 100)}%
-                                  </strong>
-                                  <span className="badge badge-available">{tx('availableBadge')}</span>
-                                </div>
-                                <span>
-                                  {s.vehicle.current_location} · {s.vehicle.capacity_tons}t ·{' '}
-                                  {s.vehicle.vehicle_type}
-                                </span>
-                                <span>{s.match_reason}</span>
-                                <span>
-                                  {tx('ownerName')}: {s.vehicle.owner_name} · {s.vehicle.owner_phone}
-                                </span>
-                                <span>
-                                  {tx('driverName')}: {s.vehicle.driver_name || '—'} ·{' '}
-                                  {s.vehicle.driver_phone || '—'}
-                                </span>
-                                <button
-                                  type="button"
-                                  className="btn btn-primary"
-                                  disabled={busy}
-                                  onClick={() => void onAssign(s.vehicle.id)}
-                                >
-                                  {tx('assignBtn')}
-                                </button>
-                              </li>
-                            ))}
-                            {pagedSuggestions.total === 0 && (
-                              <li className="empty">
-                                {matchSearch.trim() ? tx('noSearchResults') : tx('noSuggest')}
-                              </li>
-                            )}
-                          </ul>
-                        </>
-                      )}
-                    </section>
-                  )}
-
-                  {adminTab === 'fleet' && (
-                    <section className="admin-panel panel-fleet">
-                      <header className="admin-panel-head">
-                        <div>
-                          <p className="admin-panel-kicker">{tx('fleetSnap')}</p>
-                          <h3>{tx('fleetSnap')}</h3>
-                          <p className="admin-panel-hint">{tx('panelFleetHint')}</p>
-                        </div>
-                        <span className="admin-count">{vehicles.length}</span>
-                      </header>
-                      {renderListControls({
-                        value: fleetSearch,
-                        onChange: setFleetSearch,
-                        placeholder: tx('searchFleet'),
-                        page: pagedVehicles.page,
-                        totalPages: pagedVehicles.totalPages,
-                        total: pagedVehicles.total,
-                        onPage: setFleetPage,
-                      })}
-                      <ul className="data-list compact">
-                        {pagedVehicles.items.map((v) => (
-                          <li key={v.id} className="data-card static">
-                            <div className="card-top">
-                              <strong>{v.plate_number}</strong>
-                              <span
-                                className={
-                                  v.status === 'available' ? 'badge badge-available' : 'badge badge-assigned'
-                                }
-                              >
-                                {statusBadge(v.status, {
-                                  open: tx('openBadge'),
-                                  available: tx('availableBadge'),
-                                  assigned: tx('assignedBadge'),
-                                })}
-                              </span>
-                            </div>
-                            <span>
-                              {v.current_location} · {v.capacity_tons}t · {v.vehicle_type}
-                            </span>
-                            <span>
-                              {tx('ownerName')}: {v.owner_name} · {v.owner_phone}
-                            </span>
-                            <span>
-                              {tx('driverName')}: {v.driver_name || '—'} · {v.driver_phone || '—'}
-                            </span>
-                          </li>
-                        ))}
-                        {pagedVehicles.total === 0 && (
-                          <li className="empty">
-                            {fleetSearch.trim() ? tx('noSearchResults') : tx('noVehicles')}
-                          </li>
-                        )}
-                      </ul>
-                    </section>
-                  )}
-
-                  {adminTab === 'assign' && (
-                    <section className="admin-panel panel-assign">
-                      <header className="admin-panel-head">
-                        <div>
-                          <p className="admin-panel-kicker">{tx('assignments')}</p>
-                          <h3>{tx('assignments')}</h3>
-                          <p className="admin-panel-hint">{tx('panelAssignHint')}</p>
-                        </div>
-                        <span className="admin-count">{assignments.length}</span>
-                      </header>
-                      {renderListControls({
-                        value: assignSearch,
-                        onChange: setAssignSearch,
-                        placeholder: tx('searchAssign'),
-                        page: pagedAssignments.page,
-                        totalPages: pagedAssignments.totalPages,
-                        total: pagedAssignments.total,
-                        onPage: setAssignPage,
-                      })}
-                      <ul className="data-list">
-                        {pagedAssignments.items.map((a) => (
-                          <li key={a.id} className="data-card static">
-                            <div className="card-top">
-                              <strong>
-                                #{a.id} · {a.vehicle?.plate_number ?? '—'} → Load #{a.load_id}
-                              </strong>
-                              <span
-                                className={
-                                  a.status === 'assigned' ? 'badge badge-assigned' : 'badge badge-done'
-                                }
-                              >
-                                {a.status}
-                              </span>
-                            </div>
-                            <span>
-                              {a.load?.pickup} → {a.load?.dropoff}
-                            </span>
-                            <span>{a.match_reason}</span>
-                            {a.status === 'assigned' && (
-                              <button
-                                type="button"
-                                className="btn btn-ghost"
-                                disabled={busy}
-                                onClick={() => void onComplete(a.id)}
-                              >
-                                {tx('markDelivered')}
-                              </button>
-                            )}
-                          </li>
-                        ))}
-                        {pagedAssignments.total === 0 && (
-                          <li className="empty">
-                            {assignSearch.trim() ? tx('noSearchResults') : tx('noAssign')}
-                          </li>
-                        )}
-                      </ul>
-                    </section>
-                  )}
-                </div>
-              </>
-            )}
-          </section>
+          <AdminPortal
+            tx={tx}
+            adminToken={adminToken}
+            adminPin={adminPin}
+            setAdminPin={setAdminPin}
+            busy={busy}
+            openLoads={openLoads}
+            vehicles={vehicles}
+            assignments={assignments}
+            suggestions={suggestions}
+            selectedLoadId={selectedLoadId}
+            setSelectedLoadId={setSelectedLoadId}
+            adminTab={adminTab}
+            setAdminTab={setAdminTab}
+            onAdminLogin={onAdminLogin}
+            onAssign={onAssign}
+            onComplete={onComplete}
+            logoutAdmin={logoutAdmin}
+            refreshAdmin={refreshAdmin}
+          />
         )}
       </main>
 
