@@ -21,11 +21,13 @@ import { PhoneLinks } from './components/PhoneLinks'
 import { address, business, t, type Lang } from './content'
 import { AdminPortal, type AdminTab } from './portals/AdminPortal'
 import { AboutPortal } from './portals/AboutPortal'
+import { ConfirmPortal } from './portals/ConfirmPortal'
 import { HomePortal } from './portals/HomePortal'
 import { OwnerPortal } from './portals/OwnerPortal'
 import { RequestPortal } from './portals/RequestPortal'
 
-type Portal = 'home' | 'request' | 'owner' | 'admin' | 'about'
+type Portal = 'home' | 'request' | 'owner' | 'admin' | 'about' | 'confirm'
+type ConfirmKind = 'load' | 'vehicle'
 
 const ADMIN_TOKEN_KEY = 'murali_admin_token'
 
@@ -86,6 +88,8 @@ export default function App() {
   const [publicLoads, setPublicLoads] = useState<Load[]>([])
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [confirmKind, setConfirmKind] = useState<ConfirmKind | null>(null)
+  const [confirmMessage, setConfirmMessage] = useState('')
 
   const [loadForm, setLoadForm] = useState(emptyLoad)
   const [vehicleForm, setVehicleForm] = useState(emptyVehicle)
@@ -170,6 +174,22 @@ export default function App() {
     setError(null)
   }
 
+  function goPortal(next: Portal) {
+    if (next !== 'confirm') {
+      setConfirmKind(null)
+      setConfirmMessage('')
+    }
+    setPortal(next)
+  }
+
+  function showConfirm(kind: ConfirmKind, text: string) {
+    clearFlash()
+    setConfirmKind(kind)
+    setConfirmMessage(text)
+    setPortal('confirm')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   async function onCreateLoad(event: FormEvent) {
     event.preventDefault()
     clearFlash()
@@ -179,13 +199,14 @@ export default function App() {
         ...loadForm,
         weight_tons: Number(loadForm.weight_tons) || 1,
       })
-      setMessage(
+      setLoadForm(emptyLoad)
+      void refreshPublic()
+      showConfirm(
+        'load',
         lang === 'te'
           ? `లోడ్ #${created.id} నమోదు అయింది. ఆఫీస్ ${created.pickup} సమీప లారీని కేటాయిస్తుంది.`
           : `Load #${created.id} posted. Office will assign a lorry near ${created.pickup}.`,
       )
-      setLoadForm(emptyLoad)
-      void refreshPublic()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not post load')
     } finally {
@@ -202,13 +223,14 @@ export default function App() {
         ...vehicleForm,
         capacity_tons: Number(vehicleForm.capacity_tons) || 1,
       })
-      setMessage(
+      setVehicleForm(emptyVehicle)
+      void refreshPublic()
+      showConfirm(
+        'vehicle',
         lang === 'te'
           ? `వాహనం ${created.plate_number} ${created.current_location} వద్ద నమోదు అయింది.`
           : `Vehicle ${created.plate_number} registered at ${created.current_location}. Ready for loads.`,
       )
-      setVehicleForm(emptyVehicle)
-      void refreshPublic()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not register vehicle')
     } finally {
@@ -306,7 +328,7 @@ export default function App() {
           href="#top"
           onClick={(e) => {
             e.preventDefault()
-            setPortal('home')
+            goPortal('home')
           }}
         >
           <span className="nav-mark" aria-hidden="true" />
@@ -316,19 +338,19 @@ export default function App() {
           </span>
         </a>
         <nav className="nav-links" aria-label="Primary">
-          <button type="button" className={portal === 'home' ? 'active' : ''} onClick={() => setPortal('home')}>
+          <button type="button" className={portal === 'home' ? 'active' : ''} onClick={() => goPortal('home')}>
             {tx('navHome')}
           </button>
-          <button type="button" className={portal === 'about' ? 'active' : ''} onClick={() => setPortal('about')}>
+          <button type="button" className={portal === 'about' ? 'active' : ''} onClick={() => goPortal('about')}>
             {tx('navAbout')}
           </button>
-          <button type="button" className={portal === 'request' ? 'active' : ''} onClick={() => setPortal('request')}>
+          <button type="button" className={portal === 'request' ? 'active' : ''} onClick={() => goPortal('request')}>
             {tx('navRequest')}
           </button>
-          <button type="button" className={portal === 'owner' ? 'active' : ''} onClick={() => setPortal('owner')}>
+          <button type="button" className={portal === 'owner' ? 'active' : ''} onClick={() => goPortal('owner')}>
             {tx('navOwner')}
           </button>
-          <button type="button" className={portal === 'admin' ? 'active' : ''} onClick={() => setPortal('admin')}>
+          <button type="button" className={portal === 'admin' ? 'active' : ''} onClick={() => goPortal('admin')}>
             {tx('navAdmin')}
           </button>
         </nav>
@@ -356,13 +378,36 @@ export default function App() {
       </header>
 
       <main id="top">
-        {(message || error) && (
-          <div className={`flash ${error ? 'flash-error' : 'flash-ok'}`} role="status">
-            {error ?? message}
+        {error && (
+          <div className="flash flash-error" role="status">
+            {error}
             <button type="button" onClick={clearFlash} aria-label="Dismiss">
               ×
             </button>
           </div>
+        )}
+        {message && portal !== 'confirm' && (
+          <div className="flash flash-ok" role="status">
+            {message}
+            <button type="button" onClick={clearFlash} aria-label="Dismiss">
+              ×
+            </button>
+          </div>
+        )}
+
+        {portal === 'confirm' && confirmKind && (
+          <ConfirmPortal
+            title={tx(confirmKind === 'load' ? 'confirmLoadTitle' : 'confirmVehicleTitle')}
+            message={confirmMessage}
+            primaryLabel={tx('confirmBackHome')}
+            secondaryLabel={tx(
+              confirmKind === 'load' ? 'confirmAnotherLoad' : 'confirmAnotherVehicle',
+            )}
+            onPrimary={() => goPortal('home')}
+            onSecondary={() => goPortal(confirmKind === 'load' ? 'request' : 'owner')}
+            callLabel={tx('callNow')}
+            callHref={`tel:${business.phone}`}
+          />
         )}
 
         {portal === 'home' && (
@@ -377,7 +422,7 @@ export default function App() {
             findType={findType}
             setFindType={setFindType}
             setLoadForm={setLoadForm}
-            setPortal={setPortal}
+            setPortal={goPortal}
           />
         )}
 
