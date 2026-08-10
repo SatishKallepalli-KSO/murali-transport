@@ -529,6 +529,95 @@ main {
   color: var(--ink-soft);
 }
 
+.testimonials {
+  overflow: hidden;
+  margin-inline: -1.25rem;
+}
+
+.testimonials .section-head {
+  max-width: var(--max);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1.25rem;
+}
+
+.testimonial-marquee {
+  margin-top: 0.35rem;
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+}
+
+.testimonial-track {
+  display: flex;
+  width: max-content;
+  gap: 1rem;
+  padding: 0.35rem 1.25rem 0.85rem;
+  animation: testimonial-run 55s linear infinite;
+}
+
+.testimonial-marquee:hover .testimonial-track {
+  animation-play-state: paused;
+}
+
+.testimonial-card {
+  flex: 0 0 min(320px, 78vw);
+  margin: 0;
+  padding: 1.15rem 1.2rem 1.2rem;
+  border-left: 3px solid var(--warm);
+  background:
+    linear-gradient(160deg, rgba(31, 111, 235, 0.05), rgba(239, 139, 46, 0.08)),
+    #fff;
+  border-radius: 0 1rem 1rem 0;
+}
+
+.testimonial-card blockquote {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.testimonial-card figcaption {
+  display: grid;
+  gap: 0.1rem;
+  margin-top: 0.85rem;
+}
+
+.testimonial-card strong {
+  font-size: 0.98rem;
+  font-weight: 750;
+  color: var(--brand);
+}
+
+.testimonial-card figcaption span {
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+}
+
+@keyframes testimonial-run {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .testimonial-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
+    max-width: var(--max);
+    margin: 0 auto;
+    justify-content: center;
+  }
+
+  .testimonial-card {
+    flex-basis: min(320px, 100%);
+  }
+}
+
 .location-actions {
   display: flex;
   flex-wrap: wrap;

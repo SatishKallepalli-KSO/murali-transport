@@ -16,7 +16,7 @@ import {
   type Vehicle,
   type VehicleSuggestion,
 } from './api'
-import { address, business, t, type Lang } from './content'
+import { address, business, t, testimonials, type Lang } from './content'
 
 type Portal = 'home' | 'request' | 'owner' | 'admin' | 'about'
 
@@ -460,6 +460,28 @@ export default function App() {
                   </div>
                 </li>
               </ol>
+            </section>
+
+            <section className="section testimonials" aria-label="Customer testimonials">
+              <div className="section-head">
+                <h2>{tx('testimonialsTitle')}</h2>
+                <p>{tx('testimonialsIntro')}</p>
+              </div>
+              <div className="testimonial-marquee" aria-live="off">
+                <div className="testimonial-track">
+                  {[...testimonials[lang], ...testimonials[lang]].map((item, index) => (
+                    <figure className="testimonial-card" key={`${item.name}-${index}`}>
+                      <blockquote>{item.quote}</blockquote>
+                      <figcaption>
+                        <strong>{item.name}</strong>
+                        <span>
+                          {item.role} · {item.place}
+                        </span>
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              </div>
             </section>
 
             <section className="section section-alt about-preview">

@@ -68,6 +68,8 @@ const dict = {
     how2Body: 'We check availability and suggest lorries near the pickup point.',
     how3Title: 'Assign & dispatch',
     how3Body: 'Admin assigns the vehicle and shares driver / trip details for delivery.',
+    testimonialsTitle: 'What customers say',
+    testimonialsIntro: 'Local traders, farmers, and lorry owners from the Godavari belt.',
     aboutTitle: 'About us',
     aboutIntro:
       'Murali Office Miny Lorry Transport is a local commercial logistics booking office in Dommeru. We connect goods owners with mini lorries and trucks for safe, timely freight movement.',
@@ -200,6 +202,8 @@ const dict = {
     how2Body: 'అందుబాటు చూసి పికప్ సమీపంలోని లారీలను సూచిస్తాము.',
     how3Title: 'అసైన్ & డిస్పాచ్',
     how3Body: 'అడ్మిన్ వాహనం కేటాయించి డ్రైవర్ / ట్రిప్ వివరాలు పంపుతారు.',
+    testimonialsTitle: 'వినియోగదారుల అభిప్రాయాలు',
+    testimonialsIntro: 'గోదావరి ప్రాంతం వ్యాపారులు, రైతులు, లారీ యజమానుల మాటలు.',
     aboutTitle: 'మా గురించి',
     aboutIntro:
       'మురళి ఆఫీస్ మినీ లారీ ట్రాన్స్‌పోర్ట్ దొమ్మేరులోని స్థానిక వాణిజ్య లాజిస్టిక్స్ బుకింగ్ ఆఫీస్. సరుకు యజమానులను మినీ లారీలు/ట్రక్కులతో కలుపుతుంది.',
@@ -291,6 +295,116 @@ const dict = {
     langTe: 'తెలుగు',
   },
 } as const
+
+export type Testimonial = {
+  name: string
+  place: string
+  role: string
+  quote: string
+}
+
+export const testimonials: Record<Lang, Testimonial[]> = {
+  en: [
+    {
+      name: 'Venkateswara Rao',
+      place: 'Rajahmundry',
+      role: 'Hardware trader',
+      quote: 'Posted a cement load in the morning and got a mini lorry from Dommeru the same day. Clear and fast.',
+    },
+    {
+      name: 'Lakshmi Narayana',
+      place: 'Kovvur',
+      role: 'Farmer',
+      quote: 'For paddy bags to the mill, Murali office found a nearby truck. Saved me calling many drivers.',
+    },
+    {
+      name: 'Sujatha Reddy',
+      place: 'Dommeru',
+      role: 'Kirana shop owner',
+      quote: 'I book local grocery runs often. They know the routes and assign the right vehicle size.',
+    },
+    {
+      name: 'Ramesh Babu',
+      place: 'Nidadavole',
+      role: 'Lorry owner',
+      quote: 'Registered my Eicher here. Now I get load calls based on where my vehicle is parked.',
+    },
+    {
+      name: 'Padmavathi Devi',
+      place: 'Tanuku',
+      role: 'Rice merchant',
+      quote: 'Reliable office desk. Pickup and drop details were shared properly with the driver.',
+    },
+    {
+      name: 'Srinivas Naidu',
+      place: 'Eluru',
+      role: 'Construction supplier',
+      quote: 'Needed a truck for steel rods to site. Admin matched capacity well and trip went smooth.',
+    },
+    {
+      name: 'Anusha Kumari',
+      place: 'Bhimavaram',
+      role: 'Warehouse manager',
+      quote: 'WhatsApp and phone both work. Booking through the office is easier than hunting lorries myself.',
+    },
+    {
+      name: 'Krishna Murthy',
+      place: 'Tadepalligudem',
+      role: 'Truck owner',
+      quote: 'Good for part loads and full loads. Location matching helps me avoid empty return trips.',
+    },
+  ],
+  te: [
+    {
+      name: 'వెంకటేశ్వర రావు',
+      place: 'రాజమండ్రి',
+      role: 'హార్డ్‌వేర్ వ్యాపారి',
+      quote: 'ఉదయం సిమెంట్ లోడ్ పోస్ట్ చేశాను — అదే రోజు దొమ్మేరు నుండి మినీ లారీ వచ్చింది. వేగంగా, స్పష్టంగా.',
+    },
+    {
+      name: 'లక్ష్మీ నారాయణ',
+      place: 'కొవ్వూరు',
+      role: 'రైతు',
+      quote: 'వరి బస్తాలు మిల్లుకు పంపాలంటే మురళి ఆఫీస్ సమీప ట్రక్ ఏర్పాటు చేసింది. చాలా సులభం.',
+    },
+    {
+      name: 'సుజాతా రెడ్డి',
+      place: 'దొమ్మేరు',
+      role: 'కిరాణా దుకాణం',
+      quote: 'లోకల్ కిరాణా రన్‌లు తరచు బుక్ చేస్తాను. మార్గాలు తెలుసు, సరైన వాహనం కేటాయిస్తారు.',
+    },
+    {
+      name: 'రమేష్ బాబు',
+      place: 'నిడదవోలు',
+      role: 'లారీ యజమాని',
+      quote: 'నా ఐచర్ ఇక్కడ రిజిస్టర్ చేశాను. వాహనం ఉన్న స్థలం ఆధారంగా లోడ్ కాల్స్ వస్తున్నాయి.',
+    },
+    {
+      name: 'పద్మావతి దేవి',
+      place: 'తణుకు',
+      role: 'బియ్యం వ్యాపారి',
+      quote: 'నమ్మకమైన ఆఫీస్. పికప్, డ్రాప్ వివరాలు డ్రైవర్‌కు సరిగ్గా అందాయి.',
+    },
+    {
+      name: 'శ్రీనివాస్ నాయుడు',
+      place: 'ఏలూరు',
+      role: 'నిర్మాణ సామగ్రి',
+      quote: 'సైట్‌కు స్టీల్ రాడ్స్ కోసం ట్రక్ కావాలి. కెపాసిటీ సరిగ్గా మ్యాచ్ అయి ట్రిప్ సాఫీగా జరిగింది.',
+    },
+    {
+      name: 'అనూష కుమారి',
+      place: 'భీమవరం',
+      role: 'గోదాము మేనేజర్',
+      quote: 'వాట్సాప్, ఫోన్ రెండూ పని చేస్తాయి. స్వయంగా లారీ వెతకడం కంటే ఆఫీస్ ద్వారా బుకింగ్ సులభం.',
+    },
+    {
+      name: 'కృష్ణ మూర్తి',
+      place: 'తాడేపల్లిగూడెం',
+      role: 'ట్రక్ యజమాని',
+      quote: 'పార్ట్ లోడ్, ఫుల్ లోడ్ రెండింటికీ మంచిది. లొకేషన్ మ్యాచింగ్ వల్ల ఖాళీ రిటర్న్ తగ్గింది.',
+    },
+  ],
+}
 
 export type DictKey = keyof typeof dict.en
 
