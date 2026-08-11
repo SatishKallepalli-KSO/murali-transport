@@ -22,6 +22,7 @@ import {
   type VehicleSuggestion,
 } from './api'
 import { PhoneLinks } from './components/PhoneLinks'
+import { PortalBack } from './components/PortalBack'
 import { address, business, t, type Lang } from './content'
 import { AdminPortal, type AdminTab } from './portals/AdminPortal'
 import { AboutPortal } from './portals/AboutPortal'
@@ -32,6 +33,17 @@ import { RequestPortal } from './portals/RequestPortal'
 
 type Portal = 'home' | 'request' | 'owner' | 'admin' | 'about' | 'confirm'
 type ConfirmKind = 'load' | 'vehicle'
+
+const PORTALS = new Set<Portal>(['home', 'request', 'owner', 'admin', 'about', 'confirm'])
+
+function portalFromHash(): Portal {
+  const raw = window.location.hash.replace(/^#\/?/, '').split('?')[0] || 'home'
+  return PORTALS.has(raw as Portal) ? (raw as Portal) : 'home'
+}
+
+function hashForPortal(portal: Portal) {
+  return portal === 'home' ? '#/' : `#/${portal}`
+}
 
 const ADMIN_TOKEN_KEY = 'murali_admin_token'
 
@@ -86,7 +98,9 @@ export default function App() {
     const saved = localStorage.getItem('murali_lang')
     return saved === 'te' ? 'te' : 'en'
   })
-  const [portal, setPortal] = useState<Portal>('home')
+  const [portal, setPortal] = useState<Portal>(() =>
+    typeof window !== 'undefined' ? portalFromHash() : 'home',
+  )
   const [stats, setStats] = useState<Stats | null>(null)
   const [publicVehicles, setPublicVehicles] = useState<Vehicle[]>([])
   const [publicLoads, setPublicLoads] = useState<Load[]>([])
@@ -121,6 +135,25 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = lang === 'te' ? 'te' : 'en'
   }, [lang])
+
+  useEffect(() => {
+    const syncFromHash = () => {
+      const next = portalFromHash()
+      setPortal((prev) => {
+        if (prev === next) return prev
+        if (next !== 'confirm') {
+          setConfirmKind(null)
+          setConfirmMessage('')
+        }
+        return next
+      })
+    }
+    window.addEventListener('hashchange', syncFromHash)
+    if (!window.location.hash) {
+      window.history.replaceState(null, '', '#/')
+    }
+    return () => window.removeEventListener('hashchange', syncFromHash)
+  }, [])
 
   async function refreshPublic() {
     try {
@@ -178,20 +211,34 @@ export default function App() {
     setError(null)
   }
 
-  function goPortal(next: Portal) {
+  function goPortal(next: Portal, mode: 'push' | 'replace' = 'push') {
     if (next !== 'confirm') {
       setConfirmKind(null)
       setConfirmMessage('')
     }
     setPortal(next)
+    const hash = hashForPortal(next)
+    if (mode === 'replace') {
+      window.history.replaceState(null, '', hash)
+    } else if (window.location.hash !== hash) {
+      window.location.hash = hash
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function goBack() {
+    if (window.history.length > 1) {
+      window.history.back()
+      return
+    }
+    goPortal('home', 'replace')
   }
 
   function showConfirm(kind: ConfirmKind, text: string) {
     clearFlash()
     setConfirmKind(kind)
     setConfirmMessage(text)
-    setPortal('confirm')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    goPortal('confirm')
   }
 
   async function onCreateLoad(event: FormEvent) {
@@ -467,18 +514,21 @@ export default function App() {
         )}
 
         {portal === 'confirm' && confirmKind && (
-          <ConfirmPortal
-            title={tx(confirmKind === 'load' ? 'confirmLoadTitle' : 'confirmVehicleTitle')}
-            message={confirmMessage}
-            primaryLabel={tx('confirmBackHome')}
-            secondaryLabel={tx(
-              confirmKind === 'load' ? 'confirmAnotherLoad' : 'confirmAnotherVehicle',
-            )}
-            onPrimary={() => goPortal('home')}
-            onSecondary={() => goPortal(confirmKind === 'load' ? 'request' : 'owner')}
-            callLabel={tx('callNow')}
-            callHref={`tel:${business.phone}`}
-          />
+          <>
+            <PortalBack tx={tx} onBack={goBack} labelKey="backHome" />
+            <ConfirmPortal
+              title={tx(confirmKind === 'load' ? 'confirmLoadTitle' : 'confirmVehicleTitle')}
+              message={confirmMessage}
+              primaryLabel={tx('confirmBackHome')}
+              secondaryLabel={tx(
+                confirmKind === 'load' ? 'confirmAnotherLoad' : 'confirmAnotherVehicle',
+              )}
+              onPrimary={() => goPortal('home')}
+              onSecondary={() => goPortal(confirmKind === 'load' ? 'request' : 'owner')}
+              callLabel={tx('callNow')}
+              callHref={`tel:${business.phone}`}
+            />
+          </>
         )}
 
         {portal === 'home' && (
@@ -497,30 +547,43 @@ export default function App() {
           />
         )}
 
-        {portal === 'about' && <AboutPortal lang={lang} tx={tx} />}
+        {portal === 'about' && (
+          <>
+            <PortalBack tx={tx} onBack={goBack} />
+            <AboutPortal lang={lang} tx={tx} />
+          </>
+        )}
 
         {portal === 'request' && (
-          <RequestPortal
-            tx={tx}
-            loadForm={loadForm}
-            setLoadForm={setLoadForm}
-            busy={busy}
-            onCreateLoad={onCreateLoad}
-          />
+          <>
+            <PortalBack tx={tx} onBack={goBack} />
+            <RequestPortal
+              tx={tx}
+              loadForm={loadForm}
+              setLoadForm={setLoadForm}
+              busy={busy}
+              onCreateLoad={onCreateLoad}
+            />
+          </>
         )}
 
         {portal === 'owner' && (
-          <OwnerPortal
-            tx={tx}
-            vehicleForm={vehicleForm}
-            setVehicleForm={setVehicleForm}
-            busy={busy}
-            onRegisterVehicle={onRegisterVehicle}
-          />
+          <>
+            <PortalBack tx={tx} onBack={goBack} />
+            <OwnerPortal
+              tx={tx}
+              vehicleForm={vehicleForm}
+              setVehicleForm={setVehicleForm}
+              busy={busy}
+              onRegisterVehicle={onRegisterVehicle}
+            />
+          </>
         )}
 
         {portal === 'admin' && (
-          <AdminPortal
+          <>
+            <PortalBack tx={tx} onBack={goBack} />
+            <AdminPortal
             tx={tx}
             adminToken={adminToken}
             adminPin={adminPin}
@@ -544,6 +607,7 @@ export default function App() {
             logoutAdmin={logoutAdmin}
             refreshAdmin={refreshAdmin}
           />
+          </>
         )}
       </main>
 

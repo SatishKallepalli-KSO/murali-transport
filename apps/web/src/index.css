@@ -414,7 +414,41 @@ main > .routes-map {
   grid-template-columns: auto 1fr;
   gap: 1rem;
   padding: 1.15rem 0;
+  border: 0;
   border-top: 1px solid rgba(11, 42, 74, 0.1);
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  width: 100%;
+}
+
+.service-showcase-item:hover {
+  border-top-color: rgba(239, 139, 46, 0.55);
+}
+
+.service-showcase-item:hover .text-link {
+  text-decoration: underline;
+}
+
+.portal-back {
+  padding: 1rem max(1.25rem, calc((100% - var(--max)) / 2)) 0;
+}
+
+.portal-back-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--brand);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+  padding: 0.35rem 0;
+}
+
+.portal-back-btn:hover {
+  text-decoration: underline;
 }
 
 .service-showcase-item h3 {

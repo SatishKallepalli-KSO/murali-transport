@@ -42,10 +42,30 @@ export function HomePortal({
   setPortal,
 }: Props) {
   const services = [
-    { title: tx('service1Title'), body: tx('service1Body'), action: 'request' as const },
-    { title: tx('service2Title'), body: tx('service2Body'), action: 'request' as const },
-    { title: tx('service3Title'), body: tx('service3Body'), action: 'owner' as const },
-    { title: tx('service4Title'), body: tx('service4Body'), action: 'request' as const },
+    {
+      title: tx('service1Title'),
+      body: tx('service1Body'),
+      action: 'request' as const,
+      cta: tx('ctaQuote'),
+    },
+    {
+      title: tx('service2Title'),
+      body: tx('service2Body'),
+      action: 'request' as const,
+      cta: tx('ctaPostLoad'),
+    },
+    {
+      title: tx('service3Title'),
+      body: tx('service3Body'),
+      action: 'owner' as const,
+      cta: tx('ctaRegister'),
+    },
+    {
+      title: tx('service4Title'),
+      body: tx('service4Body'),
+      action: 'about' as const,
+      cta: tx('navAbout'),
+    },
   ]
 
   const whyItems = [
@@ -88,16 +108,16 @@ export function HomePortal({
         <p className="trust-strip-label">{tx('trustStripTitle')}</p>
         <div className="trust-strip-grid">
           <div>
+            <strong>{tx('trustYears')}</strong>
+            <span>{tx('trustYearsDetail')}</span>
+          </div>
+          <div>
             <strong>{tx('trustRating')}</strong>
             <span>{tx('trustReviews')}</span>
           </div>
           <div>
             <strong>{tx('trustHours')}</strong>
-            <span>{address.locality}</span>
-          </div>
-          <div>
-            <strong>{tx('trustHub')}</strong>
-            <span>{business.shortName}</span>
+            <span>{tx('trustHub')}</span>
           </div>
           <div>
             <strong>{stats?.available_vehicles ?? publicVehicles.length}</strong>
@@ -286,22 +306,21 @@ export function HomePortal({
         </div>
         <div className="service-showcase-grid">
           {services.map((service, index) => (
-            <article key={service.title} className="service-showcase-item">
+            <button
+              type="button"
+              key={service.title}
+              className="service-showcase-item"
+              onClick={() => setPortal(service.action)}
+            >
               <span className="service-index" aria-hidden="true">
                 {String(index + 1).padStart(2, '0')}
               </span>
               <div>
                 <h3>{service.title}</h3>
                 <p>{service.body}</p>
-                <button
-                  type="button"
-                  className="text-link"
-                  onClick={() => setPortal(service.action)}
-                >
-                  {tx('serviceLearn')} →
-                </button>
+                <span className="text-link">{service.cta} →</span>
               </div>
-            </article>
+            </button>
           ))}
         </div>
       </section>
