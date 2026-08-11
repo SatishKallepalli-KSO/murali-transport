@@ -190,3 +190,29 @@ export const completeAssignment = (token: string, id: number) =>
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
   })
+
+export const updateLoad = (token: string, id: number, body: Record<string, unknown>) =>
+  api<Load>(`/v1/loads/${id}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  })
+
+export const deleteLoad = (token: string, id: number) =>
+  api<{ status: string }>(`/v1/loads/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
+export const updateVehicle = (token: string, id: number, body: Record<string, unknown>) =>
+  api<Vehicle>(`/v1/vehicles/${id}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  })
+
+export const deleteVehicle = (token: string, id: number) =>
+  api<{ status: string }>(`/v1/vehicles/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })

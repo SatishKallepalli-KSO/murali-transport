@@ -41,9 +41,11 @@ from app.schemas import (
     BookingOut,
     LoadCreate,
     LoadOut,
+    LoadUpdate,
     VehicleCreate,
     VehicleOut,
     VehicleSuggestion,
+    VehicleUpdate,
     VehicleUpdateLocation,
     load_to_out,
     redact_vehicle,
@@ -302,6 +304,69 @@ def update_vehicle_location(
     return VehicleOut.model_validate(row)
 
 
+_ALLOWED_VEHICLE_STATUS = frozenset(
+    {"available", "assigned", "in_transit", "offline", "pending_approval"}
+)
+
+
+@app.patch("/v1/vehicles/{vehicle_id}", response_model=VehicleOut)
+def update_vehicle(
+    vehicle_id: int,
+    body: VehicleUpdate,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_admin),
+) -> VehicleOut:
+    row = db.get(Vehicle, vehicle_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Vehicle not found")
+    data = body.model_dump(exclude_unset=True)
+    if "plate_number" in data and data["plate_number"] is not None:
+        plate = data["plate_number"].strip().upper().replace(" ", "")
+        clash = (
+            db.query(Vehicle)
+            .filter(Vehicle.plate_number == plate, Vehicle.id != vehicle_id)
+            .first()
+        )
+        if clash:
+            raise HTTPException(status_code=409, detail="Vehicle plate already registered")
+        data["plate_number"] = plate
+    if "status" in data and data["status"] is not None:
+        status = data["status"].strip()
+        if status not in _ALLOWED_VEHICLE_STATUS:
+            raise HTTPException(status_code=400, detail=f"Invalid vehicle status: {status}")
+        data["status"] = status
+    for key, value in data.items():
+        if value is None:
+            continue
+        if isinstance(value, str):
+            value = value.strip()
+        setattr(row, key, value)
+    row.updated_at = utcnow()
+    db.commit()
+    db.refresh(row)
+    return VehicleOut.model_validate(row)
+
+
+@app.delete("/v1/vehicles/{vehicle_id}")
+def delete_vehicle(
+    vehicle_id: int,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_admin),
+) -> dict[str, str]:
+    row = db.get(Vehicle, vehicle_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Vehicle not found")
+    related = db.query(Assignment).filter(Assignment.vehicle_id == vehicle_id).all()
+    for assignment in related:
+        if assignment.load and assignment.load.status in ("assigned", "in_transit"):
+            assignment.load.status = "open"
+            assignment.load.updated_at = utcnow()
+        db.delete(assignment)
+    db.delete(row)
+    db.commit()
+    return {"status": "deleted"}
+
+
 @app.post("/v1/loads", response_model=LoadOut, status_code=201)
 def create_load(
     body: LoadCreate,
@@ -378,6 +443,82 @@ def get_load(
     if not row:
         raise HTTPException(status_code=404, detail="Load not found")
     return load_to_out(row, public=admin is None)
+
+
+_ALLOWED_LOAD_STATUS = frozenset(
+    {"open", "assigned", "in_transit", "delivered", "cancelled"}
+)
+
+
+@app.patch("/v1/loads/{load_id}", response_model=LoadOut)
+def update_load(
+    load_id: int,
+    body: LoadUpdate,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_admin),
+) -> LoadOut:
+    row = (
+        db.query(LoadRequest)
+        .options(joinedload(LoadRequest.assignment).joinedload(Assignment.vehicle))
+        .filter(LoadRequest.id == load_id)
+        .first()
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Load not found")
+    data = body.model_dump(exclude_unset=True)
+    if "status" in data and data["status"] is not None:
+        status = data["status"].strip()
+        if status not in _ALLOWED_LOAD_STATUS:
+            raise HTTPException(status_code=400, detail=f"Invalid load status: {status}")
+        data["status"] = status
+        if status in ("cancelled", "open") and row.assignment:
+            if row.assignment.vehicle and row.assignment.vehicle.status == "assigned":
+                row.assignment.vehicle.status = "available"
+                row.assignment.vehicle.updated_at = utcnow()
+            row.assignment.status = "cancelled"
+    for key, value in data.items():
+        if value is None:
+            continue
+        if isinstance(value, str):
+            value = value.strip()
+        setattr(row, key, value)
+    row.updated_at = utcnow()
+    db.commit()
+    row = (
+        db.query(LoadRequest)
+        .options(joinedload(LoadRequest.assignment).joinedload(Assignment.vehicle))
+        .filter(LoadRequest.id == load_id)
+        .first()
+    )
+    assert row is not None
+    return load_to_out(row, public=False)
+
+
+@app.delete("/v1/loads/{load_id}")
+def delete_load(
+    load_id: int,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_admin),
+) -> dict[str, str]:
+    row = (
+        db.query(LoadRequest)
+        .options(joinedload(LoadRequest.assignment).joinedload(Assignment.vehicle))
+        .filter(LoadRequest.id == load_id)
+        .first()
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Load not found")
+    if row.assignment:
+        if row.assignment.vehicle and row.assignment.vehicle.status in (
+            "assigned",
+            "in_transit",
+        ):
+            row.assignment.vehicle.status = "available"
+            row.assignment.vehicle.updated_at = utcnow()
+        db.delete(row.assignment)
+    db.delete(row)
+    db.commit()
+    return {"status": "deleted"}
 
 
 @app.get("/v1/loads/{load_id}/suggestions", response_model=list[VehicleSuggestion])

@@ -158,7 +158,66 @@ def test_assign_and_complete() -> None:
     assert done.json()["status"] == "completed"
 
 
-def test_public_load_redacts_phone() -> None:
+def test_admin_update_and_delete_load_vehicle() -> None:
+    token = _admin_token()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    load = client.post(
+        "/v1/loads",
+        json={
+            "requestor_name": "Edit Me",
+            "requestor_phone": "7000000001",
+            "pickup": "Dommeru",
+            "dropoff": "Eluru",
+            "cargo": "Boxes",
+            "weight_tons": 1.0,
+        },
+    )
+    assert load.status_code == 201
+    load_id = load.json()["id"]
+
+    patched = client.patch(
+        f"/v1/loads/{load_id}",
+        headers=headers,
+        json={"cargo": "Updated boxes", "status": "cancelled"},
+    )
+    assert patched.status_code == 200, patched.text
+    assert patched.json()["cargo"] == "Updated boxes"
+    assert patched.json()["status"] == "cancelled"
+
+    vehicle = client.post(
+        "/v1/vehicles",
+        json={
+            "owner_name": "Fleet Owner",
+            "owner_phone": "7000000002",
+            "driver_name": "Driver",
+            "driver_phone": "7000000003",
+            "plate_number": "AP39DEL999",
+            "capacity_tons": 3,
+            "current_location": "Dommeru",
+        },
+    )
+    assert vehicle.status_code == 201
+    vehicle_id = vehicle.json()["id"]
+
+    vpatch = client.patch(
+        f"/v1/vehicles/{vehicle_id}",
+        headers=headers,
+        json={"current_location": "Kovvur", "status": "offline"},
+    )
+    assert vpatch.status_code == 200, vpatch.text
+    assert vpatch.json()["current_location"] == "Kovvur"
+
+    assert client.delete(f"/v1/loads/{load_id}", headers=headers).status_code == 200
+    assert client.get(f"/v1/loads/{load_id}", headers=headers).status_code == 404
+    assert client.delete(f"/v1/vehicles/{vehicle_id}", headers=headers).status_code == 200
+    assert client.get(f"/v1/vehicles/{vehicle_id}", headers=headers).status_code == 404
+
+
+def test_public_cannot_delete() -> None:
+    assert client.delete("/v1/loads/1").status_code == 401
+    assert client.delete("/v1/vehicles/1").status_code == 401
+
     res = client.get("/v1/loads?status=open")
     assert res.status_code == 200
     for row in res.json():

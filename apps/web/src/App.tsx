@@ -5,12 +5,16 @@ import {
   assignLoad,
   completeAssignment,
   createLoad,
+  deleteLoad,
+  deleteVehicle,
   fetchAssignments,
   fetchLoads,
   fetchStats,
   fetchSuggestions,
   fetchVehicles,
   registerVehicle,
+  updateLoad,
+  updateVehicle,
   type Assignment,
   type Load,
   type Stats,
@@ -301,6 +305,73 @@ export default function App() {
     }
   }
 
+  async function onUpdateLoad(id: number, body: Record<string, unknown>) {
+    if (!adminToken) return
+    clearFlash()
+    setBusy(true)
+    try {
+      await updateLoad(adminToken, id, body)
+      setMessage(tx('loadUpdated'))
+      await refreshAdmin(adminToken)
+      void refreshPublic()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Update load failed')
+      throw err
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onDeleteLoad(id: number) {
+    if (!adminToken) return
+    clearFlash()
+    setBusy(true)
+    try {
+      await deleteLoad(adminToken, id)
+      if (selectedLoadId === id) setSelectedLoadId(null)
+      setMessage(tx('loadDeleted'))
+      await refreshAdmin(adminToken)
+      void refreshPublic()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete load failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onUpdateVehicle(id: number, body: Record<string, unknown>) {
+    if (!adminToken) return
+    clearFlash()
+    setBusy(true)
+    try {
+      await updateVehicle(adminToken, id, body)
+      setMessage(tx('vehicleUpdated'))
+      await refreshAdmin(adminToken)
+      void refreshPublic()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Update vehicle failed')
+      throw err
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onDeleteVehicle(id: number) {
+    if (!adminToken) return
+    clearFlash()
+    setBusy(true)
+    try {
+      await deleteVehicle(adminToken, id)
+      setMessage(tx('vehicleDeleted'))
+      await refreshAdmin(adminToken)
+      void refreshPublic()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete vehicle failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   function logoutAdmin() {
     if (adminToken) {
       void adminLogout(adminToken).catch(() => {
@@ -466,6 +537,10 @@ export default function App() {
             onAdminLogin={onAdminLogin}
             onAssign={onAssign}
             onComplete={onComplete}
+            onUpdateLoad={onUpdateLoad}
+            onDeleteLoad={onDeleteLoad}
+            onUpdateVehicle={onUpdateVehicle}
+            onDeleteVehicle={onDeleteVehicle}
             logoutAdmin={logoutAdmin}
             refreshAdmin={refreshAdmin}
           />

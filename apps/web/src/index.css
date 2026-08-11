@@ -1431,10 +1431,61 @@ main > .routes-map {
   color: #046c3a;
 }
 
-.flash-error {
-  background: #fdeceb;
-  color: #9b2c2c;
+.admin-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
 }
+
+.btn-danger {
+  background: #9b2c2c;
+  color: #fff;
+  border: 0;
+}
+
+.btn-danger:hover {
+  background: #7f1d1d;
+}
+
+.admin-edit-form {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.admin-edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.admin-edit-grid label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--ink-soft);
+}
+
+.admin-edit-grid .span-2 {
+  grid-column: 1 / -1;
+}
+
+.admin-edit-grid input,
+.admin-edit-grid select {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  font: inherit;
+}
+
+@media (max-width: 719px) {
+  .admin-edit-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 .portal {
   padding: 2.25rem 0 3rem;

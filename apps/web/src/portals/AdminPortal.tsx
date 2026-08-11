@@ -22,6 +22,10 @@ type Props = {
   onAdminLogin: (event: FormEvent) => void
   onAssign: (vehicleId: number) => void
   onComplete: (id: number) => void
+  onUpdateLoad: (id: number, body: Record<string, unknown>) => Promise<void>
+  onDeleteLoad: (id: number) => Promise<void>
+  onUpdateVehicle: (id: number, body: Record<string, unknown>) => Promise<void>
+  onDeleteVehicle: (id: number) => Promise<void>
   logoutAdmin: () => void
   refreshAdmin: (token: string) => Promise<void>
 }
@@ -43,6 +47,10 @@ export function AdminPortal({
   onAdminLogin,
   onAssign,
   onComplete,
+  onUpdateLoad,
+  onDeleteLoad,
+  onUpdateVehicle,
+  onDeleteVehicle,
   logoutAdmin,
   refreshAdmin,
 }: Props) {
@@ -54,6 +62,10 @@ export function AdminPortal({
   const [fleetPage, setFleetPage] = useState(1)
   const [assignPage, setAssignPage] = useState(1)
   const [matchPage, setMatchPage] = useState(1)
+  const [editingLoadId, setEditingLoadId] = useState<number | null>(null)
+  const [editingVehicleId, setEditingVehicleId] = useState<number | null>(null)
+  const [loadEdit, setLoadEdit] = useState<Record<string, string>>({})
+  const [vehicleEdit, setVehicleEdit] = useState<Record<string, string>>({})
 
   const deferredLoadSearch = useDeferredValue(loadSearch)
   const deferredFleetSearch = useDeferredValue(fleetSearch)
@@ -70,7 +82,7 @@ export function AdminPortal({
 
   const filteredLoads = useMemo(
     () =>
-      openLoadRows.filter((load) =>
+      openLoads.filter((load) =>
         matchesQuery(
           [
             load.id,
@@ -81,11 +93,12 @@ export function AdminPortal({
             load.requestor_phone,
             load.preferred_date,
             load.vehicle_preference,
+            load.status,
           ],
           deferredLoadSearch,
         ),
       ),
-    [openLoadRows, deferredLoadSearch],
+    [openLoads, deferredLoadSearch],
   )
   const filteredVehicles = useMemo(
     () =>
@@ -311,11 +324,11 @@ export function AdminPortal({
               <section className="admin-panel panel-loads">
                 <header className="admin-panel-head">
                   <div>
-                    <p className="admin-panel-kicker">{tx('openBadge')}</p>
-                    <h3>{tx('openLoads')}</h3>
+                    <p className="admin-panel-kicker">{tx('allLoads')}</p>
+                    <h3>{tx('allLoads')}</h3>
                     <p className="admin-panel-hint">{tx('panelLoadsHint')}</p>
                   </div>
-                  <span className="admin-count">{openLoadCount}</span>
+                  <span className="admin-count">{openLoads.length}</span>
                 </header>
                 {renderListControls({
                   value: loadSearch,
@@ -328,34 +341,206 @@ export function AdminPortal({
                 })}
                 <ul className="data-list">
                   {pagedLoads.items.map((load) => (
-                    <li key={load.id}>
-                      <button
-                        type="button"
-                        className={selectedLoadId === load.id ? 'data-card active' : 'data-card'}
-                        onClick={() => {
-                          setSelectedLoadId(load.id)
-                          setAdminTab('match')
-                        }}
-                      >
-                        <div className="card-top">
-                          <strong>
-                            #{load.id} · {load.pickup} → {load.dropoff}
-                          </strong>
-                          <span className="badge badge-open">{tx('openBadge')}</span>
-                        </div>
-                        <span>
-                          {load.cargo} · {load.weight_tons}t · {load.vehicle_preference}
-                        </span>
-                        <span>
-                          {tx('requestor')}: {load.requestor_name} · {load.requestor_phone}
-                        </span>
-                        {load.preferred_date ? (
+                    <li key={load.id} className="data-card static">
+                      {editingLoadId === load.id ? (
+                        <form
+                          className="admin-edit-form"
+                          onSubmit={(e) => {
+                            e.preventDefault()
+                            void onUpdateLoad(load.id, {
+                              requestor_name: loadEdit.requestor_name,
+                              requestor_phone: loadEdit.requestor_phone,
+                              pickup: loadEdit.pickup,
+                              dropoff: loadEdit.dropoff,
+                              cargo: loadEdit.cargo,
+                              weight_tons: Number(loadEdit.weight_tons) || 1,
+                              vehicle_preference: loadEdit.vehicle_preference,
+                              preferred_date: loadEdit.preferred_date,
+                              notes: loadEdit.notes,
+                              status: loadEdit.status,
+                            }).then(() => setEditingLoadId(null))
+                          }}
+                        >
+                          <div className="admin-edit-grid">
+                            <label>
+                              {tx('pickup')}
+                              <input
+                                value={loadEdit.pickup ?? ''}
+                                onChange={(e) => setLoadEdit((p) => ({ ...p, pickup: e.target.value }))}
+                                required
+                              />
+                            </label>
+                            <label>
+                              {tx('dropoff')}
+                              <input
+                                value={loadEdit.dropoff ?? ''}
+                                onChange={(e) => setLoadEdit((p) => ({ ...p, dropoff: e.target.value }))}
+                                required
+                              />
+                            </label>
+                            <label>
+                              {tx('cargo')}
+                              <input
+                                value={loadEdit.cargo ?? ''}
+                                onChange={(e) => setLoadEdit((p) => ({ ...p, cargo: e.target.value }))}
+                                required
+                              />
+                            </label>
+                            <label>
+                              {tx('weight')}
+                              <input
+                                type="number"
+                                min="0.1"
+                                step="0.1"
+                                value={loadEdit.weight_tons ?? ''}
+                                onChange={(e) =>
+                                  setLoadEdit((p) => ({ ...p, weight_tons: e.target.value }))
+                                }
+                                required
+                              />
+                            </label>
+                            <label>
+                              {tx('requestor')}
+                              <input
+                                value={loadEdit.requestor_name ?? ''}
+                                onChange={(e) =>
+                                  setLoadEdit((p) => ({ ...p, requestor_name: e.target.value }))
+                                }
+                                required
+                              />
+                            </label>
+                            <label>
+                              {tx('phone')}
+                              <input
+                                value={loadEdit.requestor_phone ?? ''}
+                                onChange={(e) =>
+                                  setLoadEdit((p) => ({ ...p, requestor_phone: e.target.value }))
+                                }
+                                required
+                              />
+                            </label>
+                            <label>
+                              {tx('loadDate')}
+                              <input
+                                type="date"
+                                value={loadEdit.preferred_date ?? ''}
+                                onChange={(e) =>
+                                  setLoadEdit((p) => ({ ...p, preferred_date: e.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
+                              {tx('statusLabel')}
+                              <select
+                                value={loadEdit.status ?? 'open'}
+                                onChange={(e) => setLoadEdit((p) => ({ ...p, status: e.target.value }))}
+                              >
+                                <option value="open">open</option>
+                                <option value="assigned">assigned</option>
+                                <option value="in_transit">in_transit</option>
+                                <option value="delivered">delivered</option>
+                                <option value="cancelled">cancelled</option>
+                              </select>
+                            </label>
+                            <label className="span-2">
+                              {tx('notes')}
+                              <input
+                                value={loadEdit.notes ?? ''}
+                                onChange={(e) => setLoadEdit((p) => ({ ...p, notes: e.target.value }))}
+                              />
+                            </label>
+                          </div>
+                          <div className="admin-card-actions">
+                            <button type="submit" className="btn btn-primary" disabled={busy}>
+                              {tx('saveBtn')}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-ghost"
+                              onClick={() => setEditingLoadId(null)}
+                            >
+                              {tx('cancelEditBtn')}
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <>
+                          <div className="card-top">
+                            <strong>
+                              #{load.id} · {load.pickup} → {load.dropoff}
+                            </strong>
+                            <span
+                              className={
+                                load.status === 'open' ? 'badge badge-open' : 'badge badge-assigned'
+                              }
+                            >
+                              {statusBadge(load.status, {
+                                open: tx('openBadge'),
+                                available: tx('availableBadge'),
+                                assigned: tx('assignedBadge'),
+                              })}
+                            </span>
+                          </div>
                           <span>
-                            {tx('loadDate')}: {load.preferred_date}
+                            {load.cargo} · {load.weight_tons}t · {load.vehicle_preference}
                           </span>
-                        ) : null}
-                        <span className="card-action">{tx('pickLoad')} → {tx('tabMatch')}</span>
-                      </button>
+                          <span>
+                            {tx('requestor')}: {load.requestor_name} · {load.requestor_phone}
+                          </span>
+                          {load.preferred_date ? (
+                            <span>
+                              {tx('loadDate')}: {load.preferred_date}
+                            </span>
+                          ) : null}
+                          <div className="admin-card-actions">
+                            {load.status === 'open' ? (
+                              <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={() => {
+                                  setSelectedLoadId(load.id)
+                                  setAdminTab('match')
+                                }}
+                              >
+                                {tx('pickLoad')} → {tx('tabMatch')}
+                              </button>
+                            ) : null}
+                            <button
+                              type="button"
+                              className="btn btn-ghost"
+                              onClick={() => {
+                                setEditingLoadId(load.id)
+                                setLoadEdit({
+                                  requestor_name: load.requestor_name,
+                                  requestor_phone: load.requestor_phone,
+                                  pickup: load.pickup,
+                                  dropoff: load.dropoff,
+                                  cargo: load.cargo,
+                                  weight_tons: String(load.weight_tons),
+                                  vehicle_preference: load.vehicle_preference,
+                                  preferred_date: load.preferred_date,
+                                  notes: load.notes,
+                                  status: load.status,
+                                })
+                              }}
+                            >
+                              {tx('editBtn')}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-danger"
+                              disabled={busy}
+                              onClick={() => {
+                                if (window.confirm(tx('confirmDeleteLoad'))) {
+                                  void onDeleteLoad(load.id)
+                                }
+                              }}
+                            >
+                              {tx('deleteBtn')}
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </li>
                   ))}
                   {pagedLoads.total === 0 && (
@@ -457,29 +642,190 @@ export function AdminPortal({
                 <ul className="data-list compact">
                   {pagedVehicles.items.map((v) => (
                     <li key={v.id} className="data-card static">
-                      <div className="card-top">
-                        <strong>{v.plate_number}</strong>
-                        <span
-                          className={
-                            v.status === 'available' ? 'badge badge-available' : 'badge badge-assigned'
-                          }
+                      {editingVehicleId === v.id ? (
+                        <form
+                          className="admin-edit-form"
+                          onSubmit={(e) => {
+                            e.preventDefault()
+                            void onUpdateVehicle(v.id, {
+                              owner_name: vehicleEdit.owner_name,
+                              owner_phone: vehicleEdit.owner_phone,
+                              driver_name: vehicleEdit.driver_name,
+                              driver_phone: vehicleEdit.driver_phone,
+                              plate_number: vehicleEdit.plate_number,
+                              vehicle_type: vehicleEdit.vehicle_type,
+                              capacity_tons: Number(vehicleEdit.capacity_tons) || 1,
+                              current_location: vehicleEdit.current_location,
+                              status: vehicleEdit.status,
+                              notes: vehicleEdit.notes,
+                            }).then(() => setEditingVehicleId(null))
+                          }}
                         >
-                          {statusBadge(v.status, {
-                            open: tx('openBadge'),
-                            available: tx('availableBadge'),
-                            assigned: tx('assignedBadge'),
-                          })}
-                        </span>
-                      </div>
-                      <span>
-                        {v.current_location} · {v.capacity_tons}t · {v.vehicle_type}
-                      </span>
-                      <span>
-                        {tx('ownerName')}: {v.owner_name} · {v.owner_phone}
-                      </span>
-                      <span>
-                        {tx('driverName')}: {v.driver_name || '—'} · {v.driver_phone || '—'}
-                      </span>
+                          <div className="admin-edit-grid">
+                            <label>
+                              {tx('plate')}
+                              <input
+                                value={vehicleEdit.plate_number ?? ''}
+                                onChange={(e) =>
+                                  setVehicleEdit((p) => ({ ...p, plate_number: e.target.value }))
+                                }
+                                required
+                              />
+                            </label>
+                            <label>
+                              {tx('statusLabel')}
+                              <select
+                                value={vehicleEdit.status ?? 'available'}
+                                onChange={(e) =>
+                                  setVehicleEdit((p) => ({ ...p, status: e.target.value }))
+                                }
+                              >
+                                <option value="available">available</option>
+                                <option value="assigned">assigned</option>
+                                <option value="in_transit">in_transit</option>
+                                <option value="offline">offline</option>
+                                <option value="pending_approval">pending_approval</option>
+                              </select>
+                            </label>
+                            <label>
+                              {tx('ownerName')}
+                              <input
+                                value={vehicleEdit.owner_name ?? ''}
+                                onChange={(e) =>
+                                  setVehicleEdit((p) => ({ ...p, owner_name: e.target.value }))
+                                }
+                                required
+                              />
+                            </label>
+                            <label>
+                              {tx('phone')}
+                              <input
+                                value={vehicleEdit.owner_phone ?? ''}
+                                onChange={(e) =>
+                                  setVehicleEdit((p) => ({ ...p, owner_phone: e.target.value }))
+                                }
+                                required
+                              />
+                            </label>
+                            <label>
+                              {tx('driverName')}
+                              <input
+                                value={vehicleEdit.driver_name ?? ''}
+                                onChange={(e) =>
+                                  setVehicleEdit((p) => ({ ...p, driver_name: e.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
+                              {tx('driverPhone')}
+                              <input
+                                value={vehicleEdit.driver_phone ?? ''}
+                                onChange={(e) =>
+                                  setVehicleEdit((p) => ({ ...p, driver_phone: e.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
+                              {tx('currentLoc')}
+                              <input
+                                value={vehicleEdit.current_location ?? ''}
+                                onChange={(e) =>
+                                  setVehicleEdit((p) => ({ ...p, current_location: e.target.value }))
+                                }
+                                required
+                              />
+                            </label>
+                            <label>
+                              {tx('capacity')}
+                              <input
+                                type="number"
+                                min="0.1"
+                                step="0.1"
+                                value={vehicleEdit.capacity_tons ?? ''}
+                                onChange={(e) =>
+                                  setVehicleEdit((p) => ({ ...p, capacity_tons: e.target.value }))
+                                }
+                                required
+                              />
+                            </label>
+                          </div>
+                          <div className="admin-card-actions">
+                            <button type="submit" className="btn btn-primary" disabled={busy}>
+                              {tx('saveBtn')}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-ghost"
+                              onClick={() => setEditingVehicleId(null)}
+                            >
+                              {tx('cancelEditBtn')}
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <>
+                          <div className="card-top">
+                            <strong>{v.plate_number}</strong>
+                            <span
+                              className={
+                                v.status === 'available'
+                                  ? 'badge badge-available'
+                                  : 'badge badge-assigned'
+                              }
+                            >
+                              {statusBadge(v.status, {
+                                open: tx('openBadge'),
+                                available: tx('availableBadge'),
+                                assigned: tx('assignedBadge'),
+                              })}
+                            </span>
+                          </div>
+                          <span>
+                            {v.current_location} · {v.capacity_tons}t · {v.vehicle_type}
+                          </span>
+                          <span>
+                            {tx('ownerName')}: {v.owner_name} · {v.owner_phone}
+                          </span>
+                          <span>
+                            {tx('driverName')}: {v.driver_name || '—'} · {v.driver_phone || '—'}
+                          </span>
+                          <div className="admin-card-actions">
+                            <button
+                              type="button"
+                              className="btn btn-ghost"
+                              onClick={() => {
+                                setEditingVehicleId(v.id)
+                                setVehicleEdit({
+                                  owner_name: v.owner_name,
+                                  owner_phone: v.owner_phone,
+                                  driver_name: v.driver_name,
+                                  driver_phone: v.driver_phone,
+                                  plate_number: v.plate_number,
+                                  vehicle_type: v.vehicle_type,
+                                  capacity_tons: String(v.capacity_tons),
+                                  current_location: v.current_location,
+                                  status: v.status,
+                                  notes: v.notes,
+                                })
+                              }}
+                            >
+                              {tx('editBtn')}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-danger"
+                              disabled={busy}
+                              onClick={() => {
+                                if (window.confirm(tx('confirmDeleteVehicle'))) {
+                                  void onDeleteVehicle(v.id)
+                                }
+                              }}
+                            >
+                              {tx('deleteBtn')}
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </li>
                   ))}
                   {pagedVehicles.total === 0 && (

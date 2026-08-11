@@ -53,6 +53,19 @@ class VehicleUpdateLocation(BaseModel):
     status: str | None = Field(default=None, max_length=32)
 
 
+class VehicleUpdate(BaseModel):
+    owner_name: str | None = Field(default=None, min_length=2, max_length=120)
+    owner_phone: str | None = Field(default=None, min_length=7, max_length=32)
+    driver_name: str | None = Field(default=None, max_length=120)
+    driver_phone: str | None = Field(default=None, max_length=32)
+    plate_number: str | None = Field(default=None, min_length=4, max_length=32)
+    vehicle_type: str | None = Field(default=None, max_length=64)
+    capacity_tons: float | None = Field(default=None, gt=0, le=50)
+    current_location: str | None = Field(default=None, min_length=2, max_length=255)
+    status: str | None = Field(default=None, max_length=32)
+    notes: str | None = Field(default=None, max_length=2000)
+
+
 class VehicleOut(BaseModel):
     id: int
     owner_name: str
@@ -81,6 +94,19 @@ class LoadCreate(BaseModel):
     vehicle_preference: str = Field(default="any", max_length=64)
     preferred_date: str = Field(default="", max_length=64)
     notes: str = Field(default="", max_length=2000)
+
+
+class LoadUpdate(BaseModel):
+    requestor_name: str | None = Field(default=None, min_length=2, max_length=120)
+    requestor_phone: str | None = Field(default=None, min_length=7, max_length=32)
+    pickup: str | None = Field(default=None, min_length=2, max_length=255)
+    dropoff: str | None = Field(default=None, min_length=2, max_length=255)
+    cargo: str | None = Field(default=None, min_length=1, max_length=255)
+    weight_tons: float | None = Field(default=None, gt=0, le=50)
+    vehicle_preference: str | None = Field(default=None, max_length=64)
+    preferred_date: str | None = Field(default=None, max_length=64)
+    notes: str | None = Field(default=None, max_length=2000)
+    status: str | None = Field(default=None, max_length=32)
 
 
 class LoadOut(BaseModel):
