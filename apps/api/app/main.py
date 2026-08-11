@@ -83,9 +83,13 @@ def on_startup() -> None:
 
 @app.get("/healthz")
 def healthz() -> dict[str, str]:
+    from app.db import DATABASE_URL
+
+    backend = "postgres" if DATABASE_URL.startswith("postgresql") else "sqlite"
     return {
         "status": "ok",
         "service": "murali-transport-api",
+        "db": backend,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 

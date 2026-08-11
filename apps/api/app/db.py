@@ -11,10 +11,27 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATA_DIR / 'murali.db'}")
+_raw_url = (os.getenv("DATABASE_URL") or "").strip()
+_is_prod = bool(
+    os.getenv("RENDER")
+    or os.getenv("RENDER_SERVICE_ID")
+    or os.getenv("ENVIRONMENT", "").lower() == "production"
+)
+
+if _is_prod and not _raw_url:
+    raise RuntimeError(
+        "DATABASE_URL is required on Render. "
+        "Without it the app uses container SQLite and data is lost on every redeploy."
+    )
+
+DATABASE_URL = _raw_url or f"sqlite:///{DATA_DIR / 'murali.db'}"
 
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+if _is_prod and DATABASE_URL.startswith("sqlite"):
+    raise RuntimeError("SQLite is not allowed in production. Set DATABASE_URL to Neon Postgres.")
+
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, connect_args=connect_args)
