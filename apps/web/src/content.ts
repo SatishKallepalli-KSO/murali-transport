@@ -73,7 +73,7 @@ export const routeLinks = [
 const dict = {
   en: {
     topStatsFallback: 'Trusted lorry booking office · Dommeru',
-    hours: 'Open daily · 9:00 AM – 9:00 PM',
+    hours: 'Open daily · 5:00 AM – 9:00 PM',
     navHome: 'Home',
     navServices: 'Services',
     navAbout: 'About',
@@ -92,8 +92,8 @@ const dict = {
     trustStripTitle: 'Trusted local transport office',
     trustRating: '4.2★ Google',
     trustReviews: '27 reviews',
-    trustHours: 'Daily 9 AM – 9 PM',
-    trustHub: 'Dommeru hub',
+    trustHours: 'Daily 5 AM – 9 PM',
+    trustHub: 'Dommeru',
     whyTitle: 'Why choose Murali Transport?',
     whyIntro:
       'In the transport industry for the last 20 years — a reliable Dommeru office you can call and trust.',
@@ -180,7 +180,7 @@ const dict = {
     aboutPhoneLabel: 'Phone',
     aboutAddressLabel: 'Office address',
     aboutHoursLabel: 'Working hours',
-    aboutHoursValue: 'Daily, typically 9:00 AM – 9:00 PM',
+    aboutHoursValue: 'Daily, 5:00 AM – 9:00 PM',
     aboutBody:
       'Whether you need a mini lorry for a short local trip or a truck for longer routes, visit or call the Dommeru office. Vehicle owners can register with us to receive load assignments based on where their lorry is.',
     fleetTitle: 'Reliable commercial fleet booking',
@@ -296,7 +296,7 @@ const dict = {
   },
   te: {
     topStatsFallback: 'నమ్మకమైన లారీ బుకింగ్ ఆఫీస్ · దొమ్మేరు',
-    hours: 'ప్రతిరోజు · ఉదయం 9:00 – రాత్రి 9:00',
+    hours: 'ప్రతిరోజు · ఉదయం 5:00 – రాత్రి 9:00',
     navHome: 'హోమ్',
     navServices: 'సేవలు',
     navAbout: 'గురించి',
@@ -315,8 +315,8 @@ const dict = {
     trustStripTitle: 'నమ్మకమైన స్థానిక ట్రాన్స్‌పోర్ట్ ఆఫీస్',
     trustRating: '4.2★ గూగుల్',
     trustReviews: '27 రివ్యూలు',
-    trustHours: 'ప్రతిరోజు ఉదయం 9 – రాత్రి 9',
-    trustHub: 'దొమ్మేరు హబ్',
+    trustHours: 'ప్రతిరోజు ఉదయం 5 – రాత్రి 9',
+    trustHub: 'దొమ్మేరు',
     whyTitle: 'మురళి ట్రాన్స్‌పోర్ట్ ఎందుకు?',
     whyIntro:
       'గత 20 సంవత్సరాలుగా ట్రాన్స్‌పోర్ట్ రంగంలో — నమ్మదగిన దొమ్మేరు ఆఫీస్.',
@@ -403,7 +403,7 @@ const dict = {
     aboutPhoneLabel: 'ఫోన్',
     aboutAddressLabel: 'ఆఫీస్ చిరునామా',
     aboutHoursLabel: 'పని గంటలు',
-    aboutHoursValue: 'ప్రతిరోజు, సాధారణంగా ఉదయం 9:00 – రాత్రి 9:00',
+    aboutHoursValue: 'ప్రతిరోజు, ఉదయం 5:00 – రాత్రి 9:00',
     aboutBody:
       'స్థానిక ప్రయాణం కోసం మినీ లారీ కావాలా లేదా దూర మార్గాలకు ట్రక్ కావాలా — దొమ్మేరు ఆఫీస్‌ను సంప్రదించండి. వాహన యజమానులు స్థానం ఆధారంగా లోడ్ అసైన్‌మెంట్లు పొందేందుకు నమోదు చేసుకోవచ్చు.',
     fleetTitle: 'నమ్మకమైన వాణిజ్య వాహన బుకింగ్',
