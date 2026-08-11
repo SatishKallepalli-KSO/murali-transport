@@ -141,6 +141,8 @@ export default function App() {
       const next = portalFromHash()
       setPortal((prev) => {
         if (prev === next) return prev
+        setMessage(null)
+        setError(null)
         if (next !== 'confirm') {
           setConfirmKind(null)
           setConfirmMessage('')
@@ -215,6 +217,9 @@ export default function App() {
     if (next !== 'confirm') {
       setConfirmKind(null)
       setConfirmMessage('')
+    }
+    if (next !== portal) {
+      clearFlash()
     }
     setPortal(next)
     const hash = hashForPortal(next)
