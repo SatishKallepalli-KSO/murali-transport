@@ -42,10 +42,17 @@ export function HomePortal({
   setPortal,
 }: Props) {
   const services = [
-    { title: tx('service1Title'), body: tx('service1Body') },
-    { title: tx('service2Title'), body: tx('service2Body') },
-    { title: tx('service3Title'), body: tx('service3Body') },
-    { title: tx('service4Title'), body: tx('service4Body') },
+    { title: tx('service1Title'), body: tx('service1Body'), action: 'request' as const },
+    { title: tx('service2Title'), body: tx('service2Body'), action: 'request' as const },
+    { title: tx('service3Title'), body: tx('service3Body'), action: 'owner' as const },
+    { title: tx('service4Title'), body: tx('service4Body'), action: 'request' as const },
+  ]
+
+  const whyItems = [
+    { title: tx('why1Title'), body: tx('why1Body') },
+    { title: tx('why2Title'), body: tx('why2Body') },
+    { title: tx('why3Title'), body: tx('why3Body') },
+    { title: tx('why4Title'), body: tx('why4Body') },
   ]
 
   const cityById = Object.fromEntries(routeCities.map((c) => [c.id, c]))
@@ -63,19 +70,38 @@ export function HomePortal({
         <div className="hero-scenic-shade" aria-hidden="true" />
         <div className="hero-copy hero-copy-on-media">
           <p className="hero-kicker">{tx('heroKicker')}</p>
-          <p className="hero-sub">{tx('heroSub')}</p>
           <h1 className="hero-name">{tx('heroBrand')}</h1>
+          <p className="hero-sub">{tx('heroSub')}</p>
           <p className="hero-tagline">{tx('heroTagline')}</p>
           <div className="hero-actions">
             <button type="button" className="btn btn-primary" onClick={() => setPortal('request')}>
-              {tx('ctaPostLoad')}
+              {tx('ctaQuote')}
             </button>
-            <button type="button" className="btn btn-light" onClick={() => setPortal('owner')}>
-              {tx('ctaRegister')}
-            </button>
-            <a className="btn btn-ghost-light" href={`tel:${business.phone}`}>
+            <a className="btn btn-light" href={`tel:${business.phone}`}>
               {tx('callNow')}
             </a>
+          </div>
+        </div>
+      </section>
+
+      <section className="trust-strip" aria-label={tx('trustStripTitle')}>
+        <p className="trust-strip-label">{tx('trustStripTitle')}</p>
+        <div className="trust-strip-grid">
+          <div>
+            <strong>{tx('trustRating')}</strong>
+            <span>{tx('trustReviews')}</span>
+          </div>
+          <div>
+            <strong>{tx('trustHours')}</strong>
+            <span>{address.locality}</span>
+          </div>
+          <div>
+            <strong>{tx('trustHub')}</strong>
+            <span>{business.shortName}</span>
+          </div>
+          <div>
+            <strong>{stats?.available_vehicles ?? publicVehicles.length}</strong>
+            <span>{tx('snapAvailable')}</span>
           </div>
         </div>
       </section>
@@ -253,16 +279,46 @@ export function HomePortal({
         </div>
       </section>
 
-      <section className="section" id="services">
+      <section className="section services-showcase" id="services">
         <div className="section-head">
           <h2>{tx('servicesTitle')}</h2>
           <p>{tx('servicesIntro')}</p>
         </div>
-        <div className="service-grid">
-          {services.map((service) => (
-            <article key={service.title} className="service-item">
-              <h3>{service.title}</h3>
-              <p>{service.body}</p>
+        <div className="service-showcase-grid">
+          {services.map((service, index) => (
+            <article key={service.title} className="service-showcase-item">
+              <span className="service-index" aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <div>
+                <h3>{service.title}</h3>
+                <p>{service.body}</p>
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => setPortal(service.action)}
+                >
+                  {tx('serviceLearn')} →
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section why-section" aria-label={tx('whyTitle')}>
+        <div className="section-head">
+          <h2>{tx('whyTitle')}</h2>
+          <p>{tx('whyIntro')}</p>
+        </div>
+        <div className="why-grid">
+          {whyItems.map((item, index) => (
+            <article key={item.title} className="why-item">
+              <span className="why-mark" aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
             </article>
           ))}
         </div>
