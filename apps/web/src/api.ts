@@ -1,5 +1,35 @@
 const apiBase = import.meta.env.VITE_API_BASE ?? ''
 
+function formatApiDetail(detail: unknown, fallback: string): string {
+  if (detail == null || detail === '') return fallback
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    const parts = detail.map((item) => {
+      if (typeof item === 'string') return item
+      if (item && typeof item === 'object') {
+        const row = item as { msg?: string; loc?: unknown[]; message?: string }
+        const field = Array.isArray(row.loc)
+          ? row.loc.filter((p) => p !== 'body' && p !== 'query').join('.')
+          : ''
+        const msg = row.msg || row.message || JSON.stringify(item)
+        return field ? `${field}: ${msg}` : msg
+      }
+      return String(item)
+    })
+    return parts.filter(Boolean).join(' · ') || fallback
+  }
+  if (typeof detail === 'object') {
+    const row = detail as { message?: string; msg?: string }
+    if (row.message || row.msg) return String(row.message || row.msg)
+    try {
+      return JSON.stringify(detail)
+    } catch {
+      return fallback
+    }
+  }
+  return String(detail)
+}
+
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${apiBase}${path}`, {
     ...init,
@@ -9,14 +39,16 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
     },
   })
   if (!res.ok) {
-    let detail = await res.text()
+    const fallback = `Request failed (${res.status})`
+    const raw = await res.text()
+    let message = raw || fallback
     try {
-      const parsed = JSON.parse(detail) as { detail?: string }
-      if (parsed.detail) detail = parsed.detail
+      const parsed = JSON.parse(raw) as { detail?: unknown }
+      message = formatApiDetail(parsed.detail, fallback)
     } catch {
-      /* keep text */
+      /* keep text body */
     }
-    throw new Error(detail || `Request failed (${res.status})`)
+    throw new Error(message)
   }
   return res.json() as Promise<T>
 }
