@@ -829,6 +829,11 @@ main > .routes-map {
   border-radius: 0.7rem;
 }
 
+.board-cols-3 .board-head,
+.board-cols-3 .board-row {
+  grid-template-columns: 1.6fr 1fr 0.7fr;
+}
+
 .board-head {
   background: rgba(11, 42, 74, 0.06);
   color: var(--ink-soft);

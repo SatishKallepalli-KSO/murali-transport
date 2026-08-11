@@ -219,12 +219,11 @@ export function HomePortal({
               </div>
               <span className="live-count">{publicLoads.length}</span>
             </header>
-            <div className="board-table" role="table" aria-label={tx('liveLoadsTitle')}>
+            <div className="board-table board-cols-3" role="table" aria-label={tx('liveLoadsTitle')}>
               <div className="board-head" role="row">
                 <span role="columnheader">{tx('liveColRoute')}</span>
                 <span role="columnheader">{tx('liveColCargo')}</span>
                 <span role="columnheader">{tx('liveColCap')}</span>
-                <span role="columnheader">{tx('liveColWhen')}</span>
               </div>
               {publicLoads.slice(0, 6).map((load, index) => (
                 <div
@@ -238,7 +237,6 @@ export function HomePortal({
                   </strong>
                   <span role="cell">{load.cargo}</span>
                   <span role="cell">{load.weight_tons}t</span>
-                  <span role="cell">{load.preferred_date || '—'}</span>
                 </div>
               ))}
               {publicLoads.length === 0 && (

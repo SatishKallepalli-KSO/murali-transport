@@ -164,3 +164,9 @@ def test_public_load_redacts_phone() -> None:
     for row in res.json():
         assert row["requestor_phone"] == ""
         assert row["requestor_name"] == "Customer"
+        assert row["cargo"] == "Freight"
+        assert row["preferred_date"] == ""
+        assert "*" in row["pickup"]
+        assert "*" in row["dropoff"]
+        assert "Coconut" not in row["cargo"]
+        assert "7777777777" not in row["requestor_phone"]

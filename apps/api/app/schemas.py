@@ -147,6 +147,16 @@ def mask_plate(plate: str) -> str:
     return f"{p[:2]}{'*' * max(2, len(p) - 4)}{p[-2:]}"
 
 
+def mask_place(name: str) -> str:
+    """Hide most of a place name on the public board."""
+    n = (name or "").strip()
+    if not n:
+        return "***"
+    if len(n) <= 3:
+        return f"{n[0]}**"
+    return f"{n[:2]}{'*' * min(8, len(n) - 2)}"
+
+
 def redact_vehicle(row: VehicleOut | object) -> VehicleOut:
     data = VehicleOut.model_validate(row)
     return data.model_copy(
@@ -192,7 +202,11 @@ def load_to_out(row: LoadRequest, *, public: bool = False) -> LoadOut:
             update={
                 "requestor_name": "Customer",
                 "requestor_phone": "",
+                "pickup": mask_place(out.pickup),
+                "dropoff": mask_place(out.dropoff),
+                "cargo": "Freight",
                 "notes": "",
+                "preferred_date": "",
             }
         )
     return out

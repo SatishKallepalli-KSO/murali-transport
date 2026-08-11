@@ -130,8 +130,8 @@ def platform_stats(db: Session = Depends(get_db)) -> dict:
 
 @app.get("/v1/activity")
 def recent_activity(limit: int = 12, db: Session = Depends(get_db)) -> list[dict]:
-    """Public ticker — no phones or full plates."""
-    from app.schemas import mask_plate
+    """Public ticker — no phones, full plates, cargo, or exact places."""
+    from app.schemas import mask_place, mask_plate
 
     limit = max(1, min(limit, 30))
     items: list[dict] = []
@@ -146,8 +146,8 @@ def recent_activity(limit: int = 12, db: Session = Depends(get_db)) -> list[dict
             {
                 "kind": "load",
                 "id": load.id,
-                "title": f"{load.pickup} → {load.dropoff}",
-                "detail": f"{load.cargo} · {load.weight_tons:g}t · {load.status}",
+                "title": f"{mask_place(load.pickup)} → {mask_place(load.dropoff)}",
+                "detail": f"Freight · {load.weight_tons:g}t · {load.status}",
                 "at": load.created_at.isoformat(),
             }
         )
@@ -160,7 +160,7 @@ def recent_activity(limit: int = 12, db: Session = Depends(get_db)) -> list[dict
                 "kind": "vehicle",
                 "id": vehicle.id,
                 "title": f"{mask_plate(vehicle.plate_number)} · {vehicle.vehicle_type}",
-                "detail": f"{vehicle.current_location} · {vehicle.status}",
+                "detail": f"{mask_place(vehicle.current_location)} · {vehicle.status}",
                 "at": vehicle.created_at.isoformat(),
             }
         )
