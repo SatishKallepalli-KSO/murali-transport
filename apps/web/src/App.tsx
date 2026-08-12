@@ -29,12 +29,13 @@ import { AboutPortal } from './portals/AboutPortal'
 import { ConfirmPortal } from './portals/ConfirmPortal'
 import { HomePortal } from './portals/HomePortal'
 import { OwnerPortal } from './portals/OwnerPortal'
+import { PrivacyPortal } from './portals/PrivacyPortal'
 import { RequestPortal } from './portals/RequestPortal'
 
-type Portal = 'home' | 'request' | 'owner' | 'admin' | 'about' | 'confirm'
+type Portal = 'home' | 'request' | 'owner' | 'admin' | 'about' | 'confirm' | 'privacy'
 type ConfirmKind = 'load' | 'vehicle'
 
-const PORTALS = new Set<Portal>(['home', 'request', 'owner', 'admin', 'about', 'confirm'])
+const PORTALS = new Set<Portal>(['home', 'request', 'owner', 'admin', 'about', 'confirm', 'privacy'])
 
 function portalFromHash(): Portal {
   const raw = window.location.hash.replace(/^#\/?/, '').split('?')[0] || 'home'
@@ -614,6 +615,13 @@ export default function App() {
           />
           </>
         )}
+
+        {portal === 'privacy' && (
+          <>
+            <PortalBack tx={tx} onBack={goBack} />
+            <PrivacyPortal tx={tx} />
+          </>
+        )}
       </main>
 
       <footer className="footer">
@@ -626,7 +634,17 @@ export default function App() {
             </p>
             <p>{address.line}</p>
           </div>
-          <p>{tx('footerRoles')}</p>
+          <div className="footer-meta">
+            <p>{tx('footerRoles')}</p>
+            <p>
+              <button type="button" className="footer-link" onClick={() => goPortal('privacy')}>
+                {tx('footerPrivacy')}
+              </button>
+            </p>
+            <p className="footer-copyright">
+              {tx('footerCopyright').replace('{year}', String(new Date().getFullYear()))}
+            </p>
+          </div>
         </div>
       </footer>
     </div>

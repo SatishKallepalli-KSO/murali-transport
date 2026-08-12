@@ -2176,6 +2176,56 @@ button.data-card.active,
   text-decoration: none;
 }
 
+.footer-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #ffc57a;
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.footer-link:hover {
+  color: #fff;
+}
+
+.footer-meta {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.footer-copyright {
+  color: #9eb6d1;
+  font-size: 0.9rem;
+}
+
+.privacy-sections {
+  display: grid;
+  gap: 1.35rem;
+  max-width: 46rem;
+}
+
+.privacy-section h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.1rem;
+}
+
+.privacy-section p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.privacy-contact,
+.privacy-updated {
+  margin-top: 1.5rem;
+  max-width: 46rem;
+  color: var(--ink-soft);
+}
+
 .footer p {
   margin: 0;
 }

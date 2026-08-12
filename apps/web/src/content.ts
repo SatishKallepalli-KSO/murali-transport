@@ -291,6 +291,31 @@ const dict = {
     partLoad: 'Part load',
     trailer: 'Trailer',
     footerRoles: 'Lorry owners · Load requestors · Office dispatch',
+    footerPrivacy: 'Privacy policy',
+    footerCopyright: '© {year} Murali Office Miny Lorry Transport, Dommeru. All rights reserved.',
+    privacyTitle: 'Privacy policy',
+    privacyIntro:
+      'This policy explains how Murali Transport Office (Dommeru) handles information you share when you post a load, register a lorry, or contact us.',
+    privacyS1Title: 'Information we collect',
+    privacyS1Body:
+      'When you use our booking forms we may collect your name, phone number, pickup and drop locations, cargo details, vehicle plate and capacity, and any notes you provide. Calls and WhatsApp messages to the office numbers may also include contact details you choose to share.',
+    privacyS2Title: 'How we use information',
+    privacyS2Body:
+      'We use this information only to arrange mini lorry and truck bookings, match loads with available vehicles, contact you about dispatch, and improve office coordination. We do not sell your personal information.',
+    privacyS3Title: 'Sharing',
+    privacyS3Body:
+      'Details needed for a trip may be shared with the assigned driver or vehicle owner and with office staff handling your booking. Public pages show only limited, masked availability information (for example masked routes or plates).',
+    privacyS4Title: 'Storage & security',
+    privacyS4Body:
+      'Booking records are stored in our office systems so we can manage assignments. We take reasonable steps to protect access to admin tools. No method of transmission or storage is completely secure.',
+    privacyS5Title: 'Your choices',
+    privacyS5Body:
+      'You may ask the Dommeru office to update or remove a load or vehicle registration you submitted, where that is practical and does not conflict with an active trip. Contact us using the office phone numbers listed on this site.',
+    privacyS6Title: 'Changes',
+    privacyS6Body:
+      'We may update this policy from time to time. The updated version will be posted on this page with a revised date.',
+    privacyContact: 'Questions about privacy? Call the Dommeru office:',
+    privacyUpdated: 'Last updated: August 2026',
     langEn: 'EN',
     langTe: 'తెలుగు',
   },
@@ -514,6 +539,31 @@ const dict = {
     partLoad: 'పార్ట్ లోడ్',
     trailer: 'ట్రైలర్',
     footerRoles: 'లారీ యజమానులు · లోడ్ అభ్యర్థనలు · ఆఫీస్ డిస్పాచ్',
+    footerPrivacy: 'గోప్యతా విధానం',
+    footerCopyright: '© {year} మురళి ఆఫీస్ మినీ లారీ ట్రాన్స్‌పోర్ట్, దొమ్మేరు. అన్ని హక్కులు కేటాయించబడ్డాయి.',
+    privacyTitle: 'గోప్యతా విధానం',
+    privacyIntro:
+      'లోడ్ పోస్ట్, లారీ నమోదు లేదా మమ్మల్ని సంప్రదించినప్పుడు మురళి ట్రాన్స్‌పోర్ట్ ఆఫీస్ (దొమ్మేరు) మీ సమాచారాన్ని ఎలా నిర్వహిస్తుందో ఈ విధానం వివరిస్తుంది.',
+    privacyS1Title: 'మేము సేకరించే సమాచారం',
+    privacyS1Body:
+      'బుకింగ్ ఫారమ్‌ల ద్వారా మీ పేరు, ఫోన్, పికప్/డ్రాప్, సరుకు వివరాలు, వాహన నంబర్/సామర్థ్యం మరియు మీరు ఇచ్చే గమనికలు సేకరించవచ్చు. ఆఫీస్ ఫోన్/వాట్సాప్ సంభాషణల్లో మీరు పంచుకున్న వివరాలు కూడా ఉండవచ్చు.',
+    privacyS2Title: 'సమాచారం ఎలా ఉపయోగిస్తాము',
+    privacyS2Body:
+      'మినీ లారీ/ట్రక్ బుకింగ్, లోడ్–వాహన మ్యాచింగ్, డిస్పాచ్ కమ్యూనికేషన్ మరియు ఆఫీస్ సమన్వయం కోసం మాత్రమే ఉపయోగిస్తాము. మేము మీ వ్యక్తిగత సమాచారాన్ని అమ్మము.',
+    privacyS3Title: 'పంచుకోవడం',
+    privacyS3Body:
+      'ట్రిప్‌కు అవసరమైన వివరాలు అసైన్ అయిన డ్రైవర్/యజమాని మరియు ఆఫీస్ సిబ్బందితో పంచుకోవచ్చు. పబ్లిక్ పేజీల్లో పరిమిత/మాస్క్ చేసిన సమాచారం మాత్రమే కనిపిస్తుంది.',
+    privacyS4Title: 'నిల్వ & భద్రత',
+    privacyS4Body:
+      'అసైన్‌మెంట్లు నిర్వహించడానికి బుకింగ్ రికార్డులు ఆఫీస్ సిస్టమ్‌ల్లో నిల్వ ఉంటాయి. అడ్మిన్ యాక్సెస్‌ను రక్షించడానికి సహేతుక చర్యలు తీసుకుంటాము. ఏ నిల్వా పూర్తిగా సురక్షితం కాదు.',
+    privacyS5Title: 'మీ ఎంపికలు',
+    privacyS5Body:
+      'మీరు పంపిన లోడ్ లేదా వాహన నమోదును అప్‌డేట్/తొలగించమని దొమ్మేరు ఆఫీస్‌ను అడగవచ్చు (యాక్టివ్ ట్రిప్‌తో విరుద్ధం కాకపోతే). సైట్‌లోని ఆఫీస్ ఫోన్ నంబర్‌లకు కాల్ చేయండి.',
+    privacyS6Title: 'మార్పులు',
+    privacyS6Body:
+      'ఈ విధానాన్ని అప్పుడప్పుడు అప్‌డేట్ చేయవచ్చు. కొత్త వెర్షన్ ఈ పేజీలో తేదీతో ప్రచురించబడుతుంది.',
+    privacyContact: 'గోప్యత గురించి ప్రశ్నలు ఉంటే దొమ్మేరు ఆఫీస్‌కు కాల్ చేయండి:',
+    privacyUpdated: 'చివరి అప్‌డేట్: ఆగస్టు 2026',
     langEn: 'EN',
     langTe: 'తెలుగు',
   },
