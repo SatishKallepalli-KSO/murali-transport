@@ -88,7 +88,7 @@ const dict = {
     heroKicker: 'Dommeru · Andhra Pradesh',
     heroBrand: 'Murali Transport Office',
     heroSub: 'Reliable mini lorry & truck booking',
-    heroTagline: 'Twenty years coordinating freight from Dommeru to major hubs — call the office or book online.',
+    heroTagline: 'Twenty years matching loads and lorries from one Dommeru desk.',
     ctaQuote: 'Get a quote',
     trustStripTitle: 'Trusted local transport office',
     trustLiveLabel: 'Live at the office',
@@ -350,8 +350,7 @@ const dict = {
     heroKicker: 'దొమ్మేరు · ఆంధ్రప్రదేశ్',
     heroBrand: 'మురళి ట్రాన్స్‌పోర్ట్ ఆఫీస్',
     heroSub: 'నమ్మకమైన మినీ లారీ & ట్రక్ బుకింగ్',
-    heroTagline:
-      'ఇరవై సంవత్సరాలుగా దొమ్మేరు నుండి ప్రధాన హబ్‌లకు ఫ్రైట్ సమన్వయం — ఆఫీస్‌కు కాల్ చేయండి లేదా ఆన్‌లైన్ బుక్ చేయండి.',
+    heroTagline: 'ఇరవై సంవత్సరాలుగా దొమ్మేరు డెస్క్ నుండి లోడ్–లారీ మ్యాచింగ్.',
     ctaQuote: 'కోట్ పొందండి',
     trustStripTitle: 'నమ్మకమైన స్థానిక ట్రాన్స్‌పోర్ట్ ఆఫీస్',
     trustLiveLabel: 'ఆఫీస్‌లో ఇప్పుడు',
