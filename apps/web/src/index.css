@@ -335,18 +335,8 @@ main > .admin-portal {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 72% center;
+  object-position: 78% center;
   display: block;
-  animation: hero-soft-drift 18s ease-out forwards;
-}
-
-@keyframes hero-soft-drift {
-  from {
-    transform: scale(1.04);
-  }
-  to {
-    transform: scale(1);
-  }
 }
 
 .hero-scenic-shade {
