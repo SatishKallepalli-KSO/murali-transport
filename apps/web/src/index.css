@@ -1488,28 +1488,37 @@ main > .admin-portal {
 
 .testimonials {
   overflow: hidden;
-  margin-inline: 0;
+  margin: 0 0 1.5rem;
+  padding: 1.35rem 0 1.1rem;
 }
 
-.testimonials .section-head {
+.testimonials-head {
   max-width: var(--max);
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0;
+  margin: 0 auto 0.85rem;
+  padding: 0 max(1.25rem, calc((100% - var(--max)) / 2));
+}
+
+.testimonials-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.4vw, 1.55rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .testimonial-marquee {
-  margin-top: 0.35rem;
-  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
 
 .testimonial-track {
   display: flex;
+  flex-wrap: nowrap;
   width: max-content;
-  gap: 1rem;
-  padding: 0.35rem 1.25rem 0.85rem;
-  animation: testimonial-run 55s linear infinite;
+  gap: 0.85rem;
+  padding: 0.15rem 1.25rem 0.35rem;
+  animation: testimonial-run 40s linear infinite;
 }
 
 .testimonial-marquee:hover .testimonial-track {
@@ -1517,38 +1526,42 @@ main > .admin-portal {
 }
 
 .testimonial-card {
-  flex: 0 0 min(320px, 78vw);
+  flex: 0 0 280px;
   margin: 0;
-  padding: 1.15rem 1.2rem 1.2rem;
+  padding: 0.85rem 1rem 0.9rem;
   border-left: 3px solid var(--warm);
   background:
     linear-gradient(160deg, rgba(31, 111, 235, 0.05), rgba(239, 139, 46, 0.08)),
     #fff;
-  border-radius: 0 1rem 1rem 0;
+  border-radius: 0 0.85rem 0.85rem 0;
 }
 
 .testimonial-card blockquote {
   margin: 0;
-  font-size: 0.98rem;
-  line-height: 1.5;
+  font-size: 0.9rem;
+  line-height: 1.4;
   color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .testimonial-card figcaption {
   display: grid;
-  gap: 0.1rem;
-  margin-top: 0.85rem;
+  gap: 0.05rem;
+  margin-top: 0.55rem;
 }
 
 .testimonial-card strong {
-  font-size: 0.98rem;
+  font-size: 0.88rem;
   font-weight: 750;
   color: var(--brand);
 }
 
 .testimonial-card figcaption span {
   color: var(--ink-soft);
-  font-size: 0.86rem;
+  font-size: 0.78rem;
 }
 
 @keyframes testimonial-run {
@@ -1556,7 +1569,7 @@ main > .admin-portal {
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translateX(-33.333%);
   }
 }
 
@@ -1570,16 +1583,7 @@ main > .admin-portal {
   }
 
   .testimonial-track {
-    animation: none;
-    flex-wrap: wrap;
-    width: auto;
-    max-width: var(--max);
-    margin: 0 auto;
-    justify-content: center;
-  }
-
-  .testimonial-card {
-    flex-basis: min(320px, 100%);
+    animation: testimonial-run 80s linear infinite;
   }
 }
 
@@ -2516,9 +2520,12 @@ button.data-card.active,
 @media (prefers-reduced-motion: reduce) {
   .hero-scenic-bg img,
   .hero-copy-on-media,
-  .pulse-dot,
-  .testimonial-track {
+  .pulse-dot {
     animation: none !important;
+  }
+
+  .testimonial-track {
+    animation: testimonial-run 90s linear infinite !important;
   }
 
   .nav-cta:hover,

@@ -384,14 +384,13 @@ export function HomePortal({
         </div>
       </section>
 
-      <section className="section testimonials" aria-label="Customer testimonials">
-        <div className="section-head">
+      <section className="testimonials" aria-label="Customer testimonials">
+        <div className="testimonials-head">
           <h2>{tx('testimonialsTitle')}</h2>
-          <p>{tx('testimonialsIntro')}</p>
         </div>
         <div className="testimonial-marquee" aria-live="off">
           <div className="testimonial-track">
-            {[...testimonials[lang], ...testimonials[lang]].map((item, index) => (
+            {[...testimonials[lang], ...testimonials[lang], ...testimonials[lang]].map((item, index) => (
               <figure className="testimonial-card" key={`${item.name}-${index}`}>
                 <blockquote>{item.quote}</blockquote>
                 <figcaption>
