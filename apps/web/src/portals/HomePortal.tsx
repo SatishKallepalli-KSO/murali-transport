@@ -9,7 +9,6 @@ import {
   type Lang,
 } from '../content'
 import { waHref } from '../lib/whatsapp'
-import { HeroSlideshow } from '../components/HeroSlideshow'
 import type { LoadFormState } from './RequestPortal'
 
 type Portal = 'home' | 'request' | 'owner' | 'admin' | 'about'
@@ -54,7 +53,15 @@ export function HomePortal({
   return (
     <>
       <section className="hero hero-scenic" aria-label="Murali Transport Office">
-        <HeroSlideshow />
+        <div className="hero-scenic-bg" aria-hidden="true">
+          <img
+            src="/hero.jpg"
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+          />
+        </div>
+        <div className="hero-scenic-shade" aria-hidden="true" />
         <div className="hero-copy hero-copy-on-media">
           <p className="hero-kicker">{tx('heroKicker')}</p>
           <h1 className="hero-name">{tx('heroBrand')}</h1>
