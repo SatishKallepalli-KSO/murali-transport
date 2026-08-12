@@ -92,10 +92,11 @@ a:hover {
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 1rem max(1.25rem, calc((100% - var(--max)) / 2));
-  background: rgba(255, 255, 255, 0.96);
+  padding: 0.95rem max(1.25rem, calc((100% - var(--max)) / 2));
+  background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px rgba(11, 42, 74, 0.04);
 }
 
 .nav-brand {
@@ -215,19 +216,31 @@ a:hover {
   text-decoration: none;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.nav-cta:hover,
+.btn:hover {
+  transform: translateY(-1px);
 }
 
 .nav-cta,
 .btn-primary {
   background: var(--warm);
   color: #1a1208;
+  box-shadow: 0 8px 20px rgba(217, 115, 22, 0.22);
 }
 
 .nav-cta:hover,
 .btn-primary:hover {
   background: var(--warm-deep);
   color: #fff;
+  box-shadow: 0 10px 24px rgba(217, 115, 22, 0.28);
 }
 
 .btn-ghost {
@@ -259,6 +272,14 @@ main {
   padding: 0 0 5rem;
 }
 
+main > .find-bar,
+main > .fleet-band,
+main > .routes-map,
+main > .final-cta {
+  padding-left: max(1.25rem, calc((100% - var(--max)) / 2));
+  padding-right: max(1.25rem, calc((100% - var(--max)) / 2));
+}
+
 main > .flash,
 main > .section,
 main > .portal,
@@ -269,22 +290,14 @@ main > .admin-portal {
   padding-right: max(1.25rem, calc((100% - var(--max)) / 2));
 }
 
-main > .market-pulse,
-main > .find-bar,
-main > .fleet-band,
-main > .routes-map {
-  padding-left: max(1.25rem, calc((100% - var(--max)) / 2));
-  padding-right: max(1.25rem, calc((100% - var(--max)) / 2));
-}
-
 .hero-scenic {
   position: relative;
   isolation: isolate;
   overflow: hidden;
   margin-inline: 0;
-  margin-bottom: 1.5rem;
-  min-height: min(78vh, 640px);
-  padding: 3.5rem max(1.25rem, calc((100% - var(--max)) / 2)) 4.5rem;
+  margin-bottom: 0;
+  min-height: min(86vh, 720px);
+  padding: 4rem max(1.25rem, calc((100% - var(--max)) / 2)) 5rem;
   border-radius: 0;
   display: grid;
   align-items: end;
@@ -303,13 +316,23 @@ main > .routes-map {
   height: 100%;
   object-fit: cover;
   object-position: 68% center;
-  transform: scale(1.04);
+  transform: scale(1.08);
+  animation: hero-kenburns 18s ease-out forwards;
+}
+
+@keyframes hero-kenburns {
+  from {
+    transform: scale(1.08) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.02) translate3d(-1.5%, 0, 0);
+  }
 }
 
 .hero-scenic-shade {
   background:
-    linear-gradient(90deg, rgba(8, 22, 40, 0.88) 0%, rgba(8, 22, 40, 0.62) 42%, rgba(8, 22, 40, 0.22) 72%, rgba(8, 22, 40, 0.12) 100%),
-    linear-gradient(180deg, rgba(8, 22, 40, 0.28) 0%, transparent 38%, rgba(8, 22, 40, 0.55) 100%);
+    linear-gradient(90deg, rgba(8, 22, 40, 0.9) 0%, rgba(8, 22, 40, 0.66) 40%, rgba(8, 22, 40, 0.2) 72%, rgba(8, 22, 40, 0.1) 100%),
+    linear-gradient(180deg, rgba(8, 22, 40, 0.32) 0%, transparent 40%, rgba(8, 22, 40, 0.62) 100%);
 }
 
 .hero-scenic::after {
@@ -318,8 +341,8 @@ main > .routes-map {
   left: 0;
   right: 0;
   bottom: -1px;
-  height: 5.5rem;
-  background: linear-gradient(transparent, #eef3f8);
+  height: 4.5rem;
+  background: linear-gradient(transparent, #f4f7fb);
   pointer-events: none;
   z-index: 1;
 }
@@ -337,8 +360,20 @@ main > .routes-map {
 .hero-copy-on-media {
   position: relative;
   z-index: 2;
-  max-width: 34rem;
+  max-width: 36rem;
   color: #f5f8fc;
+  animation: hero-rise 0.85s ease-out both;
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero-copy-on-media .hero-kicker {
@@ -348,30 +383,43 @@ main > .routes-map {
 .hero-copy-on-media .hero-sub {
   color: #fff;
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 2.8vw, 1.85rem);
+  font-size: clamp(1.4rem, 3vw, 1.95rem);
   font-weight: 750;
   letter-spacing: -0.02em;
   line-height: 1.25;
-  margin: 0.35rem 0 0.75rem;
+  margin: 0.45rem 0 0.85rem;
 }
 
 .hero-copy-on-media .hero-name {
   color: #fff;
   text-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.1rem;
 }
 
 .hero-copy-on-media .hero-tagline {
   color: #d5e2f0;
+  max-width: 38ch;
 }
 
-.trust-strip {
-  margin: 0 0 1.35rem;
-  padding: 1.35rem max(1.25rem, calc((100% - var(--max)) / 2));
+.trust-live {
+  display: grid;
+  gap: 0;
+  margin: 0 0 2rem;
+  border-block: 1px solid rgba(11, 42, 74, 0.1);
+  background: #fff;
+}
+
+.trust-live-trust {
+  padding: 1.35rem max(1.25rem, calc((100% - var(--max)) / 2)) 1.2rem;
   background:
-    linear-gradient(120deg, rgba(239, 139, 46, 0.12), transparent 45%),
-    #f7fafc;
-  border-block: 1px solid rgba(11, 42, 74, 0.08);
+    linear-gradient(120deg, rgba(239, 139, 46, 0.1), transparent 50%),
+    #f8fafc;
+}
+
+.trust-live-pulse {
+  padding: 1.15rem max(1.25rem, calc((100% - var(--max)) / 2)) 1.25rem;
+  background: var(--brand);
+  color: #fff;
 }
 
 .trust-strip-label {
@@ -383,13 +431,15 @@ main > .routes-map {
   text-transform: uppercase;
 }
 
-.trust-strip-grid {
+.trust-strip-grid,
+.trust-live-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 
-.trust-strip-grid strong {
+.trust-strip-grid strong,
+.trust-live-grid strong {
   display: block;
   font-family: var(--font-display);
   font-size: clamp(1.05rem, 2vw, 1.25rem);
@@ -398,9 +448,14 @@ main > .routes-map {
   letter-spacing: -0.02em;
 }
 
-.trust-strip-grid span {
+.trust-strip-grid span,
+.trust-live-grid span {
   color: var(--ink-soft);
   font-size: 0.88rem;
+}
+
+.trust-live-pulse-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .service-showcase-grid {
@@ -530,7 +585,8 @@ main > .routes-map {
 }
 
 @media (max-width: 719px) {
-  .trust-strip-grid,
+  .trust-live-grid,
+  .trust-live-pulse-grid,
   .service-showcase-grid,
   .why-grid {
     grid-template-columns: 1fr;
@@ -665,6 +721,10 @@ main > .routes-map {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.trust-live-pulse .market-pulse-label {
+  margin-bottom: 0.85rem;
 }
 
 .pulse-dot {
@@ -2152,14 +2212,25 @@ button.data-card.active,
   background: var(--brand);
   color: #c5d3e3;
   margin-top: 2rem;
+  padding-bottom: 4.5rem;
 }
 
 .footer-inner {
   max-width: var(--max);
   margin: 0 auto;
-  padding: 2.5rem 1.25rem 3rem;
+  padding: 2.75rem 1.25rem 2.5rem;
   display: grid;
-  gap: 0.85rem;
+  gap: 2rem;
+}
+
+.footer-brand strong {
+  display: block;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.45rem;
 }
 
 .footer strong {
@@ -2176,6 +2247,12 @@ button.data-card.active,
   text-decoration: none;
 }
 
+.footer-hours {
+  margin-top: 0.55rem !important;
+  color: #9eb6d1;
+  font-size: 0.92rem;
+}
+
 .footer-link {
   appearance: none;
   border: 0;
@@ -2184,22 +2261,134 @@ button.data-card.active,
   font: inherit;
   padding: 0;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;
   text-underline-offset: 0.18em;
 }
 
 .footer-link:hover {
   color: #fff;
+  text-decoration: underline;
 }
 
 .footer-meta {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.7rem;
+}
+
+.footer-nav-label {
+  margin: 0;
+  color: #9eb6d1;
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.15rem;
 }
 
 .footer-copyright {
   color: #9eb6d1;
   font-size: 0.9rem;
+}
+
+.final-cta {
+  margin: 0.5rem 0 0;
+  padding-top: 2.75rem;
+  padding-bottom: 2.75rem;
+  background:
+    radial-gradient(ellipse 70% 80% at 90% 20%, rgba(239, 139, 46, 0.22), transparent 55%),
+    linear-gradient(145deg, #0b2a4a 0%, #134a8a 100%);
+  color: #fff;
+}
+
+.final-cta-inner {
+  max-width: 40rem;
+}
+
+.final-cta h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.final-cta p {
+  margin: 0.85rem 0 0;
+  color: #c9d7e8;
+  font-size: 1.08rem;
+  line-height: 1.55;
+  max-width: 42ch;
+}
+
+.mobile-dock {
+  display: none;
+}
+
+@media (max-width: 719px) {
+  .site {
+    padding-bottom: 4.25rem;
+  }
+
+  .footer {
+    padding-bottom: 5.5rem;
+  }
+
+  .mobile-dock {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.35rem;
+    padding: 0.55rem 0.65rem calc(0.55rem + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid rgba(11, 42, 74, 0.12);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 -10px 28px rgba(11, 42, 74, 0.12);
+  }
+
+  .mobile-dock-item {
+    appearance: none;
+    border: 0;
+    background: #f1f5f9;
+    color: var(--brand);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 750;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 0.7rem;
+    padding: 0.72rem 0.4rem;
+    cursor: pointer;
+  }
+
+  .mobile-dock-primary {
+    background: #25d366;
+    color: #053318;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-scenic-bg img,
+  .hero-copy-on-media,
+  .pulse-dot,
+  .testimonial-track {
+    animation: none !important;
+  }
+
+  .nav-cta:hover,
+  .btn:hover,
+  .role-tile:hover {
+    transform: none;
+  }
 }
 
 .privacy-sections {
@@ -2247,13 +2436,19 @@ button.data-card.active,
     display: grid;
     grid-template-columns: 1fr;
     align-items: end;
-    min-height: min(78vh, 680px);
-    padding: 4.5rem max(1.25rem, calc((100% - var(--max)) / 2)) 5.5rem;
+    min-height: min(88vh, 760px);
+    padding: 5rem max(1.25rem, calc((100% - var(--max)) / 2)) 6rem;
     margin-inline: 0;
   }
 
   .hero-scenic-bg img {
     object-position: 72% center;
+  }
+
+  .footer-inner {
+    grid-template-columns: 1.2fr 0.9fr;
+    align-items: start;
+    gap: 2.5rem;
   }
 
   .hero-media,
@@ -2270,6 +2465,10 @@ button.data-card.active,
 
   .market-pulse-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .trust-live-pulse-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .role-grid {

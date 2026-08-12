@@ -1,8 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { Load, Stats, Vehicle } from '../api'
-import { PhoneLinks } from '../components/PhoneLinks'
 import {
-  address,
   business,
   routeCities,
   routeLinks,
@@ -10,6 +8,7 @@ import {
   type DictKey,
   type Lang,
 } from '../content'
+import { waHref } from '../lib/whatsapp'
 import type { LoadFormState } from './RequestPortal'
 
 type Portal = 'home' | 'request' | 'owner' | 'admin' | 'about'
@@ -89,7 +88,6 @@ export function HomePortal({
         </div>
         <div className="hero-scenic-shade" aria-hidden="true" />
         <div className="hero-copy hero-copy-on-media">
-          <p className="hero-kicker">{tx('heroKicker')}</p>
           <h1 className="hero-name">{tx('heroBrand')}</h1>
           <p className="hero-sub">{tx('heroSub')}</p>
           <p className="hero-tagline">{tx('heroTagline')}</p>
@@ -100,53 +98,49 @@ export function HomePortal({
             <a className="btn btn-light" href={`tel:${business.phone}`}>
               {tx('callNow')}
             </a>
+            <a className="btn btn-ghost-light" href={waHref(lang)} target="_blank" rel="noreferrer">
+              {tx('whatsapp')}
+            </a>
           </div>
         </div>
       </section>
 
-      <section className="trust-strip" aria-label={tx('trustStripTitle')}>
-        <p className="trust-strip-label">{tx('trustStripTitle')}</p>
-        <div className="trust-strip-grid">
-          <div>
-            <strong>{tx('trustYears')}</strong>
-            <span>{tx('trustYearsDetail')}</span>
-          </div>
-          <div>
-            <strong>{tx('trustRating')}</strong>
-            <span>{tx('trustReviews')}</span>
-          </div>
-          <div>
-            <strong>{tx('trustHours')}</strong>
-            <span>{tx('trustHub')}</span>
-          </div>
-          <div>
-            <strong>{stats?.available_vehicles ?? publicVehicles.length}</strong>
-            <span>{tx('snapAvailable')}</span>
+      <section className="trust-live" aria-label={tx('trustStripTitle')}>
+        <div className="trust-live-trust">
+          <p className="trust-strip-label">{tx('trustStripTitle')}</p>
+          <div className="trust-strip-grid trust-live-grid">
+            <div>
+              <strong>{tx('trustYears')}</strong>
+              <span>{tx('trustYearsDetail')}</span>
+            </div>
+            <div>
+              <strong>{tx('trustRating')}</strong>
+              <span>{tx('trustReviews')}</span>
+            </div>
+            <div>
+              <strong>{tx('trustHours')}</strong>
+              <span>{tx('trustHub')}</span>
+            </div>
           </div>
         </div>
-      </section>
-
-      <section className="market-pulse" aria-label="Market pulse">
-        <p className="market-pulse-label">
-          <span className="pulse-dot" aria-hidden="true" />
-          {tx('marketPulse')}
-        </p>
-        <div className="market-pulse-grid">
-          <div>
-            <strong>{stats?.available_vehicles ?? publicVehicles.length}</strong>
-            <span>{tx('snapAvailable')}</span>
-          </div>
-          <div>
-            <strong>{stats?.open_loads ?? publicLoads.length}</strong>
-            <span>{tx('snapOpen')}</span>
-          </div>
-          <div>
-            <strong>{stats?.assignments ?? 0}</strong>
-            <span>{tx('snapAssigned')}</span>
-          </div>
-          <div>
-            <strong>{stats?.vehicles ?? '—'}</strong>
-            <span>{tx('snapFleet')}</span>
+        <div className="trust-live-pulse">
+          <p className="market-pulse-label">
+            <span className="pulse-dot" aria-hidden="true" />
+            {tx('trustLiveLabel')}
+          </p>
+          <div className="market-pulse-grid trust-live-pulse-grid">
+            <div>
+              <strong>{stats?.available_vehicles ?? publicVehicles.length}</strong>
+              <span>{tx('snapAvailable')}</span>
+            </div>
+            <div>
+              <strong>{stats?.open_loads ?? publicLoads.length}</strong>
+              <span>{tx('snapOpen')}</span>
+            </div>
+            <div>
+              <strong>{stats?.assignments ?? 0}</strong>
+              <span>{tx('snapAssigned')}</span>
+            </div>
           </div>
         </div>
       </section>
@@ -516,34 +510,21 @@ export function HomePortal({
         </div>
       </section>
 
-      <section className="section section-alt about-preview">
-        <div className="section-head">
-          <h2>{tx('aboutTitle')}</h2>
-          <p>{tx('aboutIntro')}</p>
-        </div>
-        <dl className="about-facts">
-          <div>
-            <dt>{tx('aboutOwnerLabel')}</dt>
-            <dd>{business.owner}</dd>
+      <section className="final-cta" aria-label={tx('finalCtaTitle')}>
+        <div className="final-cta-inner">
+          <h2>{tx('finalCtaTitle')}</h2>
+          <p>{tx('finalCtaBody')}</p>
+          <div className="hero-actions">
+            <button type="button" className="btn btn-primary" onClick={() => setPortal('request')}>
+              {tx('ctaPostLoad')}
+            </button>
+            <a className="btn btn-light" href={`tel:${business.phone}`}>
+              {tx('callNow')}
+            </a>
+            <a className="btn btn-ghost-light" href={waHref(lang)} target="_blank" rel="noreferrer">
+              {tx('whatsapp')}
+            </a>
           </div>
-          <div>
-            <dt>{tx('aboutPhoneLabel')}</dt>
-            <dd>
-              <PhoneLinks />
-            </dd>
-          </div>
-          <div>
-            <dt>{tx('aboutAddressLabel')}</dt>
-            <dd>{address.line}</dd>
-          </div>
-        </dl>
-        <div className="location-actions">
-          <button type="button" className="btn btn-primary" onClick={() => setPortal('about')}>
-            {tx('navAbout')}
-          </button>
-          <a className="btn btn-ghost" href={business.mapsShareUrl} target="_blank" rel="noreferrer">
-            {tx('ctaDirections')}
-          </a>
         </div>
       </section>
     </>

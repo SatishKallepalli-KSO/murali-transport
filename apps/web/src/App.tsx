@@ -24,6 +24,7 @@ import {
 import { PhoneLinks } from './components/PhoneLinks'
 import { PortalBack } from './components/PortalBack'
 import { address, business, t, type Lang } from './content'
+import { waHref } from './lib/whatsapp'
 import { AdminPortal, type AdminTab } from './portals/AdminPortal'
 import { AboutPortal } from './portals/AboutPortal'
 import { ConfirmPortal } from './portals/ConfirmPortal'
@@ -626,27 +627,50 @@ export default function App() {
 
       <footer className="footer">
         <div className="footer-inner">
-          <div>
+          <div className="footer-brand">
             <strong>{business.name}</strong>
             <p>{business.owner}</p>
             <p>
               <PhoneLinks />
             </p>
             <p>{address.line}</p>
+            <p className="footer-hours">{tx('hours')}</p>
           </div>
           <div className="footer-meta">
-            <p>{tx('footerRoles')}</p>
-            <p>
+            <p className="footer-nav-label">{tx('footerNav')}</p>
+            <div className="footer-links">
+              <button type="button" className="footer-link" onClick={() => goPortal('request')}>
+                {tx('navRequest')}
+              </button>
+              <button type="button" className="footer-link" onClick={() => goPortal('owner')}>
+                {tx('navOwner')}
+              </button>
+              <button type="button" className="footer-link" onClick={() => goPortal('about')}>
+                {tx('navAbout')}
+              </button>
               <button type="button" className="footer-link" onClick={() => goPortal('privacy')}>
                 {tx('footerPrivacy')}
               </button>
-            </p>
+            </div>
+            <p>{tx('footerRoles')}</p>
             <p className="footer-copyright">
               {tx('footerCopyright').replace('{year}', String(new Date().getFullYear()))}
             </p>
           </div>
         </div>
       </footer>
+
+      <nav className="mobile-dock" aria-label="Quick actions">
+        <a className="mobile-dock-item" href={`tel:${business.phone}`}>
+          <span>{tx('callNow')}</span>
+        </a>
+        <a className="mobile-dock-item mobile-dock-primary" href={waHref(lang)} target="_blank" rel="noreferrer">
+          <span>{tx('whatsapp')}</span>
+        </a>
+        <button type="button" className="mobile-dock-item" onClick={() => goPortal('request')}>
+          <span>{tx('dockBook')}</span>
+        </button>
+      </nav>
     </div>
   )
 }
