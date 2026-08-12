@@ -443,7 +443,7 @@ export default function App() {
     <div className={`site lang-${lang}`}>
       <div className="topbar">
         <span className="topbar-banner">
-          Murali Transport Office, Dommeru · ph: <PhoneLinks />
+          {tx('hours')} · <PhoneLinks />
         </span>
       </div>
 
@@ -474,9 +474,6 @@ export default function App() {
           </button>
           <button type="button" className={portal === 'owner' ? 'active' : ''} onClick={() => goPortal('owner')}>
             {tx('navOwner')}
-          </button>
-          <button type="button" className={portal === 'admin' ? 'active' : ''} onClick={() => goPortal('admin')}>
-            {tx('navAdmin')}
           </button>
         </nav>
         <div className="nav-end">
@@ -565,6 +562,7 @@ export default function App() {
           <>
             <PortalBack tx={tx} onBack={goBack} />
             <RequestPortal
+              lang={lang}
               tx={tx}
               loadForm={loadForm}
               setLoadForm={setLoadForm}
@@ -578,6 +576,7 @@ export default function App() {
           <>
             <PortalBack tx={tx} onBack={goBack} />
             <OwnerPortal
+              lang={lang}
               tx={tx}
               vehicleForm={vehicleForm}
               setVehicleForm={setVehicleForm}
@@ -650,6 +649,9 @@ export default function App() {
               </button>
               <button type="button" className="footer-link" onClick={() => goPortal('privacy')}>
                 {tx('footerPrivacy')}
+              </button>
+              <button type="button" className="footer-link footer-link-quiet" onClick={() => goPortal('admin')}>
+                {tx('goAdmin')}
               </button>
             </div>
             <p>{tx('footerRoles')}</p>

@@ -14,6 +14,8 @@ export const business = {
   mapsShareUrl: 'https://share.google/mAW3H8LK7Ogq0qrBl',
   mapsSearchUrl:
     'https://www.google.com/maps/search/?api=1&query=Murali+Office+Miny+Lorry+Transport+Dommeru',
+  mapsEmbedUrl:
+    'https://www.google.com/maps?q=17.031281,81.687531&z=16&output=embed',
   lat: 17.031281,
   lng: 81.687531,
 }
@@ -185,6 +187,9 @@ const dict = {
     aboutHoursValue: 'Daily, 5:00 AM – 9:00 PM',
     aboutBody:
       'Whether you need a mini lorry for a short local trip or a truck for longer routes, visit or call the Dommeru office. Vehicle owners can register with us to receive load assignments based on where their lorry is.',
+    aboutMapTitle: 'Office on the map',
+    googleReviews: 'Read Google reviews',
+    formOfficeNote: 'Prefer to talk? Call or WhatsApp the Dommeru office — we book the same day during working hours.',
     fleetTitle: 'Reliable commercial fleet booking',
     fleetBody:
       'From Dommeru we arrange mini lorries and trucks for kirana stock, farm produce, construction material, and industrial cargo — with clear coordination from pickup to delivery.',
@@ -438,6 +443,9 @@ const dict = {
     aboutHoursValue: 'ప్రతిరోజు, ఉదయం 5:00 – రాత్రి 9:00',
     aboutBody:
       'స్థానిక ప్రయాణం కోసం మినీ లారీ కావాలా లేదా దూర మార్గాలకు ట్రక్ కావాలా — దొమ్మేరు ఆఫీస్‌ను సంప్రదించండి. వాహన యజమానులు స్థానం ఆధారంగా లోడ్ అసైన్‌మెంట్లు పొందేందుకు నమోదు చేసుకోవచ్చు.',
+    aboutMapTitle: 'మ్యాప్‌లో ఆఫీస్',
+    googleReviews: 'గూగుల్ రివ్యూలు చూడండి',
+    formOfficeNote: 'మాట్లాడాలనుకుంటే దొమ్మేరు ఆఫీస్‌కు కాల్ లేదా వాట్సాప్ చేయండి — పని గంటల్లో అదే రోజు బుక్ చేస్తాము.',
     fleetTitle: 'నమ్మకమైన వాణిజ్య వాహన బుకింగ్',
     fleetBody:
       'దొమ్మేరు నుండి కిరాణా, వ్యవసాయ ఉత్పత్తులు, నిర్మాణ సామగ్రి, పారిశ్రామిక సరుకు కోసం మినీ లారీలు మరియు ట్రక్కులు ఏర్పాటు చేస్తాము.',

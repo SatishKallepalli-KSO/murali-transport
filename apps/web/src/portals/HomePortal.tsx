@@ -40,33 +40,6 @@ export function HomePortal({
   setLoadForm,
   setPortal,
 }: Props) {
-  const services = [
-    {
-      title: tx('service1Title'),
-      body: tx('service1Body'),
-      action: 'request' as const,
-      cta: tx('ctaQuote'),
-    },
-    {
-      title: tx('service2Title'),
-      body: tx('service2Body'),
-      action: 'request' as const,
-      cta: tx('ctaPostLoad'),
-    },
-    {
-      title: tx('service3Title'),
-      body: tx('service3Body'),
-      action: 'owner' as const,
-      cta: tx('ctaRegister'),
-    },
-    {
-      title: tx('service4Title'),
-      body: tx('service4Body'),
-      action: 'about' as const,
-      cta: tx('navAbout'),
-    },
-  ]
-
   const whyItems = [
     { title: tx('why1Title'), body: tx('why1Body') },
     { title: tx('why2Title'), body: tx('why2Body') },
@@ -84,6 +57,7 @@ export function HomePortal({
           <img
             src="/eicher-highway-hero.jpg"
             alt="Eicher lorry on the highway — Murali Transport Office Dommeru"
+            fetchPriority="high"
           />
         </div>
         <div className="hero-scenic-shade" aria-hidden="true" />
@@ -142,29 +116,6 @@ export function HomePortal({
               <span>{tx('snapAssigned')}</span>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="role-paths" aria-label="Audience paths">
-        <div className="section-head">
-          <h2>{tx('roleTitle')}</h2>
-        </div>
-        <div className="role-grid">
-          <button type="button" className="role-tile role-shipper" onClick={() => setPortal('request')}>
-            <span className="role-index">01</span>
-            <strong>{tx('roleShipperTitle')}</strong>
-            <span>{tx('roleShipperBody')}</span>
-          </button>
-          <button type="button" className="role-tile role-carrier" onClick={() => setPortal('owner')}>
-            <span className="role-index">02</span>
-            <strong>{tx('roleCarrierTitle')}</strong>
-            <span>{tx('roleCarrierBody')}</span>
-          </button>
-          <a className="role-tile role-office" href={`tel:${business.phone}`}>
-            <span className="role-index">03</span>
-            <strong>{tx('roleOfficeTitle')}</strong>
-            <span>{tx('roleOfficeBody')}</span>
-          </a>
         </div>
       </section>
 
@@ -293,32 +244,6 @@ export function HomePortal({
         </div>
       </section>
 
-      <section className="section services-showcase" id="services">
-        <div className="section-head">
-          <h2>{tx('servicesTitle')}</h2>
-          <p>{tx('servicesIntro')}</p>
-        </div>
-        <div className="service-showcase-grid">
-          {services.map((service, index) => (
-            <button
-              type="button"
-              key={service.title}
-              className="service-showcase-item"
-              onClick={() => setPortal(service.action)}
-            >
-              <span className="service-index" aria-hidden="true">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <div>
-                <h3>{service.title}</h3>
-                <p>{service.body}</p>
-                <span className="text-link">{service.cta} →</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </section>
-
       <section className="section why-section" aria-label={tx('whyTitle')}>
         <div className="section-head">
           <h2>{tx('whyTitle')}</h2>
@@ -338,7 +263,7 @@ export function HomePortal({
       </section>
 
       <section className="fleet-band" aria-label="Fleet highlight">
-        <img src="/eicher-lorry.png" alt="Eicher lorry" />
+          <img src="/eicher-lorry.jpg" alt="Eicher lorry" loading="lazy" />
         <div>
           <p className="fleet-kicker">Eicher · Mini lorry & truck</p>
           <h2>{tx('fleetTitle')}</h2>
@@ -456,36 +381,6 @@ export function HomePortal({
             </svg>
           </div>
         </div>
-      </section>
-
-      <section className="section">
-        <div className="section-head">
-          <h2>{tx('howTitle')}</h2>
-          <p>{tx('howIntro')}</p>
-        </div>
-        <ol className="steps">
-          <li className="step">
-            <span className="step-num">01</span>
-            <div>
-              <h3>{tx('how1Title')}</h3>
-              <p>{tx('how1Body')}</p>
-            </div>
-          </li>
-          <li className="step">
-            <span className="step-num">02</span>
-            <div>
-              <h3>{tx('how2Title')}</h3>
-              <p>{tx('how2Body')}</p>
-            </div>
-          </li>
-          <li className="step">
-            <span className="step-num">03</span>
-            <div>
-              <h3>{tx('how3Title')}</h3>
-              <p>{tx('how3Body')}</p>
-            </div>
-          </li>
-        </ol>
       </section>
 
       <section className="section testimonials" aria-label="Customer testimonials">

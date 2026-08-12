@@ -38,7 +38,9 @@ export function AboutPortal({ lang, tx }: Props) {
             <div>
               <dt>Google</dt>
               <dd>
-                {business.rating}★ · {business.reviewCount} reviews
+                <a href={business.mapsShareUrl} target="_blank" rel="noreferrer">
+                  {business.rating}★ · {business.reviewCount} {tx('googleReviews')}
+                </a>
               </dd>
             </div>
           </dl>
@@ -55,7 +57,16 @@ export function AboutPortal({ lang, tx }: Props) {
             </a>
           </div>
         </div>
-        <img className="about-photo" src="/eicher-lorry.png" alt="Office fleet lorry" />
+        <div className="about-map">
+          <p className="about-map-label">{tx('aboutMapTitle')}</p>
+          <iframe
+            title={tx('aboutMapTitle')}
+            src={business.mapsEmbedUrl}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+          />
+        </div>
       </div>
     </section>
   )
