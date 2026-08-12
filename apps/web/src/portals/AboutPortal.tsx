@@ -10,9 +10,12 @@ type Props = {
 export function AboutPortal({ lang, tx }: Props) {
   return (
     <section className="portal about-page">
-      <div className="section-head">
-        <h2>{tx('aboutTitle')}</h2>
-        <p>{tx('aboutIntro')}</p>
+      <div className="section-head about-head">
+        <img className="about-seal" src="/brand-mark.png" alt="Murali Transport" />
+        <div>
+          <h2>{tx('aboutTitle')}</h2>
+          <p>{tx('aboutIntro')}</p>
+        </div>
       </div>
       <div className="about-layout">
         <div className="about-card">

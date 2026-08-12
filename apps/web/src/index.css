@@ -58,17 +58,18 @@ a:hover {
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0.7rem 1rem;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem max(1.25rem, calc((100% - var(--max)) / 2));
   background: var(--brand);
   color: #f5f8fc;
 }
 
 .topbar-banner {
-  font-size: clamp(0.92rem, 2.2vw, 1.05rem);
+  font-size: 0.88rem;
   font-weight: 650;
   letter-spacing: 0.01em;
-  text-align: center;
+  min-width: 0;
 }
 
 .topbar-banner a {
@@ -79,6 +80,33 @@ a:hover {
 
 .topbar-banner a:hover {
   color: #ffe0b0;
+}
+
+.local-now {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: #d5e2f0;
+  white-space: nowrap;
+}
+
+.local-now-place {
+  color: #ffc57a;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.local-now-time {
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  font-weight: 750;
 }
 
 .nav {
@@ -123,30 +151,12 @@ a:hover {
 }
 
 .nav-mark {
-  width: 2.35rem;
-  height: 2.35rem;
-  border-radius: 0.55rem;
-  background:
-    linear-gradient(145deg, #2f86ff 0%, var(--accent) 48%, #0b2a4a 100%);
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.12);
-  position: relative;
-}
-
-.nav-mark::before {
-  content: 'M';
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-}
-
-.nav-mark::after {
-  display: none;
+  width: 2.55rem;
+  height: 2.55rem;
+  flex-shrink: 0;
+  display: block;
+  border-radius: 0.6rem;
+  box-shadow: 0 6px 16px rgba(11, 42, 74, 0.18);
 }
 
 .nav-links {
@@ -952,6 +962,22 @@ main > .admin-portal {
 .section-head {
   max-width: 40rem;
   margin-bottom: 1.75rem;
+}
+
+.about-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  max-width: 46rem;
+}
+
+.about-seal {
+  width: 4.25rem;
+  height: 4.25rem;
+  flex-shrink: 0;
+  border-radius: 0.95rem;
+  object-fit: cover;
+  box-shadow: 0 10px 24px rgba(11, 42, 74, 0.16);
 }
 
 .section-head h2 {
@@ -2286,14 +2312,28 @@ button.data-card.active,
   gap: 2rem;
 }
 
+.footer-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+}
+
+.footer-mark {
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  border-radius: 0.65rem;
+}
+
 .footer-brand strong {
   display: block;
   color: #fff;
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0;
 }
 
 .footer strong {
@@ -2400,6 +2440,17 @@ button.data-card.active,
 @media (max-width: 719px) {
   .site {
     padding-bottom: 4.25rem;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+
+  .local-now {
+    justify-content: flex-start;
+    white-space: normal;
   }
 
   .nav-cta {

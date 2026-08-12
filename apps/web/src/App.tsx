@@ -23,6 +23,8 @@ import {
 } from './api'
 import { PhoneLinks } from './components/PhoneLinks'
 import { PortalBack } from './components/PortalBack'
+import { BrandMark } from './components/BrandMark'
+import { LocalNow } from './components/LocalNow'
 import { address, business, t, type Lang } from './content'
 import { waHref } from './lib/whatsapp'
 import { AdminPortal, type AdminTab } from './portals/AdminPortal'
@@ -445,6 +447,7 @@ export default function App() {
         <span className="topbar-banner">
           {tx('hours')} · <PhoneLinks />
         </span>
+        <LocalNow lang={lang} tx={tx} />
       </div>
 
       <header className="nav">
@@ -456,7 +459,7 @@ export default function App() {
             goPortal('home')
           }}
         >
-          <span className="nav-mark" aria-hidden="true" />
+          <BrandMark className="nav-mark" />
           <span>
             <strong>Murali Transport</strong>
             <small>Dommeru</small>
@@ -627,7 +630,10 @@ export default function App() {
       <footer className="footer">
         <div className="footer-inner">
           <div className="footer-brand">
-            <strong>{business.name}</strong>
+            <div className="footer-brand-row">
+              <BrandMark className="footer-mark" />
+              <strong>{business.name}</strong>
+            </div>
             <p>{business.owner}</p>
             <p>
               <PhoneLinks />
