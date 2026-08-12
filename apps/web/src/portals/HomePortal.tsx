@@ -55,7 +55,7 @@ export function HomePortal({
       <section className="hero hero-scenic" aria-label="Murali Transport Office">
         <div className="hero-scenic-bg" aria-hidden="true">
           <img
-            src="/hero-coconuts.jpg"
+            src="/hero-lorry.jpg"
             alt=""
             fetchPriority="high"
             decoding="async"
