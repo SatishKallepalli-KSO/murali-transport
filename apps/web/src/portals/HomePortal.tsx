@@ -62,6 +62,7 @@ export function HomePortal({
         </div>
         <div className="hero-scenic-shade" aria-hidden="true" />
         <div className="hero-copy hero-copy-on-media">
+          <p className="hero-kicker">{tx('heroKicker')}</p>
           <h1 className="hero-name">{tx('heroBrand')}</h1>
           <p className="hero-sub">{tx('heroSub')}</p>
           <p className="hero-tagline">{tx('heroTagline')}</p>
@@ -301,8 +302,8 @@ export function HomePortal({
             <svg viewBox="0 0 860 560" className="routes-svg">
               <defs>
                 <linearGradient id="routeRoad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ef8b2e" stopOpacity="0.95" />
-                  <stop offset="100%" stopColor="#1f6feb" stopOpacity="0.85" />
+                  <stop offset="0%" stopColor="#c4a574" stopOpacity="0.95" />
+                  <stop offset="100%" stopColor="#e6d3a8" stopOpacity="0.85" />
                 </linearGradient>
                 <radialGradient id="routeGlow" cx="50%" cy="50%" r="50%">
                   <stop offset="0%" stopColor="#ffc57a" stopOpacity="0.35" />
@@ -352,7 +353,7 @@ export function HomePortal({
                     cx={city.x}
                     cy={city.y}
                     r={city.hub ? 16 : city.major ? 11 : 7}
-                    fill={city.hub ? '#ef8b2e' : city.major ? '#ffc57a' : '#9ec5ff'}
+                    fill={city.hub ? '#c4a574' : city.major ? '#e6d3a8' : '#9eb6c9'}
                     stroke="#fff"
                     strokeWidth={city.hub || city.major ? 3 : 2}
                   />
@@ -362,7 +363,7 @@ export function HomePortal({
                       cy={city.y}
                       r="26"
                       fill="none"
-                      stroke="#ef8b2e"
+                      stroke="#c4a574"
                       strokeOpacity="0.45"
                       strokeWidth="2"
                       className="routes-hub-ring"
@@ -388,20 +389,18 @@ export function HomePortal({
           <h2>{tx('testimonialsTitle')}</h2>
           <p>{tx('testimonialsIntro')}</p>
         </div>
-        <div className="testimonial-marquee" aria-live="off">
-          <div className="testimonial-track">
-            {[...testimonials[lang], ...testimonials[lang]].map((item, index) => (
-              <figure className="testimonial-card" key={`${item.name}-${index}`}>
-                <blockquote>{item.quote}</blockquote>
-                <figcaption>
-                  <strong>{item.name}</strong>
-                  <span>
-                    {item.role} · {item.place}
-                  </span>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
+        <div className="testimonial-grid">
+          {testimonials[lang].map((item) => (
+            <figure className="testimonial-card" key={item.name}>
+              <blockquote>{item.quote}</blockquote>
+              <figcaption>
+                <strong>{item.name}</strong>
+                <span>
+                  {item.role} · {item.place}
+                </span>
+              </figcaption>
+            </figure>
+          ))}
         </div>
       </section>
 
