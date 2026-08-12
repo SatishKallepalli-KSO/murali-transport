@@ -56,7 +56,7 @@ export function HomePortal({
         <div className="hero-scenic-bg" aria-hidden="true">
           <img
             src="/eicher-highway-hero.jpg"
-            alt="Eicher Pro truck on the highway — Murali Transport Office Dommeru"
+            alt="Eicher Pro trucks — Murali Transport Office Dommeru"
             fetchPriority="high"
           />
         </div>
