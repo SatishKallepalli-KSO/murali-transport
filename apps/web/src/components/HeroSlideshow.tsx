@@ -7,19 +7,24 @@ const SLIDES = [
     position: '88% 45%',
   },
   {
-    src: '/hero-2.jpg',
-    alt: 'Eicher Pro on the highway',
-    position: '78% center',
-  },
-  {
-    src: '/hero-3.jpg',
-    alt: 'Eicher Pro 8055 truck',
+    src: '/hero-5.jpg',
+    alt: 'Commercial truck on the open road',
     position: '62% center',
   },
   {
-    src: '/hero-4.jpg',
-    alt: 'Eicher mini lorry',
-    position: '70% center',
+    src: '/hero-7.jpg',
+    alt: 'Tata Ultra T7 truck',
+    position: '58% center',
+  },
+  {
+    src: '/hero-6.jpg',
+    alt: 'Tata LPT cargo truck',
+    position: '55% center',
+  },
+  {
+    src: '/hero-2.jpg',
+    alt: 'Eicher Pro on the highway',
+    position: '78% center',
   },
 ] as const
 
