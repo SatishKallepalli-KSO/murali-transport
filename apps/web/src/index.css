@@ -54,6 +54,12 @@ a:hover {
   color: var(--accent-deep);
 }
 
+.site {
+  min-height: 100vh;
+  overflow-x: clip;
+  background: transparent;
+}
+
 .lang-te .nav-links button {
   letter-spacing: 0.02em;
 }
