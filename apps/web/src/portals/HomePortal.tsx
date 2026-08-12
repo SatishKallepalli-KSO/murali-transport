@@ -56,7 +56,7 @@ export function HomePortal({
         <div className="hero-scenic-bg" aria-hidden="true">
           <img
             src="/eicher-highway-hero.jpg"
-            alt="Eicher lorry on the highway — Murali Transport Office Dommeru"
+            alt="Eicher Pro truck on the highway — Murali Transport Office Dommeru"
             fetchPriority="high"
           />
         </div>
@@ -264,9 +264,9 @@ export function HomePortal({
       </section>
 
       <section className="fleet-band" aria-label="Fleet highlight">
-          <img src="/eicher-lorry.jpg" alt="Eicher lorry" loading="lazy" />
-        <div>
-          <p className="fleet-kicker">Eicher · Mini lorry & truck</p>
+          <img src="/eicher-lorry.jpg" alt="Eicher Pro commercial truck" loading="lazy" />
+          <div>
+            <p className="fleet-kicker">Eicher Pro · Mini lorry & truck</p>
           <h2>{tx('fleetTitle')}</h2>
           <p>{tx('fleetBody')}</p>
         </div>

@@ -330,7 +330,7 @@ main > .admin-portal {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 68% center;
+  object-position: 78% center;
   transform: scale(1.08);
   animation: hero-kenburns 18s ease-out forwards;
 }
@@ -2586,7 +2586,7 @@ button.data-card.active,
   }
 
   .hero-scenic-bg img {
-    object-position: 72% center;
+    object-position: 80% center;
   }
 
   .footer-inner {
