@@ -88,7 +88,7 @@ const dict = {
     heroKicker: 'Dommeru · Andhra Pradesh',
     heroBrand: 'Murali Transport Office',
     heroSub: 'Reliable mini lorry & truck booking',
-    heroTagline: 'Twenty years coordinating freight from one Dommeru desk — call, or book online.',
+    heroTagline: 'Twenty years coordinating freight from Dommeru to major hubs — call the office or book online.',
     ctaQuote: 'Get a quote',
     trustStripTitle: 'Trusted local transport office',
     trustLiveLabel: 'Live at the office',
