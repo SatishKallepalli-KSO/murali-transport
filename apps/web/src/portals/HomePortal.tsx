@@ -265,9 +265,9 @@ export function HomePortal({
       </section>
 
       <section className="fleet-band" aria-label="Fleet highlight">
-          <img src="/fleet-eicher.jpg" alt="Orange Eicher Pro with green coconut load" loading="lazy" />
-          <div>
-            <p className="fleet-kicker">Eicher Pro · Mini lorry & truck</p>
+        <img src="/fleet-eicher.jpg" alt="Orange Eicher Pro with green coconut load" loading="lazy" />
+        <div>
+          <p className="fleet-kicker">Eicher Pro · Mini lorry & truck</p>
           <h2>{tx('fleetTitle')}</h2>
           <p>{tx('fleetBody')}</p>
         </div>
