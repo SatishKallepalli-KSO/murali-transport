@@ -13,6 +13,9 @@ if _TEST_DB.exists():
 
 os.environ["ADMIN_PIN"] = "test-admin-pin-strong1"
 os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DB}"
+os.environ["PUBLIC_WRITE_BURST_MAX"] = "100"
+os.environ["PUBLIC_WRITE_SHORT_MAX"] = "100"
+os.environ["PUBLIC_WRITE_MAX_ATTEMPTS"] = "100"
 os.environ.pop("RENDER", None)
 os.environ.pop("RENDER_SERVICE_ID", None)
 os.environ.pop("ALLOW_INSECURE_DEFAULT_PIN", None)
@@ -229,3 +232,58 @@ def test_public_cannot_delete() -> None:
         assert "*" in row["dropoff"]
         assert "Coconut" not in row["cargo"]
         assert "7777777777" not in row["requestor_phone"]
+
+
+def test_public_write_burst_rate_limit() -> None:
+    import app.rate_limit as rl
+
+    rl.reset_all()
+    previous = (
+        rl.PUBLIC_WRITE_BURST_MAX,
+        rl.PUBLIC_WRITE_SHORT_MAX,
+        rl.PUBLIC_WRITE_MAX,
+    )
+    rl.PUBLIC_WRITE_BURST_MAX = 1
+    rl.PUBLIC_WRITE_SHORT_MAX = 3
+    rl.PUBLIC_WRITE_MAX = 8
+    try:
+        first = client.post(
+            "/v1/loads",
+            json={
+                "requestor_name": "Rate Limit One",
+                "requestor_phone": "9000000001",
+                "pickup": "Dommeru",
+                "dropoff": "Rajahmundry",
+                "cargo": "Rice",
+                "weight_tons": 2,
+                "vehicle_preference": "any",
+                "preferred_date": "",
+                "notes": "",
+            },
+        )
+        assert first.status_code == 201, first.text
+
+        second = client.post(
+            "/v1/loads",
+            json={
+                "requestor_name": "Rate Limit Two",
+                "requestor_phone": "9000000002",
+                "pickup": "Dommeru",
+                "dropoff": "Eluru",
+                "cargo": "Cement",
+                "weight_tons": 3,
+                "vehicle_preference": "truck",
+                "preferred_date": "",
+                "notes": "",
+            },
+        )
+        assert second.status_code == 429, second.text
+        assert "minute" in second.json()["detail"].lower()
+        assert second.headers.get("retry-after")
+    finally:
+        (
+            rl.PUBLIC_WRITE_BURST_MAX,
+            rl.PUBLIC_WRITE_SHORT_MAX,
+            rl.PUBLIC_WRITE_MAX,
+        ) = previous
+        rl.reset_all()

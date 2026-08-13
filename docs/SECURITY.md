@@ -19,7 +19,11 @@
 ## Rate limits
 
 - Admin login: 5 failures / IP / 15 minutes
-- Public writes (`POST` loads, vehicles, bookings): 20 / IP / hour
+- Public writes (`POST` loads, vehicles, bookings), per IP and action:
+  - **1 / minute** (stops rapid bots)
+  - **3 / 5 minutes**
+  - **8 / hour**
+- Exceeded limits return HTTP `429` with a `Retry-After` header
 
 ## Sessions
 
