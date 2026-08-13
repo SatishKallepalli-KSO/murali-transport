@@ -38,6 +38,9 @@ export async function fetchDommeruWeather(): Promise<WeatherSnapshot | null> {
 export function formatDommeruTime(lang: 'en' | 'te') {
   return new Intl.DateTimeFormat(lang === 'te' ? 'te-IN' : 'en-IN', {
     timeZone: 'Asia/Kolkata',
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
