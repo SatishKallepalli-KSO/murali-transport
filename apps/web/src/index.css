@@ -2761,6 +2761,77 @@ button.data-card.active,
     font-size: clamp(1.55rem, 7vw, 2.1rem);
   }
 
+  main {
+    padding-bottom: 3rem;
+  }
+
+  main > .find-bar,
+  main > .fleet-band,
+  main > .routes-map,
+  main > .final-cta,
+  .trust-live-trust,
+  .trust-live-pulse,
+  .testimonials-head {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+  }
+
+  .find-form input,
+  .find-form select,
+  .panel-form input,
+  .panel-form select,
+  .panel-form textarea {
+    font-size: 16px;
+    min-height: 2.85rem;
+  }
+
+  .find-form .btn {
+    justify-self: stretch;
+  }
+
+  .fleet-band {
+    gap: 1.1rem;
+    padding-top: 1.35rem;
+    padding-bottom: 1.35rem;
+  }
+
+  .fleet-band img {
+    max-height: 220px;
+    object-fit: cover;
+    object-position: 60% center;
+  }
+
+  .about-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .location-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .location-actions .btn {
+    width: 100%;
+    min-height: 3rem;
+  }
+
+  .testimonial-card {
+    flex-basis: min(240px, 78vw);
+  }
+
+  .routes-city-list li {
+    min-height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .live-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .mobile-dock {
     position: fixed;
     left: 0;
@@ -2799,6 +2870,29 @@ button.data-card.active,
   .mobile-dock-primary {
     background: #25d366;
     color: #053318;
+  }
+}
+
+@media (max-width: 390px) {
+  .hero-scenic {
+    min-height: min(54vh, 400px);
+    padding: 1.55rem 1rem 2.1rem;
+  }
+
+  .hero-copy-on-media .hero-kicker {
+    margin-bottom: 0.45rem;
+  }
+
+  .hero-actions {
+    margin-top: 1rem;
+  }
+
+  .nav-brand strong {
+    font-size: 0.9rem;
+  }
+
+  .topbar-banner {
+    font-size: 0.76rem;
   }
 }
 
