@@ -45,9 +45,7 @@ export function LocalNow({ lang, tx }: Props) {
           {weather.tempC}° · {tx(weather.labelKey)}
         </span>
       ) : null}
-      <span className="local-now-time">
-        {clock} {tx('ist')}
-      </span>
+      <span className="local-now-time">{clock}</span>
     </span>
   )
 }
