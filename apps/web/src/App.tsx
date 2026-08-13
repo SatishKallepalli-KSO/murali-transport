@@ -127,6 +127,7 @@ export default function App() {
   const [suggestions, setSuggestions] = useState<VehicleSuggestion[]>([])
   const [busy, setBusy] = useState(false)
   const [adminTab, setAdminTab] = useState<AdminTab>('snapshot')
+  const [navOpen, setNavOpen] = useState(false)
 
   const tx = (key: Parameters<typeof t>[1]) => t(lang, key)
 
@@ -160,6 +161,19 @@ export default function App() {
     }
     return () => window.removeEventListener('hashchange', syncFromHash)
   }, [])
+
+  useEffect(() => {
+    if (!navOpen) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setNavOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [navOpen])
+
+  useEffect(() => {
+    setNavOpen(false)
+  }, [portal])
 
   async function refreshPublic() {
     try {
@@ -225,6 +239,7 @@ export default function App() {
     if (next !== portal) {
       clearFlash()
     }
+    setNavOpen(false)
     setPortal(next)
     const hash = hashForPortal(next)
     if (mode === 'replace') {
@@ -450,7 +465,7 @@ export default function App() {
         <LocalNow lang={lang} tx={tx} />
       </div>
 
-      <header className="nav">
+      <header className={`nav${navOpen ? ' is-menu-open' : ''}`}>
         <a
           className="nav-brand"
           href="#top"
@@ -465,7 +480,7 @@ export default function App() {
             <small>Dommeru</small>
           </span>
         </a>
-        <nav className="nav-links" aria-label="Primary">
+        <nav className="nav-links" id="primary-nav-links" aria-label="Primary">
           <button type="button" className={portal === 'home' ? 'active' : ''} onClick={() => goPortal('home')}>
             {tx('navHome')}
           </button>
@@ -499,6 +514,18 @@ export default function App() {
           <a className="nav-cta" href={`tel:${business.phone}`}>
             {tx('callNow')}
           </a>
+          <button
+            type="button"
+            className="nav-menu-toggle"
+            aria-label={navOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={navOpen}
+            aria-controls="primary-nav-links"
+            onClick={() => setNavOpen((open) => !open)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
       </header>
 

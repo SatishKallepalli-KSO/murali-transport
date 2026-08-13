@@ -203,6 +203,44 @@ a:hover {
   gap: 0.55rem;
 }
 
+.nav-menu-toggle {
+  display: none;
+  appearance: none;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--brand);
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.55rem;
+  padding: 0;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+
+.nav-menu-toggle span {
+  display: block;
+  width: 1.15rem;
+  height: 2px;
+  border-radius: 99px;
+  background: currentColor;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.nav.is-menu-open .nav-menu-toggle span:nth-child(1) {
+  transform: translateY(0.34rem) rotate(45deg);
+}
+
+.nav.is-menu-open .nav-menu-toggle span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav.is-menu-open .nav-menu-toggle span:nth-child(3) {
+  transform: translateY(-0.34rem) rotate(-45deg);
+}
+
 .lang-switch {
   display: inline-flex;
   padding: 0.12rem;
@@ -1744,11 +1782,22 @@ main > .admin-portal {
   background: transparent;
   font-size: 1.3rem;
   cursor: pointer;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
 }
 
 .flash-ok {
   background: #e9faf1;
   color: #046c3a;
+}
+
+.flash-error {
+  background: #fdecee;
+  color: #9b1c1c;
 }
 
 .admin-card-actions {
@@ -2460,26 +2509,256 @@ button.data-card.active,
 
 @media (max-width: 719px) {
   .site {
-    padding-bottom: 4.25rem;
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
   }
 
   .topbar {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.3rem;
+    gap: 0.35rem;
+    padding: 0.65rem 1rem;
+  }
+
+  .topbar-banner {
+    font-size: 0.8rem;
+    line-height: 1.45;
   }
 
   .local-now {
     justify-content: flex-start;
     white-space: normal;
+    font-size: 0.78rem;
+    gap: 0.35rem 0.65rem;
+  }
+
+  .nav {
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    padding: 0.7rem 1rem;
+  }
+
+  .nav-brand {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .nav-brand strong {
+    font-size: 0.98rem;
+  }
+
+  .nav-brand small {
+    font-size: 0.66rem;
+  }
+
+  .nav-mark {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .nav-menu-toggle {
+    display: inline-flex;
   }
 
   .nav-cta {
     display: none;
   }
 
+  .nav-links {
+    display: none;
+    order: 3;
+    width: 100%;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.35rem 0 0.15rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .nav.is-menu-open .nav-links {
+    display: flex;
+  }
+
+  .nav-links button {
+    width: 100%;
+    min-height: 2.75rem;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 0.7rem 0.55rem;
+    border-bottom: 0;
+    border-radius: 0.55rem;
+    font-size: 0.95rem;
+  }
+
+  .nav-links button:hover,
+  .nav-links button.active {
+    background: rgba(11, 42, 74, 0.06);
+    border-bottom-color: transparent;
+  }
+
+  .lang-switch button {
+    min-height: 2.5rem;
+    min-width: 2.75rem;
+    padding: 0.55rem 0.85rem;
+  }
+
+  .hero-scenic {
+    min-height: min(62vh, 460px);
+    padding: 2rem 1.1rem 2.6rem;
+    align-items: end;
+  }
+
+  .hero-scenic-bg img {
+    object-position: 75% center;
+  }
+
+  .hero-scenic-shade {
+    background:
+      linear-gradient(180deg, rgba(8, 22, 40, 0.35) 0%, rgba(8, 22, 40, 0.2) 35%, rgba(8, 22, 40, 0.88) 100%),
+      linear-gradient(90deg, rgba(8, 22, 40, 0.72) 0%, rgba(8, 22, 40, 0.35) 55%, rgba(8, 22, 40, 0.12) 100%);
+  }
+
+  .hero-scenic::after {
+    height: 2.75rem;
+  }
+
+  .hero-copy-on-media {
+    max-width: none;
+  }
+
+  .hero-copy-on-media .hero-name {
+    font-size: clamp(1.85rem, 9vw, 2.45rem);
+  }
+
+  .hero-copy-on-media .hero-sub {
+    font-size: clamp(1.05rem, 4.6vw, 1.3rem);
+    margin: 0.4rem 0 0.7rem;
+  }
+
+  .hero-copy-on-media .hero-tagline {
+    font-size: 0.95rem;
+    max-width: none;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+    min-height: 3rem;
+  }
+
+  .portal-back-btn {
+    min-height: 2.75rem;
+    padding: 0.55rem 0;
+  }
+
+  .section,
+  .portal,
+  .live-board,
+  main > .section,
+  main > .portal,
+  main > .live-board {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+  }
+
+  .panel-form {
+    padding: 1.2rem;
+  }
+
+  .find-form {
+    grid-template-columns: 1fr;
+  }
+
+  .find-form .btn,
+  .form-actions .btn,
+  .live-cta .btn,
+  .final-cta .btn {
+    width: 100%;
+    min-height: 3rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .board-head {
+    display: none;
+  }
+
+  .board-row,
+  .board-cols-3 .board-row {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+    padding: 0.85rem 0.9rem;
+  }
+
+  .board-row strong {
+    grid-column: auto;
+  }
+
+  .about-facts > div {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .about-map iframe {
+    min-height: 260px;
+  }
+
+  .service-showcase-item {
+    grid-template-columns: auto 1fr;
+  }
+
+  .routes-map-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .list-pager .btn {
+    min-height: 2.75rem;
+    padding: 0.65rem 1rem;
+  }
+
   .footer {
-    padding-bottom: 5.5rem;
+    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
+  }
+
+  .footer-inner {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+  }
+
+  .footer-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+  }
+
+  .footer-link {
+    min-height: 2.75rem;
+    padding: 0.55rem 0.35rem;
+    text-align: left;
+  }
+
+  .final-cta {
+    padding-top: 2.4rem;
+    padding-bottom: 2.4rem;
+  }
+
+  .final-cta h2 {
+    font-size: clamp(1.55rem, 7vw, 2.1rem);
   }
 
   .mobile-dock {
@@ -2510,7 +2789,11 @@ button.data-card.active,
     text-align: center;
     border-radius: 0.7rem;
     padding: 0.72rem 0.4rem;
+    min-height: 3rem;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .mobile-dock-primary {
