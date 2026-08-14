@@ -25,7 +25,7 @@ export function buildUpiPayUrl(opts: {
   if (amount && Number(amount) > 0) {
     params.set('am', Number(amount).toFixed(2))
   }
-  const note = (opts.note || 'Murali Transport Dommeru').trim()
+  const note = (opts.note || 'Murali Transport office commission').trim()
   if (note) params.set('tn', note.slice(0, 80))
   return `upi://pay?${params.toString()}`
 }

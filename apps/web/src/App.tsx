@@ -568,11 +568,7 @@ export default function App() {
               callLabel={tx('callNow')}
               callHref={`tel:${business.phone}`}
               tx={tx}
-              payNote={
-                confirmKind === 'load'
-                  ? 'Murali Transport load advance'
-                  : 'Murali Transport office'
-              }
+              payNote="Murali Transport office commission"
             />
           </>
         )}

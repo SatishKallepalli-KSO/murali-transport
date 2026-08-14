@@ -134,7 +134,7 @@ export function RequestPortal({ lang, tx, loadForm, setLoadForm, busy, onCreateL
         <aside className="form-aside">
           <p className="form-aside-kicker">{tx('hours')}</p>
           <p>{tx('formOfficeNote')}</p>
-          <PayPhonePe tx={tx} note="Murali Transport load booking" compact />
+          <PayPhonePe tx={tx} note="Murali Transport office commission" compact />
         </aside>
       </div>
     </section>
