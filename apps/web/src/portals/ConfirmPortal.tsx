@@ -1,6 +1,3 @@
-import { PayPhonePe } from '../components/PayPhonePe'
-import type { DictKey } from '../content'
-
 type ConfirmPortalProps = {
   title: string
   message: string
@@ -10,8 +7,6 @@ type ConfirmPortalProps = {
   onSecondary: () => void
   callLabel: string
   callHref: string
-  tx: (key: DictKey) => string
-  payNote?: string
 }
 
 export function ConfirmPortal({
@@ -23,8 +18,6 @@ export function ConfirmPortal({
   onSecondary,
   callLabel,
   callHref,
-  tx,
-  payNote,
 }: ConfirmPortalProps) {
   return (
     <section className="confirm-page" aria-live="polite">
@@ -45,7 +38,6 @@ export function ConfirmPortal({
             {callLabel}
           </a>
         </div>
-        <PayPhonePe tx={tx} note={payNote} />
       </div>
     </section>
   )

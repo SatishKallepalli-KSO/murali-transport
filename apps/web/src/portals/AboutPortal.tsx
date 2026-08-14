@@ -1,3 +1,4 @@
+import { PayPhonePe } from '../components/PayPhonePe'
 import { PhoneLinks } from '../components/PhoneLinks'
 import { waHref } from '../lib/whatsapp'
 import { address, business, type DictKey, type Lang } from '../content'
@@ -59,6 +60,7 @@ export function AboutPortal({ lang, tx }: Props) {
               {tx('ctaDirections')}
             </a>
           </div>
+          <PayPhonePe tx={tx} note="Murali Transport office commission" />
         </div>
         <div className="about-map">
           <p className="about-map-label">{tx('aboutMapTitle')}</p>

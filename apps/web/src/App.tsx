@@ -567,8 +567,6 @@ export default function App() {
               onSecondary={() => goPortal(confirmKind === 'load' ? 'request' : 'owner')}
               callLabel={tx('callNow')}
               callHref={`tel:${business.phone}`}
-              tx={tx}
-              payNote="Murali Transport office commission"
             />
           </>
         )}
@@ -687,6 +685,9 @@ export default function App() {
               </button>
               <button type="button" className="footer-link" onClick={() => goPortal('about')}>
                 {tx('navAbout')}
+              </button>
+              <button type="button" className="footer-link" onClick={() => goPortal('about')}>
+                {tx('footerPayCommission')}
               </button>
               <button type="button" className="footer-link" onClick={() => goPortal('privacy')}>
                 {tx('footerPrivacy')}

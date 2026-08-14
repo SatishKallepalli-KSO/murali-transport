@@ -1,5 +1,4 @@
 import type { FormEvent } from 'react'
-import { PayPhonePe } from '../components/PayPhonePe'
 import { business, type DictKey, type Lang } from '../content'
 import { todayISO } from '../lib/format'
 import { waHref } from '../lib/whatsapp'
@@ -134,7 +133,6 @@ export function RequestPortal({ lang, tx, loadForm, setLoadForm, busy, onCreateL
         <aside className="form-aside">
           <p className="form-aside-kicker">{tx('hours')}</p>
           <p>{tx('formOfficeNote')}</p>
-          <PayPhonePe tx={tx} note="Murali Transport office commission" compact />
         </aside>
       </div>
     </section>
