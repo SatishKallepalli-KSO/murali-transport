@@ -130,7 +130,7 @@ const dict = {
     findEquipLabel: 'Vehicle type',
     findBtn: 'Continue',
     liveBoardTitle: 'Available now',
-    liveBoardIntro: 'Open loads and free lorries with this office right now.',
+    liveBoardIntro: 'Open loads show full routes so lorry owners can call the office or register. Customer phones stay private.',
     liveLorriesTitle: 'Available lorries',
     liveLoadsTitle: 'Open loads',
     liveEmptyLorries: 'No lorries marked available yet. Owners can register above.',
@@ -331,7 +331,7 @@ const dict = {
       'We use booking information only to arrange mini lorry and truck bookings, match loads with available vehicles, contact you about dispatch, and improve office coordination. Visit totals help the Dommeru office understand general demand. We do not sell your personal information.',
     privacyS3Title: 'Sharing',
     privacyS3Body:
-      'Details needed for a trip may be shared with the assigned driver or vehicle owner and with office staff handling your booking. Public pages show only limited, masked availability information (for example masked routes or plates).',
+      'Details needed for a trip may be shared with the assigned driver or vehicle owner and with office staff handling your booking. Public pages hide customer phones and names; open-load routes are shown so nearby lorry owners can respond through the office. Vehicle plates on public boards stay masked.',
     privacyS4Title: 'Storage & security',
     privacyS4Body:
       'Booking records are stored in our office systems so we can manage assignments. We take reasonable steps to protect access to admin tools. No method of transmission or storage is completely secure.',
@@ -418,7 +418,7 @@ const dict = {
     findEquipLabel: 'వాహన రకం',
     findBtn: 'కొనసాగించండి',
     liveBoardTitle: 'ఇప్పుడు అందుబాటులో',
-    liveBoardIntro: 'ఈ ఆఫీస్‌లో ఇప్పుడు ఉన్న ఓపెన్ లోడ్లు మరియు ఖాళీ లారీలు.',
+    liveBoardIntro: 'ఓపెన్ లోడ్లలో పూర్తి మార్గాలు కనిపిస్తాయి — లారీ యజమానులు ఆఫీస్‌కు కాల్ చేయవచ్చు లేదా రిజిస్టర్ చేయవచ్చు. కస్టమర్ ఫోన్లు ప్రైవేట్‌గా ఉంటాయి.',
     liveLorriesTitle: 'అందుబాటులో లారీలు',
     liveLoadsTitle: 'ఓపెన్ లోడ్లు',
     liveEmptyLorries: 'ఇంకా అందుబాటు లారీలు లేవు. యజమానులు నమోదు చేసుకోవచ్చు.',
@@ -619,7 +619,7 @@ const dict = {
       'మినీ లారీ/ట్రక్ బుకింగ్, లోడ్–వాహన మ్యాచింగ్, డిస్పాచ్ కమ్యూనికేషన్ మరియు ఆఫీస్ సమన్వయం కోసం మాత్రమే ఉపయోగిస్తాము. సందర్శన మొత్తాలు దొమ్మేరు ఆఫీస్‌కు సాధారణ డిమాండ్ అర్థం చేసుకోవడానికి సహాయపడతాయి. మేము మీ వ్యక్తిగత సమాచారాన్ని అమ్మము.',
     privacyS3Title: 'పంచుకోవడం',
     privacyS3Body:
-      'ట్రిప్‌కు అవసరమైన వివరాలు అసైన్ అయిన డ్రైవర్/యజమాని మరియు ఆఫీస్ సిబ్బందితో పంచుకోవచ్చు. పబ్లిక్ పేజీల్లో పరిమిత/మాస్క్ చేసిన సమాచారం మాత్రమే కనిపిస్తుంది.',
+      'ట్రిప్‌కు అవసరమైన వివరాలు అసైన్ అయిన డ్రైవర్/యజమాని మరియు ఆఫీస్ సిబ్బందితో పంచుకోవచ్చు. పబ్లిక్ పేజీల్లో కస్టమర్ ఫోన్/పేర్లు దాచబడతాయి; ఓపెన్ లోడ్ మార్గాలు కనిపిస్తాయి కాబట్టి సమీప లారీ యజమానులు ఆఫీస్ ద్వారా స్పందించవచ్చు. వాహన నంబర్లు మాస్క్‌లో ఉంటాయి.',
     privacyS4Title: 'నిల్వ & భద్రత',
     privacyS4Body:
       'అసైన్‌మెంట్లు నిర్వహించడానికి బుకింగ్ రికార్డులు ఆఫీస్ సిస్టమ్‌ల్లో నిల్వ ఉంటాయి. అడ్మిన్ యాక్సెస్‌ను రక్షించడానికి సహేతుక చర్యలు తీసుకుంటాము. ఏ నిల్వా పూర్తిగా సురక్షితం కాదు.',

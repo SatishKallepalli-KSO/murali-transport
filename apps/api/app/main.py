@@ -154,7 +154,7 @@ def admin_analytics(
 
 @app.get("/v1/activity")
 def recent_activity(limit: int = 12, db: Session = Depends(get_db)) -> list[dict]:
-    """Public ticker — no phones, full plates, cargo, or exact places."""
+    """Public ticker — no phones; load routes are shown so owners can respond."""
     from app.schemas import mask_place, mask_plate
 
     limit = max(1, min(limit, 30))
@@ -170,7 +170,7 @@ def recent_activity(limit: int = 12, db: Session = Depends(get_db)) -> list[dict
             {
                 "kind": "load",
                 "id": load.id,
-                "title": f"{mask_place(load.pickup)} → {mask_place(load.dropoff)}",
+                "title": f"{load.pickup} → {load.dropoff}",
                 "detail": f"Freight · {load.weight_tons:g}t · {load.status}",
                 "at": load.created_at.isoformat(),
             }

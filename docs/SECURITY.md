@@ -10,8 +10,8 @@
 
 | Surface | Phones / names / plates / notes |
 |---------|----------------------------------|
-| Public `GET /v1/vehicles`, `/v1/loads` | Redacted / masked |
-| Public open loads board | Places masked (`Ra******`), cargo shown as `Freight`, no date/notes/phones |
+| Public `GET /v1/vehicles`, `/v1/loads` | Phones/names/notes redacted; plates masked |
+| Public open loads board | **Full pickup → drop routes**; cargo shown as `Freight`; no date/notes/phones |
 | Admin Bearer on same routes | Full records |
 | `PATCH /v1/vehicles/{id}/location` | Admin only |
 | `GET /v1/bookings` | Admin only |

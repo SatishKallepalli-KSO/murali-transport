@@ -228,8 +228,9 @@ def load_to_out(row: LoadRequest, *, public: bool = False) -> LoadOut:
             update={
                 "requestor_name": "Customer",
                 "requestor_phone": "",
-                "pickup": mask_place(out.pickup),
-                "dropoff": mask_place(out.dropoff),
+                # Full route shown so lorry owners can decide to call / register.
+                "pickup": out.pickup,
+                "dropoff": out.dropoff,
                 "cargo": "Freight",
                 "notes": "",
                 "preferred_date": "",
