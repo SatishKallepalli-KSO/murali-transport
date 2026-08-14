@@ -287,3 +287,32 @@ def test_public_write_burst_rate_limit() -> None:
             rl.PUBLIC_WRITE_MAX,
         ) = previous
         rl.reset_all()
+
+
+def test_analytics_hit_and_admin_summary() -> None:
+    import app.rate_limit as rl
+
+    rl.reset_all()
+    hit = client.post("/v1/analytics/hit", json={"path": "home"})
+    assert hit.status_code == 200, hit.text
+    assert hit.json()["status"] == "ok"
+
+    skipped = client.post("/v1/analytics/hit", json={"path": "admin"})
+    assert skipped.status_code == 200
+    assert skipped.json()["status"] == "skipped"
+
+    denied = client.get("/v1/admin/analytics")
+    assert denied.status_code == 401
+
+    token = _admin_token()
+    summary = client.get(
+        "/v1/admin/analytics?days=7",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert summary.status_code == 200, summary.text
+    body = summary.json()
+    assert body["today"]["hits"] >= 1
+    assert body["totals"]["hits"] >= 1
+    assert "privacy" in body
+    assert "ip" not in str(body).lower() or "No IP" in body["privacy"]
+    rl.reset_all()

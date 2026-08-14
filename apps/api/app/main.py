@@ -14,6 +14,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session, joinedload
 
+from app.analytics import analytics_summary, record_hit
 from app.auth import (
     get_admin_pin,
     issue_token,
@@ -27,6 +28,7 @@ from app.models import Assignment, BookingEnquiry, LoadRequest, Vehicle, utcnow
 from app.rate_limit import (
     clear_login_failures,
     client_ip,
+    enforce_analytics_hit,
     enforce_login,
     enforce_public_write,
     login_failures_remaining,
@@ -35,6 +37,7 @@ from app.rate_limit import (
 from app.schemas import (
     AdminLogin,
     AdminLoginOut,
+    AnalyticsHit,
     AssignBody,
     AssignmentOut,
     BookingCreate,
@@ -128,6 +131,25 @@ def platform_stats(db: Session = Depends(get_db)) -> dict:
         "assigned_loads": assigned,
         "assignments": assignments,
     }
+
+
+@app.post("/v1/analytics/hit")
+def analytics_hit(
+    body: AnalyticsHit,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict[str, str]:
+    enforce_analytics_hit(request)
+    return record_hit(db, request, body.path)
+
+
+@app.get("/v1/admin/analytics")
+def admin_analytics(
+    days: int = 14,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_admin),
+) -> dict:
+    return analytics_summary(db, days)
 
 
 @app.get("/v1/activity")

@@ -236,3 +236,7 @@ def load_to_out(row: LoadRequest, *, public: bool = False) -> LoadOut:
             }
         )
     return out
+
+
+class AnalyticsHit(BaseModel):
+    path: str = Field(default="home", max_length=64)

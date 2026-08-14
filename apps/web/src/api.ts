@@ -216,3 +216,47 @@ export const deleteVehicle = (token: string, id: number) =>
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   })
+
+export type VisitDay = {
+  day: string
+  hits: number
+  uniques: number
+}
+
+export type VisitGeo = {
+  country: string
+  city: string | null
+  hits: number
+}
+
+export type VisitAnalytics = {
+  timezone: string
+  days: number
+  today: VisitDay
+  totals: { hits: number; uniques: number }
+  daily: VisitDay[]
+  geo: VisitGeo[]
+  privacy: string
+}
+
+export function trackPageView(path: string) {
+  const payload = JSON.stringify({ path })
+  try {
+    void fetch(`${apiBase}/v1/analytics/hit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload,
+      keepalive: true,
+      credentials: 'omit',
+    }).catch(() => {
+      /* ignore analytics failures */
+    })
+  } catch {
+    /* ignore */
+  }
+}
+
+export const fetchVisitAnalytics = (token: string, days = 14) =>
+  api<VisitAnalytics>(`/v1/admin/analytics?days=${days}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })

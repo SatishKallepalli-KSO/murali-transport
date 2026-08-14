@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -125,3 +125,33 @@ class Assignment(Base):
 
     load: Mapped[LoadRequest] = relationship(back_populates="assignment")
     vehicle: Mapped[Vehicle] = relationship(back_populates="assignments")
+
+
+class VisitDaily(Base):
+    """Aggregated site hits per IST calendar day. No personal data."""
+
+    __tablename__ = "visit_stats_daily"
+
+    day: Mapped[date] = mapped_column(Date, primary_key=True)
+    hits: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    uniques: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+class VisitGeoDaily(Base):
+    """Aggregated hits by country/city per day. City may be blank."""
+
+    __tablename__ = "visit_stats_geo_daily"
+
+    day: Mapped[date] = mapped_column(Date, primary_key=True)
+    country: Mapped[str] = mapped_column(String(8), primary_key=True, default="ZZ")
+    city: Mapped[str] = mapped_column(String(80), primary_key=True, default="")
+    hits: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+class VisitUnique(Base):
+    """Short-lived daily visitor fingerprints (hashed). Not an IP log."""
+
+    __tablename__ = "visit_stats_uniques"
+
+    day: Mapped[date] = mapped_column(Date, primary_key=True)
+    visitor_hash: Mapped[str] = mapped_column(String(64), primary_key=True)

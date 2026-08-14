@@ -2096,6 +2096,12 @@ main > .admin-portal {
   border-color: #d8bfff;
 }
 
+.admin-tab.tab-visits {
+  background: #e0f2fe;
+  color: #075985;
+  border-color: #bae6fd;
+}
+
 .admin-tab.active.tab-snapshot {
   background: #0b2a4a;
   color: #fff;
@@ -2126,6 +2132,12 @@ main > .admin-portal {
   border-color: #6b21a8;
 }
 
+.admin-tab.active.tab-visits {
+  background: #0369a1;
+  color: #fff;
+  border-color: #0369a1;
+}
+
 .admin-tab.active em {
   background: rgba(255, 255, 255, 0.22);
 }
@@ -2154,6 +2166,130 @@ main > .admin-portal {
 
 .admin-tab-panel.theme-assign {
   background: linear-gradient(160deg, #efe4ff, #f7f1ff);
+}
+
+.admin-tab-panel.theme-visits {
+  background: linear-gradient(160deg, #e0f2fe, #f0f9ff);
+}
+
+.visit-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.15rem;
+}
+
+.visit-stat {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.95rem 1rem;
+  border-radius: 0.9rem;
+  background: #fff;
+  border: 1px solid rgba(11, 42, 74, 0.08);
+}
+
+.visit-stat strong {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--brand);
+  letter-spacing: -0.03em;
+}
+
+.visit-stat span {
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.visit-block {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(11, 42, 74, 0.06);
+}
+
+.visit-block h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.visit-day-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.visit-day-list li {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr auto;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.visit-day-label {
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.visit-day-bar {
+  display: block;
+  height: 0.55rem;
+  border-radius: 99px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.visit-day-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0369a1, #ef8b2e);
+}
+
+.visit-day-counts {
+  font-size: 0.82rem;
+  font-weight: 750;
+  color: var(--brand);
+  font-variant-numeric: tabular-nums;
+  min-width: 3.5rem;
+  text-align: right;
+}
+
+.visit-geo-table {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.visit-geo-head,
+.visit-geo-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 0.55fr;
+  gap: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.65rem;
+}
+
+.visit-geo-head {
+  background: rgba(11, 42, 74, 0.06);
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.visit-geo-row {
+  background: #fff;
+  border: 1px solid rgba(16, 24, 40, 0.06);
+  font-size: 0.9rem;
 }
 
 .admin-snapshot-grid {
@@ -3050,7 +3186,11 @@ button.data-card.active,
   }
 
   .admin-tabs {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .visit-summary-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .admin-snapshot-grid {

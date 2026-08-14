@@ -1,9 +1,16 @@
 import { useDeferredValue, useEffect, useMemo, useState, type FormEvent } from 'react'
-import type { Assignment, Load, Vehicle, VehicleSuggestion } from '../api'
+import {
+  fetchVisitAnalytics,
+  type Assignment,
+  type Load,
+  type Vehicle,
+  type VehicleSuggestion,
+  type VisitAnalytics,
+} from '../api'
 import type { DictKey } from '../content'
 import { matchesQuery, paginateItems, statusBadge } from '../lib/format'
 
-export type AdminTab = 'snapshot' | 'loads' | 'match' | 'fleet' | 'assign'
+export type AdminTab = 'snapshot' | 'loads' | 'match' | 'fleet' | 'assign' | 'visits'
 
 type Props = {
   tx: (key: DictKey) => string
@@ -66,11 +73,34 @@ export function AdminPortal({
   const [editingVehicleId, setEditingVehicleId] = useState<number | null>(null)
   const [loadEdit, setLoadEdit] = useState<Record<string, string>>({})
   const [vehicleEdit, setVehicleEdit] = useState<Record<string, string>>({})
+  const [visitStats, setVisitStats] = useState<VisitAnalytics | null>(null)
+  const [visitError, setVisitError] = useState<string | null>(null)
+  const [visitLoading, setVisitLoading] = useState(false)
 
   const deferredLoadSearch = useDeferredValue(loadSearch)
   const deferredFleetSearch = useDeferredValue(fleetSearch)
   const deferredAssignSearch = useDeferredValue(assignSearch)
   const deferredMatchSearch = useDeferredValue(matchSearch)
+
+  useEffect(() => {
+    if (!adminToken || adminTab !== 'visits') return
+    let cancelled = false
+    setVisitLoading(true)
+    setVisitError(null)
+    void fetchVisitAnalytics(adminToken, 14)
+      .then((data) => {
+        if (!cancelled) setVisitStats(data)
+      })
+      .catch((err) => {
+        if (!cancelled) setVisitError(err instanceof Error ? err.message : 'Could not load visits')
+      })
+      .finally(() => {
+        if (!cancelled) setVisitLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [adminToken, adminTab])
 
   const openLoadRows = useMemo(
     () => openLoads.filter((l) => l.status === 'open'),
@@ -273,6 +303,7 @@ export function AdminPortal({
                 { id: 'match' as const, label: tx('tabMatch'), count: selectedLoadId ? suggestions.length : null },
                 { id: 'fleet' as const, label: tx('tabFleet'), count: vehicles.length },
                 { id: 'assign' as const, label: tx('tabAssign'), count: assignments.length },
+                { id: 'visits' as const, label: tx('tabVisits'), count: null },
               ] as const
             ).map((tab) => (
               <button
@@ -895,9 +926,117 @@ export function AdminPortal({
                 </ul>
               </section>
             )}
+
+            {adminTab === 'visits' && (
+              <section className="admin-panel panel-visits">
+                <header className="admin-panel-head">
+                  <div>
+                    <p className="admin-panel-kicker">{tx('tabVisits')}</p>
+                    <h3>{tx('visitsTitle')}</h3>
+                    <p className="admin-panel-hint">{tx('visitsHint')}</p>
+                  </div>
+                </header>
+
+                {visitLoading && <p className="admin-panel-hint">{tx('refresh')}…</p>}
+                {visitError && <p className="flash flash-error">{visitError}</p>}
+
+                {!visitLoading && !visitError && visitStats && (
+                  <>
+                    <div className="visit-summary-grid">
+                      <div className="visit-stat">
+                        <strong>{visitStats.today.hits}</strong>
+                        <span>
+                          {tx('visitsToday')} · {tx('visitsHits')}
+                        </span>
+                      </div>
+                      <div className="visit-stat">
+                        <strong>{visitStats.today.uniques}</strong>
+                        <span>
+                          {tx('visitsToday')} · {tx('visitsUniques')}
+                        </span>
+                      </div>
+                      <div className="visit-stat">
+                        <strong>{visitStats.totals.hits}</strong>
+                        <span>
+                          {tx('visitsPeriod')} · {tx('visitsHits')}
+                        </span>
+                      </div>
+                      <div className="visit-stat">
+                        <strong>{visitStats.totals.uniques}</strong>
+                        <span>
+                          {tx('visitsPeriod')} · {tx('visitsUniques')}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="visit-block">
+                      <h4>{tx('visitsDaily')}</h4>
+                      {visitStats.totals.hits === 0 ? (
+                        <p className="empty">{tx('visitsEmpty')}</p>
+                      ) : (
+                        <ul className="visit-day-list">
+                          {[...visitStats.daily].reverse().map((row) => {
+                            const maxHits = Math.max(1, ...visitStats.daily.map((d) => d.hits))
+                            const width = Math.round((row.hits / maxHits) * 100)
+                            return (
+                              <li key={row.day}>
+                                <span className="visit-day-label">{row.day}</span>
+                                <span className="visit-day-bar" aria-hidden="true">
+                                  <i style={{ width: `${width}%` }} />
+                                </span>
+                                <span className="visit-day-counts">
+                                  {row.hits} / {row.uniques}
+                                </span>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      )}
+                    </div>
+
+                    <div className="visit-block">
+                      <h4>{tx('visitsGeo')}</h4>
+                      {visitStats.geo.length === 0 ? (
+                        <p className="empty">{tx('visitsEmpty')}</p>
+                      ) : (
+                        <div className="visit-geo-table" role="table" aria-label={tx('visitsGeo')}>
+                          <div className="visit-geo-head" role="row">
+                            <span role="columnheader">{tx('visitsCountry')}</span>
+                            <span role="columnheader">{tx('visitsCity')}</span>
+                            <span role="columnheader">{tx('visitsHits')}</span>
+                          </div>
+                          {visitStats.geo.map((row) => (
+                            <div
+                              className="visit-geo-row"
+                              role="row"
+                              key={`${row.country}-${row.city ?? ''}-${row.hits}`}
+                            >
+                              <span role="cell">{countryLabel(row.country, tx('visitsUnknown'))}</span>
+                              <span role="cell">{row.city || '—'}</span>
+                              <span role="cell">{row.hits}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <p className="admin-panel-hint">{tx('visitsPrivacyNote')}</p>
+                    </div>
+                  </>
+                )}
+              </section>
+            )}
           </div>
         </>
       )}
     </section>
   )
+}
+
+function countryLabel(code: string, unknownLabel: string): string {
+  if (!code || code === 'ZZ' || code === 'XX') return unknownLabel
+  try {
+    const name = new Intl.DisplayNames(['en'], { type: 'region' }).of(code)
+    return name ? `${name} (${code})` : code
+  } catch {
+    return code
+  }
 }

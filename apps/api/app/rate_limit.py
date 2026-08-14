@@ -22,6 +22,9 @@ PUBLIC_WRITE_SHORT_WINDOW_SEC = int(os.getenv("PUBLIC_WRITE_SHORT_WINDOW_SEC", s
 PUBLIC_WRITE_MAX = int(os.getenv("PUBLIC_WRITE_MAX_ATTEMPTS", "8"))
 PUBLIC_WRITE_WINDOW_SEC = int(os.getenv("PUBLIC_WRITE_WINDOW_SEC", str(60 * 60)))
 
+ANALYTICS_HIT_MAX = int(os.getenv("ANALYTICS_HIT_MAX", "60"))
+ANALYTICS_HIT_WINDOW_SEC = int(os.getenv("ANALYTICS_HIT_WINDOW_SEC", "60"))
+
 
 def client_ip(request: Request) -> str:
     forwarded = request.headers.get("x-forwarded-for")
@@ -132,3 +135,14 @@ def enforce_public_write(request: Request, action: str) -> None:
         )
 
     record(key)
+
+
+def enforce_analytics_hit(request: Request) -> None:
+    ip = client_ip(request)
+    enforce(
+        f"analytics:{ip}",
+        max_attempts=ANALYTICS_HIT_MAX,
+        window_sec=ANALYTICS_HIT_WINDOW_SEC,
+        detail="Too many analytics pings. Slow down.",
+    )
+    record(f"analytics:{ip}")

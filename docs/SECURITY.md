@@ -23,7 +23,15 @@
   - **1 / minute** (stops rapid bots)
   - **3 / 5 minutes**
   - **8 / hour**
+- Analytics hit beacon: **60 / minute / IP**
 - Exceeded limits return HTTP `429` with a `Retry-After` header
+
+## Visit analytics (privacy-safe)
+
+- Public pages send a tiny `POST /v1/analytics/hit` (admin desk is not counted)
+- **No IP addresses are stored** — only a daily one-way hash for unique counting, then dropped within ~2 days
+- Country/city come from CDN headers when present (`CF-IPCountry` / city); otherwise shown as Unknown
+- Admin **Visits** tab shows daily hits/uniques and top locations for the last 14 days
 
 ## Sessions
 

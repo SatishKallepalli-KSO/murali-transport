@@ -13,6 +13,7 @@ import {
   fetchSuggestions,
   fetchVehicles,
   registerVehicle,
+  trackPageView,
   updateLoad,
   updateVehicle,
   type Assignment,
@@ -173,6 +174,11 @@ export default function App() {
 
   useEffect(() => {
     setNavOpen(false)
+  }, [portal])
+
+  useEffect(() => {
+    if (portal === 'admin') return
+    trackPageView(portal)
   }, [portal])
 
   async function refreshPublic() {
