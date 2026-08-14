@@ -1684,6 +1684,32 @@ main > .admin-portal {
   gap: 1.25rem;
 }
 
+.about-office {
+  margin: 0 0 1.35rem;
+  border-radius: 1.15rem;
+  overflow: hidden;
+  background: #0b2a4a;
+  border: 1px solid var(--line);
+  box-shadow: 0 16px 40px rgba(11, 42, 74, 0.1);
+}
+
+.about-office img {
+  display: block;
+  width: 100%;
+  max-height: min(52vh, 420px);
+  object-fit: cover;
+  object-position: center 60%;
+}
+
+.about-office figcaption {
+  margin: 0;
+  padding: 0.75rem 1rem 0.9rem;
+  background: #fff;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
 .about-card {
   padding: 1.5rem;
   border-radius: 1.15rem;
@@ -1694,7 +1720,8 @@ main > .admin-portal {
 .about-photo {
   width: 100%;
   max-height: 340px;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center;
   background: #f1f1f1;
   border-radius: 1.15rem;
 }

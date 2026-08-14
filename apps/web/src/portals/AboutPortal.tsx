@@ -18,6 +18,17 @@ export function AboutPortal({ lang, tx }: Props) {
           <p>{tx('aboutIntro')}</p>
         </div>
       </div>
+
+      <figure className="about-office">
+        <img
+          src="/office-dommeru.jpg"
+          alt={tx('aboutOfficeAlt')}
+          loading="lazy"
+          decoding="async"
+        />
+        <figcaption>{tx('aboutOfficeCaption')}</figcaption>
+      </figure>
+
       <div className="about-layout">
         <div className="about-card">
           <dl className="about-facts">
