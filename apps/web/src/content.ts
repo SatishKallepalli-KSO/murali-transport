@@ -18,6 +18,9 @@ export const business = {
     'https://www.google.com/maps?q=17.031281,81.687531&z=16&output=embed',
   lat: 17.031281,
   lng: 81.687531,
+  /** PhonePe / UPI ID — confirm in the PhonePe app; override with VITE_UPI_ID */
+  upiId: '9949705008@ybl',
+  upiName: 'Murali Transport',
 }
 
 export const address = {
@@ -346,6 +349,17 @@ const dict = {
     wxRain: 'Rain',
     wxStorm: 'Storm',
     wxFog: 'Haze',
+    payPhonePeKicker: 'UPI · PhonePe',
+    payPhonePeTitle: 'Pay with PhonePe',
+    payPhonePeBody:
+      'Pay booking advance or trip charges to the Dommeru office. Open PhonePe, or scan the QR.',
+    payAmountLabel: 'Amount (₹, optional)',
+    payAmountPh: 'e.g. 500',
+    payPhonePeBtn: 'Pay with PhonePe',
+    payCopyUpi: 'Copy UPI ID',
+    payCopied: 'UPI copied',
+    payQrAlt: 'PhonePe UPI QR code',
+    payQrHint: 'Scan with PhonePe or any UPI app',
     langEn: 'EN',
     langTe: 'తెలుగు',
   },
@@ -622,6 +636,17 @@ const dict = {
     wxRain: 'వర్షం',
     wxStorm: 'తుఫాను',
     wxFog: 'పొగమంచు',
+    payPhonePeKicker: 'UPI · PhonePe',
+    payPhonePeTitle: 'PhonePe తో చెల్లించండి',
+    payPhonePeBody:
+      'బుకింగ్ అడ్వాన్స్ లేదా ట్రిప్ ఛార్జీలు దొమ్మేరు ఆఫీస్‌కు చెల్లించండి. PhonePe తెరవండి లేదా QR స్కాన్ చేయండి.',
+    payAmountLabel: 'మొత్తం (₹, ఐచ్ఛికం)',
+    payAmountPh: 'ఉదా. 500',
+    payPhonePeBtn: 'PhonePe తో చెల్లించు',
+    payCopyUpi: 'UPI ID కాపీ',
+    payCopied: 'UPI కాపీ అయింది',
+    payQrAlt: 'PhonePe UPI QR కోడ్',
+    payQrHint: 'PhonePe లేదా ఏ UPI యాప్‌తోనైనా స్కాన్ చేయండి',
     langEn: 'EN',
     langTe: 'తెలుగు',
   },

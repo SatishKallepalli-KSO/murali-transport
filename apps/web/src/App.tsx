@@ -567,6 +567,12 @@ export default function App() {
               onSecondary={() => goPortal(confirmKind === 'load' ? 'request' : 'owner')}
               callLabel={tx('callNow')}
               callHref={`tel:${business.phone}`}
+              tx={tx}
+              payNote={
+                confirmKind === 'load'
+                  ? 'Murali Transport load advance'
+                  : 'Murali Transport office'
+              }
             />
           </>
         )}

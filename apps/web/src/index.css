@@ -1778,6 +1778,154 @@ main > .admin-portal {
   justify-content: center;
 }
 
+.pay-phonepe {
+  display: grid;
+  gap: 1.15rem;
+  margin-top: 1.5rem;
+  padding: 1.15rem 1.1rem 1.2rem;
+  text-align: left;
+  border-radius: 1rem;
+  border: 1px solid rgba(95, 37, 159, 0.18);
+  background:
+    linear-gradient(145deg, rgba(95, 37, 159, 0.08), rgba(239, 139, 46, 0.06)),
+    #faf8ff;
+}
+
+.pay-phonepe-kicker {
+  margin: 0 0 0.35rem;
+  color: #5f259f;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.pay-phonepe-copy h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.pay-phonepe-copy > p {
+  margin: 0 0 0.85rem;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.pay-phonepe-amount {
+  display: grid;
+  gap: 0.3rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 750;
+  color: var(--ink-soft);
+}
+
+.pay-phonepe-amount input {
+  width: 100%;
+  max-width: 12rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  font: inherit;
+  color: var(--ink);
+}
+
+.pay-phonepe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 0.65rem;
+}
+
+.btn-phonepe {
+  background: #5f259f;
+  color: #fff;
+  border-color: #5f259f;
+  box-shadow: 0 6px 16px rgba(95, 37, 159, 0.22);
+}
+
+.btn-phonepe:hover {
+  background: #4a1c7a;
+  color: #fff;
+  border-color: #4a1c7a;
+}
+
+.pay-phonepe-id {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+.pay-phonepe-id strong {
+  color: var(--brand);
+  font-weight: 750;
+  word-break: break-all;
+}
+
+.pay-phonepe-qr {
+  margin: 0;
+  justify-self: center;
+  text-align: center;
+}
+
+.pay-phonepe-qr img {
+  display: block;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto;
+  border-radius: 0.75rem;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.pay-phonepe-qr figcaption {
+  margin-top: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.form-aside .pay-phonepe {
+  margin-top: 1.1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.form-aside .pay-phonepe-kicker {
+  color: #d8b4fe;
+}
+
+.form-aside .pay-phonepe-copy h3,
+.form-aside .pay-phonepe-id strong {
+  color: #fff;
+}
+
+.form-aside .pay-phonepe-copy > p,
+.form-aside .pay-phonepe-amount,
+.form-aside .pay-phonepe-id,
+.form-aside .pay-phonepe-qr figcaption {
+  color: #c9d7e8;
+}
+
+.form-aside .pay-phonepe-amount input {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.form-aside .btn-ghost {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+@media (min-width: 560px) {
+  .pay-phonepe:not(.is-compact) {
+    grid-template-columns: 1.2fr auto;
+    align-items: center;
+  }
+}
+
 .flash {
   display: flex;
   align-items: center;
@@ -1947,7 +2095,7 @@ main > .admin-portal {
   text-transform: uppercase;
 }
 
-.form-aside p:last-child {
+.form-aside > p {
   margin: 0;
   line-height: 1.55;
 }
